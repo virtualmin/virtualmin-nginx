@@ -23,9 +23,78 @@ if (!&has_command($config{'nginx_cmd'})) {
 	}
 
 # Show icons for global config types
+print &ui_subheading($text{'index_global'});
 my $conf = &get_config();
+my @gpages = ( "net", "mime", "logs", "misc" );
+&icons_table(
+	[ map { "edit_".$_.".cgi" } @gpages ],
+	[ map { $text{$_."_title"} } @gpages ],
+	[ map { "images/".$_.".gif" } @gpages ],
+	);
+print &ui_hr();
 
 # Show list of virtual hosts
-# XXX
+print &ui_subheading($text{'index_virts'});
+my $http = &find("http", $conf);
+if (!$http) {
+	&ui_print_endpage(
+		&text('index_ehttp', "<tt>$config{'nginx_config'}</tt>"));
+	}
+my @servers = &find("server", $http->{'members'});
+my @links = ( "<a href='edit_server.cgi?new=1'>$text{'index_add'}</a>" );
+if (@servers) {
+	unshift(@links, &select_all_link("d"),
+			&select_invert_link("d"));
+	print &ui_links_row(\@links);
+	my @tds = ( "width=5 valign=top", "valign=top",
+		    undef, undef, "valign=top" );
+	print &ui_columns_start([ "",
+				  $text{'index_name'},
+				  $text{'index_ip'},
+				  $text{'index_port'},
+				  $text{'index_root'} ], 100, 0, \@tds);
+	foreach my $s (@servers) {
+		my $name = &find_value("server_name", $s->{'members'});
+
+		my (@ips, @ports);
+		foreach my $l (&find_value("listen", $s->{'members'})) {
+			if ($l =~ /^\d+$/) {
+				push(@ips, $text{'index_any'});
+				push(@ports, $l);
+				}
+			elsif ($l =~ /^\[(\S+)\]:(\d+)$/) {
+				push(@ips, $1 eq "::" ? $text{'index_any6'}
+						      : $1);
+				push(@ports, $2);
+				}
+			elsif ($l =~ /^(\S+):(\d+)$/) {
+				push(@ips, $1);
+				push(@ports, $2);
+				}
+			}
+
+		my @locs = &find("location", $s->{'members'});
+		my ($rootloc) = grep { $_->{'value'} eq '/' } @locs;
+		my $root;
+		if ($rootloc) {
+			$root = &find_value("root", $rootloc->{'members'}) ||
+				"<i>$text{'index_noroot'}</i>";
+			}
+		else {
+			$root = "<i>$text{'index_norootloc'}</i>";
+			}
+		print &ui_checked_columns_row([
+				$name,
+				join("<br>", @ips),
+				join("<br>", @ports),
+				$root ],
+			\@tds, "d", $name);
+		}
+	print &ui_columns_end();
+	}
+else {
+	print "<b>$text{'index_none'}</b><p>\n";
+	}
+print &ui_links_row(\@links);
 
 &ui_print_footer("/", $text{'index'});

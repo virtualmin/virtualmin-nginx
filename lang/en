@@ -1,3 +1,24 @@
 index_version=Nginx version $1
 index_econfig=The Nginx configuration file $1 was not found on your system. Use the <a href='$2'>module configuration</a> page to enter the correct path.
 index_ecmd=The Nginx command $1 was not found on your system. Use the <a href='$2'>module configuration</a> page to enter the correct path.
+index_ehttp=No <tt>http</tt> section was found in your Nginx config file $1. Maybe it is not setup as a webserver?
+index_name=Virtual host name
+index_ip=IP addresses
+index_port=Port numbers
+index_root=Root directory
+index_any=Any IPv4 address
+index_any6=Any IPv6 address
+index_noroot=No root location
+index_norootloc=Not a directory
+index_none=No virtual hosts have been defined yet.
+index_add=Add a new Nginx virtual host.
+index_global=Global Settings
+index_virts=Virtual Hosts
+
+net_title=Network Configuration
+
+mime_title=MIME Types
+
+logs_title=Logging Settings
+
+misc_title=Other Settings

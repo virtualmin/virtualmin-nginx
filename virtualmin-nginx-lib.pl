@@ -25,17 +25,17 @@ return $get_config_cache;
 sub read_config_file
 {
 my ($file) = @_;
-my $fh;
 my @rv = ( );
 my $addto = \@rv;
 my @stack = ( );
 my $lnum = 0;
-&open_readfile($fh, $file);
-while(<$fh>) {
+my $lref = &read_file_lines($file, 1);
+foreach (@$lref) {
 	s/#.*$//;
-	if (/^(\S+)\s+\{/) {
+	if (/^\s*(\S+)\s+((\S+)\s+)?\{/) {
 		# Start of a section
 		my $ns = { 'name' => $1,
+			   'value' => $3,
 			   'type' => 1,
 			   'file' => $file,
 			   'line' => $lnum,
@@ -45,32 +45,37 @@ while(<$fh>) {
 		push(@$addto, $ns);
 		$addto = $ns->{'members'};
 		}
-	elsif (/\s*}/) {
+	elsif (/^\s*}/) {
 		# End of a section
 		$addto = pop(@stack);
 		$addto->[@$addto-1]->{'eline'} = $lnum;
 		}
-	elsif (/^(\S+)\s*"([^"]*)";/ ||
-	       /^(\S+)\s*'([^']*)';/ ||
-	       /^(\S+)\s*(\S+);/) {
+	elsif (/^\s*(\S+)((\s+("([^"]*)"|'([^']*)'|\S+))*);/) {
 		# Found a directive
 		my ($name, $value) = ($1, $2);
+		my @words;
+		while($value =~ s/^\s+"([^"]+)"// ||
+		      $value =~ s/^\s+'([^']+)'// ||
+		      $value =~ s/^\s+(\S+)//) {
+			push(@words, $1);
+			}
 		if ($name eq "include") {
 			# Include a file or glob
-			if ($value !~ /^\//) {
+			if ($words[0] !~ /^\//) {
 				my $filedir = $file;
 				$filedir =~ s/\/[^\/]+$//;
-				$value = $filedir."/".$value;
+				$words[0] = $filedir."/".$value;
 				}
-			foreach my $ifile (glob($value)) {
+			foreach my $ifile (glob($words[0])) {
 				my $inc = &read_config_file($ifile);
-				push(@$addto, $inc);
+				push(@$addto, @$inc);
 				}
 			}
 		else {
 			# Some directive in the current section
 			my $dir = { 'name' => $name,
-				    'value' => $value,
+				    'value' => $words[0],
+				    'words' => \@words,
 				    'type' => 0,
 				    'file' => $file,
 				    'line' => $lnum,
@@ -80,8 +85,31 @@ while(<$fh>) {
 		}
 	$lnum++;
 	}
-close($fh);
 return \@rv;
+}
+
+# find(name, [&config])
+# Returns the object or objects with some name in the given config
+sub find
+{
+my ($name, $conf) = @_;
+$conf ||= &get_config();
+my @rv;
+foreach my $c (@$conf) {
+	if (lc($c->{'name'}) eq $name) {
+		push(@rv, $c);
+		}
+	}
+return wantarray ? @rv : $rv[0];
+}
+
+# find_value(name, [config])
+# Returns the value of the object or objects with some name in the given config
+sub find_value
+{
+my ($name, $conf) = @_;
+my @rv = map { $_->{'value'} } &find($name, $conf);
+return wantarray ? @rv : $rv[0];
 }
 
 # get_nginx_version()
