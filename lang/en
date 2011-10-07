@@ -1,0 +1,3 @@
+index_version=Nginx version $1
+index_econfig=The Nginx configuration file $1 was not found on your system. Use the <a href='$2'>module configuration</a> page to enter the correct path.
+index_ecmd=The Nginx command $1 was not found on your system. Use the <a href='$2'>module configuration</a> page to enter the correct path.

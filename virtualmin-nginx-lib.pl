@@ -84,5 +84,13 @@ close($fh);
 return \@rv;
 }
 
+# get_nginx_version()
+# Returns the version number of the installed Nginx binary
+sub get_nginx_version
+{
+my $out = &backquote_command("$config{'nginx_cmd'} -v 2>&1 </dev/null");
+return $out =~ /version:\s*nginx\/([0-9\.]+)/i ? $1 : undef;
+}
+
 1;
 
