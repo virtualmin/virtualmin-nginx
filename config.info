@@ -1,0 +1,5 @@
+nginx_config=Full path to Nginx config file,0
+nginx_cmd=Full path to Nginx command,0
+start_cmd=Command to start Nginx,0
+stop_cmd=Command to stop Nginx,0
+apply_cmd=Command to apply Nginx configuration,0

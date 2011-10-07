@@ -1,0 +1,5 @@
+desc=Virtualmin Nginx Plugin
+depends=virtual-server/3.89
+category=servers
+version=1.0
+readonly=1
