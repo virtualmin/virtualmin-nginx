@@ -7,8 +7,7 @@ BEGIN { push(@INC, ".."); };
 eval "use WebminCore;";
 &init_config();
 our %access = &get_module_acl();
-our $get_config_cache;
-our %get_default_cache;
+our ($get_config_cache, %get_default_cache, $get_config_parent_cache);
 our (%config, %text, %in, $module_root_directory);
 
 # get_config()
@@ -19,6 +18,25 @@ if (!$get_config_cache) {
 	$get_config_cache = &read_config_file($config{'nginx_config'});
 	}
 return $get_config_cache;
+}
+
+# get_config_parent()
+# Returns an object that represents the whole config file
+sub get_config_parent
+{
+if (!$get_config_parent_cache) {
+	$get_config_parent_cache = { 'members' => &get_config(),
+				     'file' => $config{'nginx_config'},
+				     'line' => 0,
+				     'eline' => 0 };
+	foreach my $c (@{$get_config_parent_cache->{'members'}}) {
+		if ($c->{'file'} eq $get_config_parent_cache->{'file'} &&
+		    $c->{'eline'} > $get_config_parent_cache->{'eline'}) {
+			$get_config_parent_cache->{'eline'} = $c->{'eline'};
+			}
+		}
+	}
+return $get_config_parent_cache;
 }
 
 # read_config_file(file)
@@ -89,12 +107,15 @@ foreach (@$lref) {
 return \@rv;
 }
 
-# find(name, [&config])
+# find(name, [&config|&parent])
 # Returns the object or objects with some name in the given config
 sub find
 {
 my ($name, $conf) = @_;
 $conf ||= &get_config();
+if (ref($conf) eq 'HASH') {
+	$conf = $conf->{'members'};
+	}
 my @rv;
 foreach my $c (@$conf) {
 	if (lc($c->{'name'}) eq $name) {
@@ -118,9 +139,47 @@ return wantarray ? @rv : $rv[0];
 sub save_directive
 {
 my ($parent, $name, $values) = @_;
-my $oldvalues = [ &find($name, $parent) ];
-for(my $i=0; $i<@$values || $i<@$oldvalues; $i++) {
-	# XXX
+my $oldstructs = [ &find($name, $parent) ];
+my $newstructs = [ map { &value_to_struct($_) } @$values ];
+for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
+	my $o = $i<@$oldstructs ? $oldstructs->[$i] : undef;
+	my $n = $i<@$newstructs ? $newstructs->[$i] : undef;
+	my $file = $o ? $o->{'file'} : $parent->{'file'};
+	if ($i<@$newstructs && $i<@$oldstructs) {
+		# Updating some directive
+		$o->{'value'} = $newstructs->{'value'};
+		# XXX
+		}
+	elsif ($i<@$newstructs) {
+		# Adding a directive
+		}
+	elsif ($i<@$oldstructs) {
+		# Removing a directive
+		}
+	}
+}
+
+# value_to_struct(name, value)
+# Converts a string, array ref or hash ref to a config struct
+sub value_to_struct
+{
+my ($name, $value) = @_;
+if (ref($value) eq 'HASH') {
+	# Already in correct format
+	$value->{'name'} = $name;
+	return $value;
+	}
+elsif (ref($value) eq 'ARRAY') {
+	# Array of words
+	return { 'name' => $name,
+		 'words' => $value,
+		 'value' => $value->[0] };
+	}
+else {
+	# Single value
+	return { 'name' => $name,
+		 'words' => [ $value ],
+		 'value' => $value };
 	}
 }
 
@@ -150,12 +209,12 @@ if (!%get_default_cache) {
 return $get_default_cache{$name};
 }
 
-# nginx_onoff_input(name, &config)
+# nginx_onoff_input(name, &parent)
 # Returns HTML for a table row for an on/off input
 sub nginx_onoff_input
 {
-my ($name, $conf) = @_;
-my $value = &find_value($name, $conf);
+my ($name, $parent) = @_;
+my $value = &find_value($name, $parent);
 $value ||= &get_default($name);
 return &ui_table_row($text{'opt_'.$name},
 	&ui_yesno_radio($name, $value =~ /on|true|yes/i ? 1 : 0));
@@ -165,17 +224,17 @@ return &ui_table_row($text{'opt_'.$name},
 # Updates the config with input from nginx_onoff_input
 sub nginx_onoff_parse
 {
-my ($name, $conf, $in) = @_;
+my ($name, $parent, $in) = @_;
 $in ||= \%in;
-&save_directive($conf, $name, [ $in->{$name} ? "on" : "off" ]);
+&save_directive($parent, $name, [ $in->{$name} ? "on" : "off" ]);
 }
 
-# nginx_opt_input(name, &config, size, prefix, suffix)
+# nginx_opt_input(name, &parent, size, prefix, suffix)
 # Returns HTML for an optional text field
 sub nginx_opt_input
 {
-my ($name, $conf, $size, $prefix, $suffix) = @_;
-my $value = &find_value($name, $conf);
+my ($name, $parent, $size, $prefix, $suffix) = @_;
+my $value = &find_value($name, $parent);
 my $def = &get_default($name);
 return &ui_table_row($text{'opt_'.$name},
 	&ui_opt_textbox($name, $value, $size,
