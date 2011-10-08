@@ -14,8 +14,14 @@ index_none=No virtual hosts have been defined yet.
 index_add=Add a new Nginx virtual host.
 index_global=Global Settings
 index_virts=Virtual Hosts
+index_return=module index
 
 net_title=Network Configuration
+net_header=Global networking options
+opt_sendfile=Use sendfile function?
+opt_gzip=Gzip compress responses?
+opt_keepalive_timeout=Timeout for keepalive connections
+opt_secs=seconds
 
 mime_title=MIME Types
 

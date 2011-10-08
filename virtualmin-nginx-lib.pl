@@ -8,7 +8,8 @@ eval "use WebminCore;";
 &init_config();
 our %access = &get_module_acl();
 our $get_config_cache;
-our %config;
+our %get_default_cache;
+our (%config, %text, %in, $module_root_directory);
 
 # get_config()
 # Parses the Nginx config file into an array ref
@@ -112,12 +113,74 @@ my @rv = map { $_->{'value'} } &find($name, $conf);
 return wantarray ? @rv : $rv[0];
 }
 
+# save_directive(&parent, name, &values)
+# Updates the values of some named directive
+sub save_directive
+{
+my ($parent, $name, $values) = @_;
+my $oldvalues = [ &find($name, $parent) ];
+for(my $i=0; $i<@$values || $i<@$oldvalues; $i++) {
+	# XXX
+	}
+}
+
 # get_nginx_version()
 # Returns the version number of the installed Nginx binary
 sub get_nginx_version
 {
 my $out = &backquote_command("$config{'nginx_cmd'} -v 2>&1 </dev/null");
 return $out =~ /version:\s*nginx\/([0-9\.]+)/i ? $1 : undef;
+}
+
+# get_default(name)
+# Returns the default value for some directive
+sub get_default
+{
+my ($name) = @_;
+if (!%get_default_cache) {
+	my $lref = &read_file_lines("$module_root_directory/default-values", 1);
+	foreach my $l (@$lref) {
+		$l =~ s/^\s*#.*//;
+		$l =~ s/\s+$//;
+		if ($l =~ /^(\S+)\s+(.*)/) {
+			$get_default_cache{$1} = $2;
+			}
+		}
+	}
+return $get_default_cache{$name};
+}
+
+# nginx_onoff_input(name, &config)
+# Returns HTML for a table row for an on/off input
+sub nginx_onoff_input
+{
+my ($name, $conf) = @_;
+my $value = &find_value($name, $conf);
+$value ||= &get_default($name);
+return &ui_table_row($text{'opt_'.$name},
+	&ui_yesno_radio($name, $value =~ /on|true|yes/i ? 1 : 0));
+}
+
+# nginx_onoff_parse(name, &config, &in)
+# Updates the config with input from nginx_onoff_input
+sub nginx_onoff_parse
+{
+my ($name, $conf, $in) = @_;
+$in ||= \%in;
+&save_directive($conf, $name, [ $in->{$name} ? "on" : "off" ]);
+}
+
+# nginx_opt_input(name, &config, size, prefix, suffix)
+# Returns HTML for an optional text field
+sub nginx_opt_input
+{
+my ($name, $conf, $size, $prefix, $suffix) = @_;
+my $value = &find_value($name, $conf);
+my $def = &get_default($name);
+return &ui_table_row($text{'opt_'.$name},
+	&ui_opt_textbox($name, $value, $size,
+			$text{'default'}.($def ? " ($def)" : ""), $prefix).
+	$suffix, $size > 40 ? 3 : 1);
 }
 
 1;
