@@ -27,6 +27,7 @@ sub get_config_parent
 if (!$get_config_parent_cache) {
 	$get_config_parent_cache = { 'members' => &get_config(),
 				     'file' => $config{'nginx_config'},
+				     'indent' => 0,
 				     'line' => 0,
 				     'eline' => 0 };
 	foreach my $c (@{$get_config_parent_cache->{'members'}}) {
@@ -48,14 +49,18 @@ my @rv = ( );
 my $addto = \@rv;
 my @stack = ( );
 my $lnum = 0;
-my $lref = &read_file_lines($file, 1);
-foreach (@$lref) {
+my $fh = "CFILE";
+&open_readfile($fh, $file);
+my @lines = <$fh>;
+close($fh);
+foreach (@lines) {
 	s/#.*$//;
 	if (/^\s*(\S+)\s+((\S+)\s+)?\{/) {
 		# Start of a section
 		my $ns = { 'name' => $1,
 			   'value' => $3,
 			   'type' => 1,
+			   'indent' => scalar(@stack),
 			   'file' => $file,
 			   'line' => $lnum,
 			   'eline' => $lnum,
@@ -96,6 +101,7 @@ foreach (@$lref) {
 				    'value' => $words[0],
 				    'words' => \@words,
 				    'type' => 0,
+				    'indent' => scalar(@stack),
 				    'file' => $file,
 				    'line' => $lnum,
 				    'eline' => $lnum };
@@ -140,23 +146,115 @@ sub save_directive
 {
 my ($parent, $name, $values) = @_;
 my $oldstructs = [ &find($name, $parent) ];
-my $newstructs = [ map { &value_to_struct($_) } @$values ];
+my $newstructs = [ map { &value_to_struct($name, $_) } @$values ];
 for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 	my $o = $i<@$oldstructs ? $oldstructs->[$i] : undef;
 	my $n = $i<@$newstructs ? $newstructs->[$i] : undef;
 	my $file = $o ? $o->{'file'} : $parent->{'file'};
+	my $lref = &read_file_lines($file);
 	if ($i<@$newstructs && $i<@$oldstructs) {
 		# Updating some directive
-		$o->{'value'} = $newstructs->{'value'};
-		# XXX
+		$o->{'value'} = $n->{'value'};
+		$o->{'words'} = $n->{'words'};
+		$lref->[$o->{'line'}] = &make_directive_lines(
+						$o, $parent->{'indent'} + 1);
 		}
 	elsif ($i<@$newstructs) {
 		# Adding a directive
+		# XXX
 		}
 	elsif ($i<@$oldstructs) {
 		# Removing a directive
+		# XXX
 		}
 	}
+}
+
+# flush_config_file_lines([&parent])
+# Flush all lines in the current config
+sub flush_config_file_lines
+{
+my ($parent) = @_;
+foreach my $f (&get_all_config_files($parent)) {
+	&flush_file_lines($f);
+	}
+}
+
+# lock_all_config_files([&parent])
+# Locks all files used in the current config
+sub lock_all_config_files
+{
+my ($parent) = @_;
+foreach my $f (&get_all_config_files($parent)) {
+	&lock_file($f);
+	}
+}
+
+# unlock_all_config_files([&parent])
+# Un-locks all files used in the current config
+sub unlock_all_config_files
+{
+my ($parent) = @_;
+foreach my $f (reverse(&get_all_config_files($parent))) {
+	&unlock_file($f);
+	}
+}
+
+# get_all_config_files([&parent])
+# Returns all files in the given config object
+sub get_all_config_files
+{
+my ($parent) = @_;
+$parent ||= &get_config_parent();
+my @rv = ( $parent->{'file'} );
+if ($parent->{'type'}) {
+	foreach my $c (@{$parent->{'members'}}) {
+		push(@rv, &get_all_config_files($c));
+		}
+	}
+return &unique(@rv);
+}
+
+# make_directive_lines(&directive, indent)
+# Returns text for some directive
+sub make_directive_lines
+{
+my ($dir, $indent) = @_;
+my @rv;
+if ($dir->{'type'}) {
+	# Multi-line
+	# XXX
+	}
+else {
+	# Single line
+	push(@rv, $dir->{'name'}." ".&join_words(@{$dir->{'words'}}).";");
+	}
+foreach my $r (@rv) {
+	$r = ("\t" x $indent).$r;
+	}
+return wantarray ? @rv : $rv[0];
+}
+
+# join_words(word, etc..)
+# Returns a string made by joining directive words
+sub join_words
+{
+my @rv;
+foreach my $w (@_) {
+	if ($w eq "") {
+		push(@rv, '""');
+		}
+	elsif ($w =~ /\s/ && $w !~ /"/) {
+		push(@rv, "\"$w\"");
+		}
+	elsif ($w =~ /\s/) {
+		push(@rv, "'$w'");
+		}
+	else {
+		push(@rv, $w);
+		}
+	}
+return join(" ", @rv);
 }
 
 # value_to_struct(name, value)
@@ -216,6 +314,7 @@ sub nginx_onoff_input
 my ($name, $parent) = @_;
 my $value = &find_value($name, $parent);
 $value ||= &get_default($name);
+$value ||= "";
 return &ui_table_row($text{'opt_'.$name},
 	&ui_yesno_radio($name, $value =~ /on|true|yes/i ? 1 : 0));
 }
