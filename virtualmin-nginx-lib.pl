@@ -161,11 +161,37 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 		}
 	elsif ($i<@$newstructs) {
 		# Adding a directive
-		# XXX
+		&renumber($file, $parent->{'eline'}-1, 1);
+		$n->{'eline'} = $n->{'line'} = $parent->{'eline'};
+		push(@{$parent->{'members'}}, $n);
+		splice(@$lref, $n->{'line'}, 0,
+		       &make_directive_lines($n, $parent->{'indent'} + 1));
 		}
 	elsif ($i<@$oldstructs) {
 		# Removing a directive
-		# XXX
+		splice(@$lref, $o->{'line'}, 1);
+		my $idx = &indexof($o, @{$parent->{'members'}});
+		if ($idx >= 0) {
+			splice(@{$parent->{'members'}}, $idx, 1);
+			}
+		&renumber($file, $o->{'line'}, -1);
+		}
+	}
+}
+
+# renumber(filename, line, offset, [&parent])
+# Adjusts the line number of any directive after the one given by the offset
+sub renumber
+{
+my ($file, $line, $offset, $object) = @_;
+$object ||= &get_config_parent();
+if ($object->{'file'} eq $file) {
+	$object->{'line'} += $offset if ($object->{'line'} > $line);
+	$object->{'eline'} += $offset if ($object->{'eline'} > $line);
+	}
+if ($object->{'type'}) {
+	foreach my $m (@{$object->{'members'}}) {
+		&renumber($file, $line, $offset, $m);
 		}
 	}
 }
@@ -319,7 +345,7 @@ return &ui_table_row($text{'opt_'.$name},
 	&ui_yesno_radio($name, $value =~ /on|true|yes/i ? 1 : 0));
 }
 
-# nginx_onoff_parse(name, &config, &in)
+# nginx_onoff_parse(name, &parent, &in)
 # Updates the config with input from nginx_onoff_input
 sub nginx_onoff_parse
 {
@@ -339,6 +365,25 @@ return &ui_table_row($text{'opt_'.$name},
 	&ui_opt_textbox($name, $value, $size,
 			$text{'default'}.($def ? " ($def)" : ""), $prefix).
 	$suffix, $size > 40 ? 3 : 1);
+}
+
+# nginx_opt_parse(name, &parent, &in, [regex], [&validator])
+# Updates the config with input from nginx_opt_input
+sub nginx_opt_parse
+{
+my ($name, $parent, $in, $regexp, $vfunc) = @_;
+$in ||= \%in;
+if ($in->{$name."_def"}) {
+	&save_directive($parent, $name, [ ]);
+	}
+else {
+	my $v = $in->{$name};
+	$v eq '' && &error(&text('opt_missing', $text{'opt_'.$name}));
+	!$regexp || $v =~ /$regexp/ || &error($text{'opt_e'.$name});
+	my $err = $vfunc && &$vfunc($v, $name);
+	$err && &error($err);
+	&save_directive($parent, $name, [ $v ]);
+	}
 }
 
 1;
