@@ -18,6 +18,8 @@ my $http = &find("http", $conf);
 
 &nginx_opt_parse("keepalive_timeout", $http, undef, '\d+');
 
+&nginx_opt_parse("keepalive_requests", $http, undef, '\d+');
+
 &flush_config_file_lines();
 &unlock_all_config_files();
 &webmin_log("net");

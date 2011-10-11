@@ -17,8 +17,10 @@ print &nginx_onoff_input("sendfile", $http);
 
 print &nginx_onoff_input("gzip", $http);
 
-print &nginx_opt_input("keepalive_timeout", $http, 5,
-		       undef, $text{'opt_secs'});
+print &nginx_opt_input("keepalive_timeout", $http, 5, undef,
+		       $text{'opt_secs'});
+
+print &nginx_opt_input("keepalive_requests", $http, 5, undef);
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
