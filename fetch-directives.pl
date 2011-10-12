@@ -24,6 +24,7 @@ foreach my $m (@mods) {
 			}
 		elsif ($l =~ /<b>default:<\/b> <i>([^<]+)</ && $dir) {
 			$dir->{'default'} = $1;
+			$dir->{'default'} =~ s/^\Q$dir->{'name'}\E\s+//;
 			}
 		elsif ($l =~ /<b>context:<\/b> <i>([^<]+)</ && $dir) {
 			$dir->{'context'} = $1;

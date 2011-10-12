@@ -22,8 +22,10 @@ opt_missing=Nothing entered for : $1
 opt_sendfile=Use sendfile function?
 opt_gzip=Gzip compress responses?
 opt_keepalive_timeout=Timeout for keepalive connections
-opt_secs=seconds
 opt_ekeepalive_timeout=Timeout for keepalive connections must be a number of seconds
+opt_keepalive_requests=Request limit for keepalive connections
+opt_ekeepalive_requests=Request limit for keepalive connections must be a number of requests
+opt_secs=seconds
 
 mime_title=MIME Types
 

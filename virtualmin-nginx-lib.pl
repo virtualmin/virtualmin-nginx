@@ -7,7 +7,8 @@ BEGIN { push(@INC, ".."); };
 eval "use WebminCore;";
 &init_config();
 our %access = &get_module_acl();
-our ($get_config_cache, %get_default_cache, $get_config_parent_cache);
+our ($get_config_cache, $get_config_parent_cache, %list_directives_cache,
+     @list_modules_cache);
 our (%config, %text, %in, $module_root_directory);
 
 # get_config()
@@ -315,22 +316,62 @@ my $out = &backquote_command("$config{'nginx_cmd'} -v 2>&1 </dev/null");
 return $out =~ /version:\s*nginx\/([0-9\.]+)/i ? $1 : undef;
 }
 
+# list_nginx_directives()
+# Returns a hash ref of hash refs, with name, module, default and context keys
+sub list_nginx_directives
+{
+if (!%list_directives_cache) {
+	my $lref = &read_file_lines(
+			"$module_root_directory/nginx-directives", 1);
+	foreach my $l (@$lref) {
+		my ($module, $name, $default, $context) = split(/\t/, $l);
+		$list_directives_cache{$name} = 
+			{ 'module' => $module,
+			  'name' => $name,
+			  'default' => $default eq '-' ? undef : $default,
+			  'context' => [ split(/,/, $context) ],
+			};
+		}
+	}
+return \%list_directives_cache;
+}
+
 # get_default(name)
 # Returns the default value for some directive
 sub get_default
 {
 my ($name) = @_;
-if (!%get_default_cache) {
-	my $lref = &read_file_lines("$module_root_directory/default-values", 1);
-	foreach my $l (@$lref) {
-		$l =~ s/^\s*#.*//;
-		$l =~ s/\s+$//;
-		if ($l =~ /^(\S+)\s+(.*)/) {
-			$get_default_cache{$1} = $2;
-			}
+my $dirs = &list_nginx_directives();
+my $dir = $dirs->{$name};
+return $dir ? $dir->{'default'} : undef;
+}
+
+# list_nginx_modules()
+# Returns a list of enabled modules
+sub list_nginx_modules
+{
+if (!@list_modules_cache) {
+	@list_modules_cache = ( 'http_core' );
+	my $out = &backquote_command("$config{'nginx_cmd'} -V 2>&1 </dev/null");
+	while($out =~ s/--with-(\S+)_module\s+//) {
+		push(@list_modules_cache, $1);
 		}
 	}
-return $get_default_cache{$name};
+return @list_modules_cache;
+}
+
+# supported_directive(name, [&parent])
+# Returns 1 if the module for some directive is supported on this system
+sub supported_directive
+{
+my ($name, $parent) = @_;
+my $dirs = &list_nginx_directives();
+my $dir = $dirs->{$name};
+return 0 if (!$dir);
+return 0 if ($parent && &indexof($parent->{'name'}, @{$dir->{'context'}}) < 0);
+my @mods = &list_nginx_modules();
+return 0 if (&indexof($dir->{'module'}, @mods) < 0);
+return 1;
 }
 
 # nginx_onoff_input(name, &parent)
@@ -338,6 +379,7 @@ return $get_default_cache{$name};
 sub nginx_onoff_input
 {
 my ($name, $parent) = @_;
+return undef if (!&supported_directive($name, $parent));
 my $value = &find_value($name, $parent);
 $value ||= &get_default($name);
 $value ||= "";
@@ -350,6 +392,7 @@ return &ui_table_row($text{'opt_'.$name},
 sub nginx_onoff_parse
 {
 my ($name, $parent, $in) = @_;
+return undef if (!&supported_directive($name, $parent));
 $in ||= \%in;
 &save_directive($parent, $name, [ $in->{$name} ? "on" : "off" ]);
 }
@@ -359,6 +402,7 @@ $in ||= \%in;
 sub nginx_opt_input
 {
 my ($name, $parent, $size, $prefix, $suffix) = @_;
+return undef if (!&supported_directive($name, $parent));
 my $value = &find_value($name, $parent);
 my $def = &get_default($name);
 return &ui_table_row($text{'opt_'.$name},
@@ -372,6 +416,7 @@ return &ui_table_row($text{'opt_'.$name},
 sub nginx_opt_parse
 {
 my ($name, $parent, $in, $regexp, $vfunc) = @_;
+return undef if (!&supported_directive($name, $parent));
 $in ||= \%in;
 if ($in->{$name."_def"}) {
 	&save_directive($parent, $name, [ ]);
