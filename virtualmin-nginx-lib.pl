@@ -347,14 +347,28 @@ return $dir ? $dir->{'default'} : undef;
 }
 
 # list_nginx_modules()
-# Returns a list of enabled modules
+# Returns a list of enabled modules. Includes those compiled in by default
+# unless disabled, plus extra compiled in at build time.
 sub list_nginx_modules
 {
 if (!@list_modules_cache) {
-	@list_modules_cache = ( 'http_core' );
+	@list_modules_cache = ( 'http_core', 'http_access', 'http_access',
+				'http_auth_basic', 'http_autoindex',
+				'http_browser', 'http_charset',
+				'http_empty_gif', 'http_fastcgi', 'http_geo',
+				'http_gzip', 'http_limit_req',
+				'http_limit_zone', 'http_map',
+				'http_memcached', 'http_proxy',
+				'http_referer', 'http_rewrite',
+				'http_scgi', 'http_split_clients',
+				'http_ssi', 'http_userid', 
+				'http_uwsgi' );
 	my $out = &backquote_command("$config{'nginx_cmd'} -V 2>&1 </dev/null");
 	while($out =~ s/--with-(\S+)_module\s+//) {
 		push(@list_modules_cache, $1);
+		}
+	while($out =~ s/--without-(\S+)_module\s+//) {
+		@list_modules_cache = grep { $_ ne $1 } @list_modules_cache;
 		}
 	}
 return @list_modules_cache;
