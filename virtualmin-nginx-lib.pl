@@ -27,6 +27,7 @@ sub get_config_parent
 {
 if (!$get_config_parent_cache) {
 	$get_config_parent_cache = { 'members' => &get_config(),
+				     'type' => 1,
 				     'file' => $config{'nginx_config'},
 				     'indent' => 0,
 				     'line' => 0,
@@ -141,12 +142,15 @@ my @rv = map { $_->{'value'} } &find($name, $conf);
 return wantarray ? @rv : $rv[0];
 }
 
-# save_directive(&parent, name, &values)
+# save_directive(&parent, name|&oldobjects, &newvalues|&newobjects)
 # Updates the values of some named directive
 sub save_directive
 {
-my ($parent, $name, $values) = @_;
-my $oldstructs = [ &find($name, $parent) ];
+my ($parent, $name_or_oldstructs, $values) = @_;
+my $oldstructs = ref($name_or_oldstructs) ? $name_or_oldstructs :
+			[ &find($name_or_oldstructs, $parent) ];
+my $name = !ref($name_or_oldstructs) ? $name_or_oldstructs :
+	   @$name_or_oldstructs ? $name_or_oldstructs->[0]->{'name'} : undef;
 my $newstructs = [ map { &value_to_struct($name, $_) } @$values ];
 for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 	my $o = $i<@$oldstructs ? $oldstructs->[$i] : undef;
@@ -162,8 +166,8 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 		}
 	elsif ($i<@$newstructs) {
 		# Adding a directive
-		&renumber($file, $parent->{'eline'}-1, 1);
 		$n->{'eline'} = $n->{'line'} = $parent->{'eline'};
+		&renumber($file, $parent->{'eline'}-1, 1);
 		push(@{$parent->{'members'}}, $n);
 		splice(@$lref, $n->{'line'}, 0,
 		       &make_directive_lines($n, $parent->{'indent'} + 1));
@@ -203,7 +207,9 @@ sub flush_config_file_lines
 {
 my ($parent) = @_;
 foreach my $f (&get_all_config_files($parent)) {
-	&flush_file_lines($f);
+	if ($main::file_cache{$f}) {
+		&flush_file_lines($f);
+		}
 	}
 }
 
@@ -291,7 +297,7 @@ sub value_to_struct
 my ($name, $value) = @_;
 if (ref($value) eq 'HASH') {
 	# Already in correct format
-	$value->{'name'} = $name;
+	$value->{'name'} ||= $name;
 	return $value;
 	}
 elsif (ref($value) eq 'ARRAY') {

@@ -27,18 +27,22 @@ if ($in{'search'}) {
 		      @types;
 	}
 
-my @links = ( "<a href='edit_mime.cgi?new=1&search=".&urlize($in{'search'}).
-	      "#new'>".$text{'mime_add'}."</a>" );
+my @links;
+push(@links, "<a href='edit_mime.cgi?new=1&search=".&urlize($in{'search'}).
+	     "#new'>".$text{'mime_add'}."</a>") if (!$in{'new'});
 if (@types) {
 	# Show in table
 	unshift(@links, &select_all_link("d"),
 			&select_invert_link("d"));
 	print &ui_form_start("save_mime.cgi", "post");
+	print &ui_hidden("new", $in{'new'});
+	print &ui_hidden("type", $in{'type'});
+	print &ui_hidden("search", $in{'search'});
 	print &ui_links_row(\@links);
 	print &ui_columns_start([ "", $text{'mime_type'}, $text{'mime_exts'} ],
 				100, 0, [ "width=5" ]);
 	foreach my $t (@types) {
-		if ($in{'type'} eq $t->{'name'}) {
+		if ($in{'type'} && $in{'type'} eq $t->{'name'}) {
 			# Editing this type
 			print "<a name=edit>";
 			print &ui_checked_columns_row(
@@ -59,9 +63,13 @@ if (@types) {
 			}
 		}
 	if ($in{'new'}) {
-		print "<a name=new>\n";
+		print &ui_checked_columns_row(
+		  [ &ui_textbox("name", undef, 30),
+		    &ui_textbox("words", undef, 50) ],
+		  undef, "d", "xxx", 0, 1);
 		}
 	print &ui_columns_end();
+	print "<a name=new>\n";
 	print &ui_links_row(\@links);
 	print &ui_form_end([ $in{'type'} ? ( [ undef, $text{'save'} ] ) :
 			     $in{'new'} ? ( [ undef, $text{'create'} ] ) : ( ),

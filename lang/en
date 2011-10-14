@@ -40,6 +40,11 @@ mime_type=MIME type
 mime_exts=File extensions
 mime_add=Add a new MIME type.
 mime_delete=Delete Selected Types
+mime_err=Failed to update MIME types
+mime_ebutton=No button clicked!
+mime_ename=Missing or invalid MIME type name - must be like text/plain
+mime_ewords=No file extensions entered
+mime_eword=File extension contains invalid characters or starts with a dot
 
 logs_title=Logging Settings
 
