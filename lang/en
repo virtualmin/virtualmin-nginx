@@ -32,6 +32,14 @@ opt_ekeepalive_requests=Request limit for keepalive connections must be a number
 opt_secs=seconds
 
 mime_title=MIME Types
+mime_search=Find MIME types matching :
+mime_ok=Search
+mime_nomatch=No MIME types matched your search.
+mime_none=No MIME types were found in your Nginx configuration.
+mime_type=MIME type
+mime_exts=File extensions
+mime_add=Add a new MIME type.
+mime_delete=Delete Selected Types
 
 logs_title=Logging Settings
 
