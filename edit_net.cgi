@@ -17,6 +17,12 @@ print &nginx_onoff_input("sendfile", $http);
 
 print &nginx_onoff_input("gzip", $http);
 
+print &nginx_opt_input("gzip_disable", $http, 60, $text{'net_regexp'});
+
+print &nginx_onoff_input("tcp_nopush", $http);
+
+print &nginx_onoff_input("tcp_nodelay", $http);
+
 print &nginx_opt_input("keepalive_timeout", $http, 5, undef,
 		       $text{'opt_secs'});
 

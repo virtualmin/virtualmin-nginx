@@ -16,6 +16,12 @@ my $http = &find("http", $conf);
 
 &nginx_onoff_parse("gzip", $http);
 
+&nginx_opt_parse("gzip_disable", $http, undef);
+
+&nginx_onoff_parse("tcp_nopush", $http);
+
+&nginx_onoff_parse("tcp_nodelay", $http);
+
 &nginx_opt_parse("keepalive_timeout", $http, undef, '\d+');
 
 &nginx_opt_parse("keepalive_requests", $http, undef, '\d+');
