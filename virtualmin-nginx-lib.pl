@@ -159,6 +159,7 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 	my $lref = &read_file_lines($file);
 	if ($i<@$newstructs && $i<@$oldstructs) {
 		# Updating some directive
+		$o->{'name'} = $n->{'name'};
 		$o->{'value'} = $n->{'value'};
 		$o->{'words'} = $n->{'words'};
 		$lref->[$o->{'line'}] = &make_directive_lines(

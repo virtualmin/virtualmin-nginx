@@ -15,7 +15,6 @@ my $types = &find("types", $http);
 # Validate type name and values
 my @words;
 if ($in{'new'} || $in{'type'}) {
-	# XXX clash check
 	$in{'name'} =~ /^[a-z0-9\.\_\-]+\/[a-z0-9\.\_\-]+$/ ||
 		&error($text{'mime_ename'});
 	@words = split(/\s+/, $in{'words'});
@@ -25,6 +24,13 @@ if ($in{'new'} || $in{'type'}) {
 		}
 	}
 
+# Check for clash
+if ($in{'new'} || $in{'type'} && $in{'type'} ne $in{'name'}) {
+	my ($clash) = grep { $_->{'name'} eq $in{'name'} }
+			   @{$types->{'members'}};
+	$clash && &error($text{'mime_eclash'});
+	}
+
 if ($in{'new'}) {
 	# Add a new type
 	&save_directive($types, [ ], [ { 'name' => $in{'name'},
@@ -32,6 +38,10 @@ if ($in{'new'}) {
 	}
 elsif ($in{'type'}) {
 	# Updating some type
+	my ($old) = grep { $_->{'name'} eq $in{'type'} } @{$types->{'members'}};
+	$old || &error($text{'mime_eold'});
+	&save_directive($types, [ $old ], [ { 'name' => $in{'name'},
+                                              'words' => \@words } ]);
 	}
 elsif ($in{'delete'}) {
 	# Deleting some rows
