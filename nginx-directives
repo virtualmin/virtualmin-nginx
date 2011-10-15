@@ -1,3 +1,12 @@
+http_events	accept_mutex	on	-
+http_events	accept_mutex_delay	500ms	-
+http_events	debug_connection	none	-
+http_events	devpoll_changes	 	-
+http_events	multi_accept	off	-
+http_events	rtsig_signo	 	-
+http_events	rtsig_overflow_*	 	-
+http_events	use	 	-
+http_events	worker_connections	 	-
 http_log	access_log	log/access.log combined	http,server,location
 http_log	log_format	combined "..."	http
 http_log	open_log_file_cache	off	http
@@ -95,6 +104,24 @@ http_charset	source_charset	no	http,server,location,ifinlocation
 http_dav	dav_access	user:rw	http,server,location
 http_dav	dav_methods	off	http,server,location
 http_dav	create_full_put_path	off	http,server,location
+http_main	daemon	on	-
+http_main	env	TZ	main
+http_main	debug_points	none	-
+http_main	error_log	${prefix}/logs/error.log	-
+http_main	include	none	-
+http_main	lock_file	-	-
+http_main	master_process	on	-
+http_main	pid	-	-
+http_main	ssl_engine	-	-
+http_main	timer_resolution	none	-
+http_main	user	nobody nobody	-
+http_main	worker_cpu_affinity	none	-
+http_main	worker_priority	on	-
+http_main	worker_processes	1	-
+http_main	worker_rlimit_core	 	-
+http_main	worker_rlimit_nofile	-	-
+http_main	worker_rlimit_sigpending	 	-
+http_main	working_directory	--prefix	-
 http_empty_gif	empty_gif	n/a	location
 http_fcgi	fastcgi_bind	none	http,server,location
 http_fcgi	fastcgi_buffer_size	4k/8k	http,server,location
@@ -140,6 +167,10 @@ http_gzip	gzip_proxied	off	http,server,location
 http_gzip	gzip_types	text/html	http,server,location
 http_gzip	gzip_vary	off	http,server,location
 http_gzip_static	gzip_static	off	http,server,location
+http_image_filter	image_filter	none	location
+http_image_filter	image_filter_buffer	1M	http,server,location
+http_image_filter	image_filter_jpeg_quality	75	http,server,location
+http_image_filter	image_filter_transparency	on	http,server,location
 http_upstream	ip_hash	none	upstream
 http_upstream	server	none	upstream
 http_upstream	upstream	none	http
@@ -248,3 +279,21 @@ http_referer	valid_referers	no	server,location
 http_xslt	xml_entities	no	http,server,location
 http_xslt	xslt_stylesheet	no	http,server,location
 http_xslt	xslt_types	text/xml	http,server,location
+core	daemon	on	-
+core	env	TZ	main
+core	debug_points	none	-
+core	error_log	${prefix}/logs/error.log	-
+core	include	none	-
+core	lock_file	-	-
+core	master_process	on	-
+core	pid	-	-
+core	ssl_engine	-	-
+core	timer_resolution	none	-
+core	user	nobody nobody	-
+core	worker_cpu_affinity	none	-
+core	worker_priority	on	-
+core	worker_processes	1	-
+core	worker_rlimit_core	 	-
+core	worker_rlimit_nofile	-	-
+core	worker_rlimit_sigpending	 	-
+core	working_directory	--prefix	-

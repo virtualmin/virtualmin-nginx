@@ -62,7 +62,7 @@ foreach (@lines) {
 		my $ns = { 'name' => $1,
 			   'value' => $3,
 			   'type' => 1,
-			   'indent' => scalar(@stack),
+			   'indent' => scalar(@stack)+1,
 			   'file' => $file,
 			   'line' => $lnum,
 			   'eline' => $lnum,
@@ -103,7 +103,6 @@ foreach (@lines) {
 				    'value' => $words[0],
 				    'words' => \@words,
 				    'type' => 0,
-				    'indent' => scalar(@stack),
 				    'file' => $file,
 				    'line' => $lnum,
 				    'eline' => $lnum };
@@ -163,7 +162,7 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 		$o->{'value'} = $n->{'value'};
 		$o->{'words'} = $n->{'words'};
 		$lref->[$o->{'line'}] = &make_directive_lines(
-						$o, $parent->{'indent'} + 1);
+						$o, $parent->{'indent'});
 		}
 	elsif ($i<@$newstructs) {
 		# Adding a directive
@@ -171,7 +170,7 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 		&renumber($file, $parent->{'eline'}-1, 1);
 		push(@{$parent->{'members'}}, $n);
 		splice(@$lref, $n->{'line'}, 0,
-		       &make_directive_lines($n, $parent->{'indent'} + 1));
+		       &make_directive_lines($n, $parent->{'indent'}));
 		}
 	elsif ($i<@$oldstructs) {
 		# Removing a directive
@@ -336,7 +335,8 @@ if (!%list_directives_cache) {
 			{ 'module' => $module,
 			  'name' => $name,
 			  'default' => $default eq '-' ? undef : $default,
-			  'context' => [ split(/,/, $context) ],
+			  'context' => $context eq '-' ? undef :
+					[ split(/,/, $context) ],
 			};
 		}
 	}
@@ -369,7 +369,7 @@ if (!@list_modules_cache) {
 				'http_referer', 'http_rewrite',
 				'http_scgi', 'http_split_clients',
 				'http_ssi', 'http_userid', 
-				'http_uwsgi' );
+				'http_uwsgi', 'http_log', 'core' );
 	my $out = &backquote_command("$config{'nginx_cmd'} -V 2>&1 </dev/null");
 	while($out =~ s/--with-(\S+)_module\s+//) {
 		push(@list_modules_cache, $1);
@@ -389,9 +389,10 @@ my ($name, $parent) = @_;
 my $dirs = &list_nginx_directives();
 my $dir = $dirs->{$name};
 return 0 if (!$dir);
-return 0 if ($parent && &indexof($parent->{'name'}, @{$dir->{'context'}}) < 0);
+return 0 if ($dir->{'context'} && $parent &&
+	     &indexof($parent->{'name'}, @{$dir->{'context'}}) < 0);
 my @mods = &list_nginx_modules();
-return 0 if (&indexof($dir->{'module'}, @mods) < 0);
+#return 0 if (&indexof($dir->{'module'}, @mods) < 0);
 return 1;
 }
 
@@ -450,6 +451,70 @@ else {
 	$err && &error($err);
 	&save_directive($parent, $name, [ $v ]);
 	}
+}
+
+# nginx_error_log_input(name, &parent)
+# Returns HTML specifically for setting the error_log directive
+sub nginx_error_log_input
+{
+my ($name, $parent) = @_;
+return undef if (!&supported_directive($name, $parent));
+my $obj = &find($name, $parent);
+my $def = &get_default($name);
+$def =~ s/^\$\{prefix\}\///;
+return &ui_table_row($text{'opt_'.$name},
+	&ui_radio($name."_def", $obj ? 0 : 1,
+		  [ [ 1, $text{'default'}.($def ? " ($def)" : "")."<br>" ],
+		    [ 0, $text{'logs_file'} ] ])." ".
+	&ui_textbox($name, $obj ? $obj->{'words'}->[0] : undef, 40)." ".
+	$text{'logs_level'}." ".
+	&ui_select($name."_level", $obj ? $obj->{'words'}->[1] : "",
+		   [ [ "", "&lt;$text{'default'}&gt;" ],
+		     "debug", "info", "notice", "warn", "error", "crit" ]));
+}
+
+# nginx_error_log_parse(name, &parent, &in)
+# Validate input from nginx_error_log_input
+sub nginx_error_log_parse
+{
+my ($name, $parent, $in) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+if ($in->{$name."_def"}) {
+	&save_directive($parent, $name, [ ]);
+        }
+else {
+	$in->{$name} || &error(&text('opt_missing', $text{'opt_'.$name}));
+	$in->{$name} =~ /^\/\S+$/ || &error($text{'opt_e'.$name});
+	my @w = ( $in->{$name} );
+	push(@w, $in->{$name."_level"}) if ($in->{$name."_level"});
+	&save_directive($parent, $name, [ { 'name' => $name,
+					    'words' => \@w } ]);
+	}
+}
+
+# nginx_access_log_input(name, &parent)
+# Returns HTML specifically for setting the access_log directive
+sub nginx_access_log_input
+{
+my ($name, $parent) = @_;
+return undef if (!&supported_directive($name, $parent));
+my $obj = &find($name, $parent);
+my $mode = !$obj ? 1 : $obj->{'value'} eq 'off' ? 2 : 0;
+my $buffer = $mode == 0 && $obj->{'words'}->[2] =~ /buffer=(\S+)/ ? $1 : "";
+my $def = &get_default($name);
+return &ui_table_row($text{'opt_'.$name},
+	&ui_radio($name."_def", $mode,
+		[ [ 1, $text{'default'}.($def ? " ($def)" : "")."<br>" ],
+		  [ 2, $text{'logs_disabled'}."<br>" ],
+		  [ 0, $text{'logs_file'} ] ])." ".
+	&ui_textbox($name, $mode == 0 ? $obj->{'words'}->[0] : undef, 40)." ".
+	$text{'logs_format'}." ".
+	&ui_select($name."_format", $mode == 0 ? $obj->{'words'}->[1] : "",
+		   [ [ "", "&lt;$text{'default'}&gt;" ],
+		     &list_log_formats() ])." ".
+	$text{'logs_buffer'}." ".
+	&ui_textbox($name."_buffer", $buffer, 6));
 }
 
 1;

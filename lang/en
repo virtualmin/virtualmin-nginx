@@ -50,5 +50,17 @@ mime_eclash=A MIME type with the same name already exists
 mime_enone=No MIME types selected to delete
 
 logs_title=Logging Settings
+logs_header=Log and PID file options
+opt_error_log=Error log file
+opt_access_log=Global HTTP log file
+opt_pid=Process ID file
+logs_file=Write to file
+logs_level=for events at level
+logs_err=Failed to save logging settings
+opt_epid=Process ID file must be an absolute path
+opt_eerror_log=Error log file must be an absolute path
+logs_disabled=Logging disabled
+logs_format=in format
+logs_buffer=with buffer size
 
 misc_title=Other Settings

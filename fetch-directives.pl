@@ -12,21 +12,27 @@ foreach my $l (&download("http://wiki.nginx.org/DirectiveIndex")) {
 		push(@mods, [ $page, $mod ]) if (!$donemod{$mod}++);
 		}
 	}
+push(@mods, [ "CoreModule", "core" ]);
 
 foreach my $m (@mods) {
 	my ($page, $mod) = @$m;
 	my $dir;
 	foreach my $l (&download("http://wiki.nginx.org/$page")) {
-		if ($l =~ /<b>syntax:<\/b> <i>([^< ]+)/) {
+		if ($l =~ /<b>syntax:<\/b> <i>([^< ]+)/i) {
 			$dir = { 'name' => $1,
 				 'mod' => $mod };
 			push(@dirs, $dir);
 			}
-		elsif ($l =~ /<b>default:<\/b> <i>([^<]+)</ && $dir) {
+		elsif ($l =~ /<b>default:<\/b> <i>([^<]+)</i && $dir) {
 			$dir->{'default'} = $1;
 			$dir->{'default'} =~ s/^\Q$dir->{'name'}\E\s+//;
+			if ($dir->{'default'} eq 'compile-time option' ||
+			    $dir->{'default'} eq 'system dependent' ||
+			    $dir->{'default'} =~ /No value specified/) {
+				$dir->{'default'} = '';
+				}
 			}
-		elsif ($l =~ /<b>context:<\/b> <i>([^<]+)</ && $dir) {
+		elsif ($l =~ /<b>context:<\/b> <i>([^<]+)</i && $dir) {
 			$dir->{'context'} = $1;
 			$dir->{'context'} =~ s/\s//g;
 			$dir->{'context'} =~ s/\([^\)]+\)//g;
