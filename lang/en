@@ -47,6 +47,7 @@ mime_ewords=No file extensions entered
 mime_eword=File extension contains invalid characters or starts with a dot
 mime_eold=MIME type no longer exists!
 mime_eclash=A MIME type with the same name already exists
+mime_enone=No MIME types selected to delete
 
 logs_title=Logging Settings
 

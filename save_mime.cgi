@@ -31,6 +31,7 @@ if ($in{'new'} || $in{'type'} && $in{'type'} ne $in{'name'}) {
 	$clash && &error($text{'mime_eclash'});
 	}
 
+my @d;
 if ($in{'new'}) {
 	# Add a new type
 	&save_directive($types, [ ], [ { 'name' => $in{'name'},
@@ -45,6 +46,14 @@ elsif ($in{'type'}) {
 	}
 elsif ($in{'delete'}) {
 	# Deleting some rows
+	@d = split(/\0/, $in{'d'});
+	@d || &error($text{'mime_enone'});
+	my @del = ( );
+	foreach my $name (@d) {
+		my ($d) = grep { $_->{'name'} eq $name } @{$types->{'members'}};
+		push(@del, $d) if ($d);
+		}
+	&save_directive($types, \@del, [ ]);
 	}
 else {
 	# Nothing to do?
@@ -53,5 +62,10 @@ else {
 
 &flush_config_file_lines();
 &unlock_all_config_files();
-&webmin_log("net");
+if ($in{'new'} || $in{'type'}) {
+	&webmin_log($in{'new'} ? "create" : "modify", "mime", $in{'name'});
+	}
+else {
+	&webmin_log("delete", "mimes", scalar(@d));
+	}
 &redirect("edit_mime.cgi?search=".&urlize($in{'search'}));
