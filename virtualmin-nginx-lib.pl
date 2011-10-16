@@ -512,9 +512,56 @@ return &ui_table_row($text{'opt_'.$name},
 	$text{'logs_format'}." ".
 	&ui_select($name."_format", $mode == 0 ? $obj->{'words'}->[1] : "",
 		   [ [ "", "&lt;$text{'default'}&gt;" ],
-		     &list_log_formats() ])." ".
+		     &list_log_formats($parent) ])." ".
 	$text{'logs_buffer'}." ".
 	&ui_textbox($name."_buffer", $buffer, 6));
+}
+
+# nginx_access_log_parse(name, &parent, &in)
+# Validate input from nginx_access_log_input
+sub nginx_access_log_parse
+{
+my ($name, $parent, $in) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+if ($in->{$name."_def"} == 1) {
+	&save_directive($parent, $name, [ ]);
+        }
+elsif ($in->{$name."_def"} == 2) {
+	&save_directive($parent, $name, [ "off" ]);
+	}
+else {
+	$in->{$name} || &error(&text('opt_missing', $text{'opt_'.$name}));
+	$in->{$name} =~ /^\/\S+$/ || &error($text{'opt_e'.$name});
+	my @w = ( $in->{$name} );
+	push(@w, $in->{$name."_format"}) if ($in->{$name."_format"});
+	my $buffer = $in->{$name."_buffer"};
+	if ($buffer) {
+		$buffer =~ /^\d+[bKMGT]?$/i || &error($text{'logs_ebuffer'});
+		push(@w, "buffer=$buffer");
+		}
+	&save_directive($parent, $name, [ { 'name' => $name,
+					    'words' => \@w } ]);
+	}
+}
+
+# list_log_formats([&server])
+# Returns a list of all log format names
+sub list_log_formats
+{
+my ($server) = @_;
+my $parent = &get_config_parent();
+my @rv = ( "combined" );
+my $http = &find("http", $parent);
+foreach my $l (&find("log_format", $http)) {
+	push(@rv, $l->{'words'}->[0]);
+	}
+if ($server && $server->{'name'} eq 'server') {
+	foreach my $l (&find("log_format", $server)) {
+		push(@rv, $l->{'words'}->[0]);
+		}
+	}
+return &unique(@rv);
 }
 
 1;
