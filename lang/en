@@ -66,3 +66,13 @@ logs_buffer=with buffer size
 logs_ebuffer=Buffer size number be like 32k or 32762, or left empty
 
 misc_title=Other Settings
+misc_header=Users and process options
+opt_worker_processes=Number of worker processes
+opt_user=Run as user
+misc_group=and group
+opt_worker_priority=Run workers with priority
+misc_pri=Number
+misc_prisuffix=(Negative numbers are better, postive are worse)
+misc_username=Unix user
+misc_euser=Invalid Unix username
+misc_egroup=Invalid Unix group name

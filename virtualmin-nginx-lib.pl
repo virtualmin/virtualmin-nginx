@@ -545,6 +545,47 @@ else {
 	}
 }
 
+# nginx_user_input(name, &parent)
+# Returns HTML for a user field with an optional group
+sub nginx_user_input
+{
+my ($name, $parent) = @_;
+return undef if (!&supported_directive($name, $parent));
+my $obj = &find($name, $parent);
+my $def = &get_default($name);
+return &ui_table_row($text{'opt_'.$name},
+	&ui_radio($name."_def", $obj ? 0 : 1,
+		  [ [ 1, $text{'default'}.($def ? " ($def)" : "")."<br>" ],
+		    [ 0, $text{'misc_username'} ] ])." ".
+	&ui_user_textbox($name, $obj ? $obj->{'words'}->[0] : "")." ".
+	$text{'misc_group'}." ".
+	&ui_group_textbox($name."_group", $obj ? $obj->{'words'}->[1] : ""));
+}
+
+# nginx_user_parse(name, &parent, &in)
+# Validate input from nginx_user_input
+sub nginx_user_parse
+{
+my ($name, $parent, $in) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+if ($in->{$name."_def"} == 1) {
+	&save_directive($parent, $name, [ ]);
+        }
+else {
+	$in->{$name} || &error(&text('opt_missing', $text{'opt_'.$name}));
+	defined(getpwnam($in->{$name})) || &error($text{'misc_euser'});
+	my @w = ( $in->{$name} );
+	my $group = $in->{$name."_group"};
+	if ($group) {
+		defined(getgrnam($group)) || &error($text{'misc_egroup'});
+		push(@w, $group);
+		}
+	&save_directive($parent, $name, [ { 'name' => $name,
+					    'words' => \@w } ]);
+	}
+}
+
 # list_log_formats([&server])
 # Returns a list of all log format names
 sub list_log_formats

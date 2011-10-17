@@ -5,12 +5,11 @@ use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
 our (%text);
+&lock_all_config_files();
 my $conf = &get_config();
 my $http = &find("http", $conf);
 &error_setup($text{'net_err'});
 &ReadParse();
-
-&lock_all_config_files();
 
 &nginx_onoff_parse("sendfile", $http);
 
@@ -22,9 +21,9 @@ my $http = &find("http", $conf);
 
 &nginx_onoff_parse("tcp_nodelay", $http);
 
-&nginx_opt_parse("keepalive_timeout", $http, undef, '\d+');
+&nginx_opt_parse("keepalive_timeout", $http, undef, '^\d+$');
 
-&nginx_opt_parse("keepalive_requests", $http, undef, '\d+');
+&nginx_opt_parse("keepalive_requests", $http, undef, '^\d+$');
 
 &flush_config_file_lines();
 &unlock_all_config_files();
