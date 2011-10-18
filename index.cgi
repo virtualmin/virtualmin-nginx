@@ -25,11 +25,12 @@ if (!&has_command($config{'nginx_cmd'})) {
 # Show icons for global config types
 print &ui_subheading($text{'index_global'});
 my $conf = &get_config();
-my @gpages = ( "net", "mime", "logs", "misc" );
+my @gpages = ( "net", "mime", "logs", "misc", "manual" );
 &icons_table(
 	[ map { "edit_".$_.".cgi" } @gpages ],
 	[ map { $text{$_."_title"} } @gpages ],
 	[ map { "images/".$_.".gif" } @gpages ],
+	scalar(@gpages),
 	);
 print &ui_hr();
 
@@ -83,8 +84,10 @@ if (@servers) {
 		else {
 			$root = "<i>$text{'index_norootloc'}</i>";
 			}
+		my $id = $name.";".$root;
 		print &ui_checked_columns_row([
-				$name,
+				"<a href='edit_serv.cgi?id=".&urlize($id)."'>".
+				  &html_escape($name)."</a>",
 				join("<br>", @ips),
 				join("<br>", @ports),
 				$root ],
@@ -96,5 +99,20 @@ else {
 	print "<b>$text{'index_none'}</b><p>\n";
 	}
 print &ui_links_row(\@links);
+
+# Show start / stop buttons
+print &ui_hr();
+print &ui_buttons_start();
+if (&is_nginx_running()) {
+	print &ui_buttons_row("stop.cgi", $text{'index_stop'},
+			      $text{'index_stopdesc'});
+	print &ui_buttons_row("restart.cgi", $text{'index_restart'},
+			      $text{'index_restartdesc'});
+	}
+else {
+	print &ui_buttons_row("start.cgi", $text{'index_start'},
+			      $text{'index_startdesc'});
+	}
+print &ui_buttons_end();
 
 &ui_print_footer("/", $text{'index'});

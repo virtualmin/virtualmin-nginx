@@ -605,5 +605,57 @@ if ($server && $server->{'name'} eq 'server') {
 return &unique(@rv);
 }
 
+# is_nginx_running()
+# Returns the PID if nginx is running
+sub is_nginx_running
+{
+my $parent = &get_config_parent();
+my $pidfile = &find_value("pid", $parent);
+$pidfile ||= &get_default("pid");
+$pidfile ||= $config{'pid_file'};
+if ($pidfile =~ /^\//) {
+	return &check_pid_file($pidfile);
+	}
+else {
+	my ($pid) = &find_byname("nginx");
+	return $pid;
+	}
+}
+
+# stop_nginx()
+# Attempt to stop nginx, return an error on failure or undef on success
+sub stop_nginx
+{
+my $out = &backquote_logged("$config{'stop_cmd'} 2>&1 </dev/null");
+return $? ? $out : undef;
+}
+
+# start_nginx()
+# Attempt to start nginx, return an error on failure or undef on success
+sub start_nginx
+{
+my $out = &backquote_logged("$config{'start_cmd'} 2>&1 </dev/null");
+return $? ? $out : undef;
+}
+
+# apply_nginx()
+# Attempt to apply the nginx config, return an error on failure or undef
+# on success
+sub apply_nginx
+{
+my $out = &backquote_logged("$config{'apply_cmd'} 2>&1 </dev/null");
+return $? ? $out : undef;
+}
+
+# test_config()
+# Returns an error message if the config is invalid
+sub test_config
+{
+&clean_language() if (defined(&clean_language));
+my $out = &backquote_logged("$config{'nginx_cmd'} -t 2>&1 </dev/null");
+&reset_environment() if (defined(&clean_language));
+return $? || $out !~ /syntax\s+is\s+ok/ ? $out : undef;
+}
+
 1;
 

@@ -15,6 +15,12 @@ index_add=Add a new Nginx virtual host.
 index_global=Global Settings
 index_virts=Virtual Hosts
 index_return=module index
+index_stop=Stop Nginx Webserver
+index_stopdesc=Shut down all running Nginx webserver processes.
+index_start=Start Nginx Webserver
+index_startdesc=Start up the Nginx webserver using the current configuration.
+index_restart=Re-start Nginx Webserver
+index_restartdesc=Apply the current configuration by stopping and re-starting the Nginx webserver.
 
 net_title=Network Configuration
 net_header=Global networking options
@@ -81,6 +87,12 @@ opt_eworker_processes=Number of worker processes must be a number greater than z
 opt_eworker_priority=Worker priority must be a positive or negative number
 misc_pri=Number
 
+manual_title=Edit Configuration Files
+manual_file=Editing configuration file:
+manual_ok=Switch
+manual_efile=Selected file is not part of the Nginx configuration!
+manual_test=Test new configuration before saving?
+
 log_net=Changed network configuration
 log_logs=Changed logging settings
 log_misc=Changed other settings
@@ -88,3 +100,10 @@ log_create_mime=Created MIME type $1
 log_delete_mime=Deleted MIME type $1
 log_modify_mime=Modified MIME type $1
 log_delete_mimes=Deleted $1 MIME types
+
+stop_err=Failed to stop Nginx
+
+start_err=Failed to start Nginx
+
+restart_err=Failed to apply Nginx configuration
+restart_etest=Configuration is invalid : $1
