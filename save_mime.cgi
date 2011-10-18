@@ -65,6 +65,9 @@ else {
 if ($in{'new'} || $in{'type'}) {
 	&webmin_log($in{'new'} ? "create" : "modify", "mime", $in{'name'});
 	}
+elsif (@d == 1) {
+	&webmin_log("delete", "mime", $d[0]);
+	}
 else {
 	&webmin_log("delete", "mimes", scalar(@d));
 	}

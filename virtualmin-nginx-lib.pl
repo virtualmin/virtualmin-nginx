@@ -35,7 +35,7 @@ if (!$get_config_parent_cache) {
 	foreach my $c (@{$get_config_parent_cache->{'members'}}) {
 		if ($c->{'file'} eq $get_config_parent_cache->{'file'} &&
 		    $c->{'eline'} > $get_config_parent_cache->{'eline'}) {
-			$get_config_parent_cache->{'eline'} = $c->{'eline'};
+			$get_config_parent_cache->{'eline'} = $c->{'eline'}+1;
 			}
 		}
 	}
