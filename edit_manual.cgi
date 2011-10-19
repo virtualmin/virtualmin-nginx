@@ -16,7 +16,8 @@ $in{'file'} ||= $files[0];
 # Show file selector
 print &ui_form_start("edit_manual.cgi");
 print "<b>$text{'manual_file'}</b>\n";
-print &ui_select("file", $in{'file'}, \@files);
+print &ui_select("file", $in{'file'}, \@files, 1, 0, 0, 0,
+		 "onChange='form.submit()'");
 print &ui_submit($text{'manual_ok'});
 print &ui_form_end();
 

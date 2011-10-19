@@ -17,6 +17,9 @@ if ($type eq 'mime') {
 elsif ($type eq 'mimes') {
 	return &text('log_'.$action.'_mimes', $object);
 	}
+elsif ($type eq 'manual') {
+	return &text('log_manual', &html_escape($object));
+	}
 else {
 	return $text{'log_'.$action};
 	}

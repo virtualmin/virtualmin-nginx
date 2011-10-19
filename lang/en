@@ -92,6 +92,8 @@ manual_file=Editing configuration file:
 manual_ok=Switch
 manual_efile=Selected file is not part of the Nginx configuration!
 manual_test=Test new configuration before saving?
+manual_elink=Dangling symbolic link!
+manual_err=Failed to save configuration file
 
 log_net=Changed network configuration
 log_logs=Changed logging settings
@@ -100,6 +102,7 @@ log_create_mime=Created MIME type $1
 log_delete_mime=Deleted MIME type $1
 log_modify_mime=Modified MIME type $1
 log_delete_mimes=Deleted $1 MIME types
+log_manual=Manually edited config file $1
 
 stop_err=Failed to stop Nginx
 
