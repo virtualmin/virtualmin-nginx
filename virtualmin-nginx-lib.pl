@@ -158,28 +158,33 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 	my $lref = &read_file_lines($file);
 	if ($i<@$newstructs && $i<@$oldstructs) {
 		# Updating some directive
+		# XXX deal with length change
+		my $olen = $o->{'eline'} - $o->{'line'} + 1;
+		my @lines = &make_directive_lines($n, $parent->{'indent'});
 		$o->{'name'} = $n->{'name'};
 		$o->{'value'} = $n->{'value'};
 		$o->{'words'} = $n->{'words'};
-		$lref->[$o->{'line'}] = &make_directive_lines(
-						$o, $parent->{'indent'});
+		splice(@$lref, $o->{'line'}, $o->{'eline'}-$o->{'line'}+1,
+		       @lines);
 		}
 	elsif ($i<@$newstructs) {
 		# Adding a directive
-		$n->{'eline'} = $n->{'line'} = $parent->{'eline'};
-		&renumber($file, $parent->{'eline'}-1, 1);
+		my @lines = &make_directive_lines($n, $parent->{'indent'});
+		$n->{'line'} = $parent->{'eline'};
+		$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
+		&renumber($file, $parent->{'eline'}-1, scalar(@lines));
 		push(@{$parent->{'members'}}, $n);
-		splice(@$lref, $n->{'line'}, 0,
-		       &make_directive_lines($n, $parent->{'indent'}));
+		splice(@$lref, $n->{'line'}, 0, @lines);
 		}
 	elsif ($i<@$oldstructs) {
 		# Removing a directive
-		splice(@$lref, $o->{'line'}, 1);
+		my $olen = $o->{'eline'} - $o->{'line'} + 1;
+		splice(@$lref, $o->{'line'}, $olen);
 		my $idx = &indexof($o, @{$parent->{'members'}});
 		if ($idx >= 0) {
 			splice(@{$parent->{'members'}}, $idx, 1);
 			}
-		&renumber($file, $o->{'line'}, -1);
+		&renumber($file, $o->{'line'}, -$olen);
 		}
 	}
 }
@@ -254,13 +259,18 @@ sub make_directive_lines
 {
 my ($dir, $indent) = @_;
 my @rv;
+my @w = @{$dir->{'words'}};
 if ($dir->{'type'}) {
 	# Multi-line
-	# XXX
+	push(@rv, $dir->{'name'}.(@w ? " ".&join_words(@w) : "")." {");
+	foreach my $m (@{$dir->{'members'}}) {
+		push(@rv, &make_directive_lines($m, $indent+1));
+		}
+	push(@rv, "}");
 	}
 else {
 	# Single line
-	push(@rv, $dir->{'name'}." ".&join_words(@{$dir->{'words'}}).";");
+	push(@rv, $dir->{'name'}." ".&join_words(@w).";");
 	}
 foreach my $r (@rv) {
 	$r = ("\t" x $indent).$r;

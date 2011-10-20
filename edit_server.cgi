@@ -10,7 +10,8 @@ our (%text, %in);
 my $server;
 if ($in{'new'}) {
 	&ui_print_header(undef, $text{'server_create'}, "");
-	$server = { };
+	$server = { 'name' => 'server',
+		    'members' => [ ] };
 	}
 else {
 	&ui_print_header(undef, $text{'server_edit'}, "");
@@ -20,26 +21,39 @@ else {
 
 if ($in{'server'}) {
 	# Show icons for server settings types
-
+	# XXX
 
 	# Show table for locations
+	# XXX
+
+	print &ui_hr();
 	}
 
 # Show form to edit name, IPs and root
 print &ui_form_start("save_server.cgi", "post");
+print &ui_hidden("id", $in{'id'});
+print &ui_hidden("new", $in{'new'});
 print &ui_table_start($text{'server_header'}, "width=100%", 2);
 
 # Server name
 print &nginx_text_input("server_name", $server, 50);
 
 # IP addresses / ports to listen on
-my @listen = &find("listen", $server);
+my @listen;
+if ($in{'new'}) {
+	@listen = ( &value_to_struct('listen', '80') );
+	}
+else {
+	@listen = &find("listen", $server);
+	}
 my $table = &ui_columns_start([ $text{'server_ip'},
 				$text{'server_port'},
 				$text{'server_default'},
 				$text{'server_ssl'},
 				$text{'server_ipv6'} ], 100);
 my $i = 0;
+my @tds = ( "valign=top", "valign=top", "valign=top",
+	    "valign=top", "valign=top" );
 foreach my $l (@listen, { 'words' => [ ] }) {
 	my @w = @{$l->{'words'}};
 	my ($ip, $port) = @w ? &split_ip_port(shift(@w)) : ( );
@@ -59,9 +73,9 @@ foreach my $l (@listen, { 'words' => [ ] }) {
 	# XXX disable inputs when disabled
 	$table .= &ui_columns_row([
 		&ui_radio("ip_def_$i", $ipmode,
-			  [ [ 3, $text{'server_none'} ],
-			    [ 1, $text{'server_ipany'} ],
-			    [ 2, $text{'server_ip6any'} ],
+			  [ [ 3, $text{'server_none'}."<br>" ],
+			    [ 1, $text{'server_ipany'}."<br>" ],
+			    [ 2, $text{'server_ip6any'}."<br>" ],
 			    [ 0, $text{'server_ipaddr'} ] ])." ".
 		  &ui_textbox("ip_$i", $ipmode == 0 ? $ip : "", 30),
 		&ui_textbox("port_$i", $port, 6),
@@ -72,7 +86,7 @@ foreach my $l (@listen, { 'words' => [ ] }) {
 		&ui_select("ipv6_$i", $ipv6,
 			   [ [ "", $text{'server_auto'} ],
 		  	     [ "off", $text{'no'} ], [ "on", $text{'yes'} ] ]),
-		]);
+		], \@tds);
 	$i++;
 	}
 $table .= &ui_columns_end();
