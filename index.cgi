@@ -41,7 +41,7 @@ if (!$http) {
 	&ui_print_endpage(
 		&text('index_ehttp', "<tt>$config{'nginx_config'}</tt>"));
 	}
-my @servers = &find("server", $http->{'members'});
+my @servers = &find("server", $http);
 my @links = ( "<a href='edit_server.cgi?new=1'>$text{'index_add'}</a>" );
 if (@servers) {
 	unshift(@links, &select_all_link("d"),
@@ -55,42 +55,36 @@ if (@servers) {
 				  $text{'index_port'},
 				  $text{'index_root'} ], 100, 0, \@tds);
 	foreach my $s (@servers) {
-		my $name = &find_value("server_name", $s->{'members'});
+		my $name = &find_value("server_name", $s);
 
+		# Extract all IPs and ports from listen directives
 		my (@ips, @ports);
-		foreach my $l (&find_value("listen", $s->{'members'})) {
-			if ($l =~ /^\d+$/) {
-				push(@ips, $text{'index_any'});
-				push(@ports, $l);
-				}
-			elsif ($l =~ /^\[(\S+)\]:(\d+)$/) {
-				push(@ips, $1 eq "::" ? $text{'index_any6'}
-						      : $1);
-				push(@ports, $2);
-				}
-			elsif ($l =~ /^(\S+):(\d+)$/) {
-				push(@ips, $1);
-				push(@ports, $2);
-				}
+		foreach my $l (&find_value("listen", $s)) {
+			my ($ip, $port) = &split_ip_port($l);
+			$ip = $text{'index_any6'} if ($ip eq "::");
+			$ip ||= $text{'index_any'};
+			push(@ips, $ip);
+			push(@ports, $port);
 			}
 
-		my @locs = &find("location", $s->{'members'});
+		my @locs = &find("location", $s);
 		my ($rootloc) = grep { $_->{'value'} eq '/' } @locs;
 		my $root;
+		my $rootdir = "";
 		if ($rootloc) {
-			$root = &find_value("root", $rootloc->{'members'}) ||
-				"<i>$text{'index_noroot'}</i>";
+			$rootdir = &find_value("root", $rootloc);
+			$root = $rootdir || "<i>$text{'index_noroot'}</i>";
 			}
 		else {
 			$root = "<i>$text{'index_norootloc'}</i>";
 			}
-		my $id = $name.";".$root;
+		my $id = $name.";".$rootdir;
 		print &ui_checked_columns_row([
-				"<a href='edit_serv.cgi?id=".&urlize($id)."'>".
-				  &html_escape($name)."</a>",
-				join("<br>", @ips),
-				join("<br>", @ports),
-				$root ],
+			"<a href='edit_server.cgi?id=".&urlize($id)."'>".
+			  &html_escape($name)."</a>",
+			join("<br>", @ips),
+			join("<br>", @ports),
+			$root ],
 			\@tds, "d", $name);
 		}
 	print &ui_columns_end();

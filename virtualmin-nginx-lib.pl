@@ -453,6 +453,32 @@ else {
 	}
 }
 
+# nginx_text_input(name, &parent, size, suffix)
+# Returns HTML for a non-optional text field
+sub nginx_text_input
+{
+my ($name, $parent, $size, $suffix) = @_;
+return undef if (!&supported_directive($name, $parent));
+my $value = &find_value($name, $parent);
+return &ui_table_row($text{'opt_'.$name},
+	&ui_textbox($name, $value, $size).$suffix, $size > 40 ? 3 : 1);
+}
+
+# nginx_text_parse(name, &parent, &in, [regex], [&validator])
+# Updates the config with input from nginx_text_input
+sub nginx_text_parse
+{
+my ($name, $parent, $in, $regexp, $vfunc) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+my $v = $in->{$name};
+$v eq '' && &error(&text('opt_missing', $text{'opt_'.$name}));
+!$regexp || $v =~ /$regexp/ || &error($text{'opt_e'.$name});
+my $err = $vfunc && &$vfunc($v, $name);
+$err && &error($err);
+&save_directive($parent, $name, [ $v ]);
+}
+
 # nginx_error_log_input(name, &parent)
 # Returns HTML specifically for setting the error_log directive
 sub nginx_error_log_input
@@ -655,6 +681,50 @@ sub test_config
 my $out = &backquote_logged("$config{'nginx_cmd'} -t 2>&1 </dev/null");
 &reset_environment() if (defined(&clean_language));
 return $? || $out !~ /syntax\s+is\s+ok/ ? $out : undef;
+}
+
+# find_server(id)
+# Convenience function to find an HTTP server object with some ID
+sub find_server
+{
+my ($id) = @_;
+my $conf = &get_config();
+my $http = &find("http", $conf);
+return undef if (!$http);
+my @servers = &find("server", $http);
+my ($idname, $idrootdir) = split(/;/, $id);
+foreach my $s (@servers) {
+	my $name = &find_value("server_name", $s->{'members'});
+	next if ($idname ne $name);
+	my @locs = &find("location", $s->{'members'});
+	my ($rootloc) = grep { $_->{'value'} eq '/' } @locs;
+	my $rootdir = $rootloc ? &find_value("root", $rootloc) : "";
+	next if ($idrootdir ne $rootdir);
+	return $s;
+	}
+return undef;
+}
+
+# split_ip_port(string)
+# Given an ip:port pair as used in a listen directive, split them up
+sub split_ip_port
+{
+my ($l) = @_;
+if ($l =~ /^\d+$/) {
+	return (undef, $l);
+	}
+elsif ($l =~ /^\[(\S+)\]:(\d+)$/) {
+	return ($1, $2);
+	}
+elsif ($l =~ /^\[(\S+)\]$/) {
+	return ($1, 80);
+	}
+elsif ($l =~ /^(\S+):(\d+)$/) {
+	return ($1, $2);
+	}
+else {
+	return ($l, 80);
+	}
 }
 
 1;
