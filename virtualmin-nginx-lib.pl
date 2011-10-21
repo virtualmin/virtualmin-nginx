@@ -173,6 +173,8 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 		$n->{'line'} = $parent->{'eline'};
 		$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
 		&renumber($file, $parent->{'eline'}-1, scalar(@lines));
+		$n->{'file'} = $file;
+		$n->{'indent'} = $parent->{'indent'} + 1 if ($n->{'type'});
 		push(@{$parent->{'members'}}, $n);
 		splice(@$lref, $n->{'line'}, 0, @lines);
 		}

@@ -15,6 +15,7 @@ my $server;
 if ($in{'new'}) {
 	$server = { 'name' => 'server',
 		    'type' => 1,
+		    'words' => [ ],
 		    'members' => [ ] };
 	}
 else {
@@ -51,10 +52,13 @@ else {
 	# Addresses to accept connections on
 	# XXX preserve existing args
 	my $i = 0;
-	my @listens;
+	my @listen;
 	while(defined($in{"ip_def_$i"})) {
 		my $def = $in{"ip_def_$i"};
-		next if ($def == 3);
+		if ($def == 3) {
+			$i++;
+			next;
+			}
 		my $ip;
 		if ($def == 0) {
 			$ip = $in{"ip_$i"};
@@ -75,7 +79,7 @@ else {
 		if ($ip && $in{"port_$i"} != 80) {
 			$ip .= ":".$in{"port_$i"};
 			}
-		else {
+		elsif (!$ip) {
 			$ip = $in{"port_$i"};
 			}
 
@@ -93,6 +97,7 @@ else {
 		push(@listen, { 'name' => 'listen',
 				'value' => $words[0],
 				'words' => \@words });
+		$i++;
 		}
 	@listen || &error($text{'server_elisten'});
 	&save_directive($server, "listen", \@listen);
@@ -103,7 +108,7 @@ else {
 		}
 	}
 
-&flush_all_config_file_lines();
+&flush_config_file_lines();
 &unlock_all_config_files();
 &webmin_log($action, 'server', $in{'name'}) if ($action);
 &redirect("");
