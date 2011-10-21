@@ -44,8 +44,58 @@ else {
 		$action = 'modify';
 		}
 
-	# Validate and update existing directives
+	# Validate and update existing directives, starting with hostname
+	# or regexp
 	&nginx_text_parse("server_name", $server, undef, '^\S+$');
+
+	# Addresses to accept connections on
+	# XXX preserve existing args
+	my $i = 0;
+	my @listens;
+	while(defined($in{"ip_def_$i"})) {
+		my $def = $in{"ip_def_$i"};
+		next if ($def == 3);
+		my $ip;
+		if ($def == 0) {
+			$ip = $in{"ip_$i"};
+			$ip || &error(&text('server_eipmissing', $i+1));
+			&to_ipaddress($ip) || &to_ip6address($ip) ||
+				&error(&text('server_eip', $i+1, $ip));
+			if (&check_ip6address($ip)) {
+				$ip = "[$ip]";
+				}
+			}
+		elsif ($def == 2) {
+			$ip = "[::]";
+			}
+	
+		# Port number
+		$in{"port_$i"} =~ /^\d+$/ ||
+			&error(&text('server_eport', $i+1));
+		if ($ip && $in{"port_$i"} != 80) {
+			$ip .= ":".$in{"port_$i"};
+			}
+		else {
+			$ip = $in{"port_$i"};
+			}
+
+		# Other random options
+		my @words = ( $ip );
+		if ($in{"default_$i"}) {
+			push(@words, "default_server");
+			}
+		if ($in{"ssl_$i"}) {
+			push(@words, "ssl");
+			}
+		if ($in{"ipv6_$i"}) {
+			push(@words, "ipv6only=".$in{"ipv6_$i"});
+			}
+		push(@listen, { 'name' => 'listen',
+				'value' => $words[0],
+				'words' => \@words });
+		}
+	@listen || &error($text{'server_elisten'});
+	&save_directive($server, "listen", \@listen);
 
 	if ($in{'new'}) {
 		# Add root directory block
@@ -53,7 +103,6 @@ else {
 		}
 	}
 
-# XXX logging
 &flush_all_config_file_lines();
 &unlock_all_config_files();
 &webmin_log($action, 'server', $in{'name'}) if ($action);

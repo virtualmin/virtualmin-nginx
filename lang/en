@@ -113,6 +113,12 @@ server_ipaddr=IPv4 or IPv6 address
 server_auto=Automatic
 server_listen=Addresses to listen on
 server_rootdir=Document root directory
+server_err=Failed to save virtual host
+opt_eserver_name=Webserver hostname cannot contain spaces
+server_eipmissing=Missing IP address in row $1
+server_eip=IP address $2 in row $1 is not a valid v4 or v6 address
+server_eport=Missing or non-numeric port number in row $1
+server_elisten=No addresses to listen on entered
 
 log_net=Changed network configuration
 log_logs=Changed logging settings
