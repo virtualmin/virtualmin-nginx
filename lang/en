@@ -123,6 +123,8 @@ server_rusure=Are you sure you want to delete the virtual host $1? All configura
 server_confirm=Delete Now
 server_desc=Virtual host $1
 server_descnone=Virtual host with no name
+server_erootdir=Root directory must be an absolute path
+server_erootdir2=Root directory $1 does not exist
 server_return=virtual host settings
 
 log_net=Changed network configuration

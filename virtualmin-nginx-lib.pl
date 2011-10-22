@@ -29,7 +29,7 @@ if (!$get_config_parent_cache) {
 	$get_config_parent_cache = { 'members' => &get_config(),
 				     'type' => 1,
 				     'file' => $config{'nginx_config'},
-				     'indent' => 0,
+				     'indent' => -1,
 				     'line' => 0,
 				     'eline' => 0 };
 	foreach my $c (@{$get_config_parent_cache->{'members'}}) {
@@ -67,7 +67,7 @@ foreach (@lines) {
 		my $ns = { 'name' => $1,
 			   'value' => $3,
 			   'type' => 1,
-			   'indent' => scalar(@stack)+1,
+			   'indent' => scalar(@stack),
 			   'file' => $file,
 			   'line' => $lnum,
 			   'eline' => $lnum,
@@ -167,7 +167,7 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 		# Updating some directive
 		# XXX deal with length change
 		my $olen = $o->{'eline'} - $o->{'line'} + 1;
-		my @lines = &make_directive_lines($n, $parent->{'indent'});
+		my @lines = &make_directive_lines($n, $parent->{'indent'}+1);
 		$o->{'name'} = $n->{'name'};
 		$o->{'value'} = $n->{'value'};
 		$o->{'words'} = $n->{'words'};
@@ -176,15 +176,18 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 		}
 	elsif ($i<@$newstructs) {
 		# Adding a directive
-		my @lines = &make_directive_lines($n, $parent->{'indent'});
+		my @lines;
 		if ($n->{'file'}) {
 			# New file, add at start
+			@lines = &make_directive_lines($n, 0);
 			$n->{'line'} = 0;
 			$n->{'eline'} = scalar(@lines) - 1;
-			$n->{'indent'} = 1 if ($n->{'type'});
+			$n->{'indent'} = 0 if ($n->{'type'});
 			}
 		else {
 			# Insert into parent
+			@lines = &make_directive_lines(
+					$n, $parent->{'indent'} + 1);
 			$n->{'file'} = $file;
 			$n->{'line'} = $parent->{'eline'};
 			$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
@@ -282,16 +285,16 @@ if ($dir->{'type'}) {
 	# Multi-line
 	push(@rv, $dir->{'name'}.(@w ? " ".&join_words(@w) : "")." {");
 	foreach my $m (@{$dir->{'members'}}) {
-		push(@rv, &make_directive_lines($m, $indent+1));
+		push(@rv, &make_directive_lines($m, 1));
 		}
 	push(@rv, "}");
 	}
 else {
 	# Single line
 	push(@rv, $dir->{'name'}." ".&join_words(@w).";");
-	foreach my $r (@rv) {
-		$r = ("\t" x $indent).$r;
-		}
+	}
+foreach my $r (@rv) {
+	$r = ("\t" x $indent).$r;
 	}
 return wantarray ? @rv : $rv[0];
 }

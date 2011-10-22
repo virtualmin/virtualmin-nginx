@@ -47,10 +47,8 @@ if (@servers) {
 	unshift(@links, &select_all_link("d"),
 			&select_invert_link("d"));
 	print &ui_links_row(\@links);
-	my @tds = ( "width=5 valign=top", "valign=top",
-		    undef, undef, "valign=top" );
-	print &ui_columns_start([ "",
-				  $text{'index_name'},
+	my @tds = ( "valign=top", undef, undef, "valign=top" );
+	print &ui_columns_start([ $text{'index_name'},
 				  $text{'index_ip'},
 				  $text{'index_port'},
 				  $text{'index_root'} ], 100, 0, \@tds);
@@ -79,13 +77,13 @@ if (@servers) {
 			$root = "<i>$text{'index_norootloc'}</i>";
 			}
 		my $id = $name.";".$rootdir;
-		print &ui_checked_columns_row([
+		print &ui_columns_row([
 			"<a href='edit_server.cgi?id=".&urlize($id)."'>".
 			  &html_escape($name)."</a>",
 			join("<br>", @ips),
 			join("<br>", @ports),
 			$root ],
-			\@tds, "d", $name);
+			\@tds);
 		}
 	print &ui_columns_end();
 	}

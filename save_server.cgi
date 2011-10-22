@@ -130,7 +130,18 @@ else {
 
 	if ($in{'new'}) {
 		# Add root directory block
-		# XXX
+		$in{'rootdir'} =~ /^\// || &error($text{'server_erootdir'});
+		-d $in{'rootdir'} || &error(&text('server_erootdir2',
+						  $in{'rootdir'}));
+		&save_directive($server, [ ],
+			[ { 'name' => 'location',
+			    'words' => [ '/' ],
+			    'type' => 1,
+			    'members' => [
+				{ 'name' => 'root',
+				  'words' => [ $in{'rootdir'} ] },
+				],
+			  } ]);
 		}
 	}
 
