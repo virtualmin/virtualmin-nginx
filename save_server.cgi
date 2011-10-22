@@ -24,15 +24,30 @@ else {
         }
 
 my $action;
+my $name;
 if ($in{'delete'}) {
+	$name = &find_value("server_name", $server);
 	if ($in{'confirm'}) {
 		# Got confirmation, delete it
-		# XXX
+		&save_directive($http, [ $server ], [ ]);
+		# XXX empty file
+		# XXX symlink
 		$action = 'delete';
 		}
 	else {
 		# Ask for confirmation first
-		# XXX
+		&ui_print_header(&server_desc($server),
+				 $text{'server_edit'}, "");
+
+		print &ui_confirmation_form("save_server.cgi",
+			&text('server_rusure', $name),
+			[ [ 'id', $in{'id'} ],
+			  [ 'delete', 1 ] ],
+			[ [ 'confirm', $text{'server_confirm'} ] ],
+			);
+
+		&ui_print_footer("edit_server.cgi?id=".&urlize($in{'id'}),
+				 $text{'server_return'});
 		}
 	}
 else {
@@ -48,6 +63,7 @@ else {
 	# Validate and update existing directives, starting with hostname
 	# or regexp
 	&nginx_text_parse("server_name", $server, undef, '^\S+$');
+	$name = $in{'server_name'};
 
 	# Addresses to accept connections on
 	# XXX preserve existing args
@@ -110,6 +126,9 @@ else {
 
 &flush_config_file_lines();
 &unlock_all_config_files();
-&webmin_log($action, 'server', $in{'name'}) if ($action);
-&redirect("");
+if ($action) {
+	&webmin_log($action, 'server', $name);
+	&redirect("");
+	}
+
 

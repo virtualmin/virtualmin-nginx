@@ -739,5 +739,13 @@ else {
 	}
 }
 
+sub server_desc
+{
+my ($server) = @_;
+my $name = &find_value("server_name", $server);
+return $name ? &text('server_desc', "<tt>".&html_escape($name)."</tt>")
+	     : $text{'server_descnone'};
+}
+
 1;
 

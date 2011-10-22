@@ -42,6 +42,6 @@ else {
 	&print_tempfile($fh, $in{'data'});
 	&close_tempfile($fh);
 	}
-&webmin_log("manual", $in{'file'});
+&webmin_log("manual", undef, $in{'file'});
 &redirect("");
 

@@ -14,9 +14,9 @@ if ($in{'new'}) {
 		    'members' => [ ] };
 	}
 else {
-	&ui_print_header(undef, $text{'server_edit'}, "");
 	$server = &find_server($in{'id'});
 	$server || &error($text{'server_egone'});
+	&ui_print_header(&server_desc($server), $text{'server_edit'}, "");
 	}
 
 if ($in{'server'}) {
