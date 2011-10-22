@@ -19,17 +19,57 @@ else {
 	&ui_print_header(&server_desc($server), $text{'server_edit'}, "");
 	}
 
-if ($in{'server'}) {
+if ($in{'id'}) {
 	# Show icons for server settings types
-	# XXX
+	print &ui_subheading($text{'server_settings'});
+	my @spages = ( "slogs", "ssl" );
+	&icons_table(
+		[ map { "edit_".$_.".cgi?id=".&urlize($in{'id'}) } @spages ],
+		[ map { $text{$_."_title"} } @spages ],
+		[ map { "images/".$_.".gif" } @spages ],
+		);
 
 	# Show table for locations
-	# XXX
+	print &ui_subheading($text{'server_locations'});
+	my @locations = &find("location", $server);
+	my @links = ( "<a href='edit_location.cgi?id=".&urlize($in{'id'}).
+		      "&new=1'>$text{'server_addloc'}</a>" );
+	if (@locations) {
+		print &ui_links_row(\@links);
+		print &ui_columns_start([ $text{'server_pathloc'},
+					  $text{'server_dirloc'},
+					  $text{'server_indexloc'},
+					  $text{'server_autoloc'} ]);
+		foreach my $l (@locations) {
+			my $rootdir = &find_value("root", $l);
+			my @indexes = map { @{$_->{'words'}} }
+					  &find("index", $l);
+			my $auto = &find_value("autoindex", $l);
+			print &ui_columns_row([
+				"<a href='edit_location.cgi?id=".
+				  &urlize($in{'id'})."&path=".
+				  &urlize($l->{'value'})."'>".
+				  $l->{'value'}."</a>",
+				$rootdir || "<i>$text{'index_noroot'}</i>",
+				join(" ", @indexes) ||
+				  "<i>$text{'server_noindex'}</i>",
+				$auto =~ /on/i ? $text{'yes'} : $text{'no'},
+				]);
+			}
+		print &ui_columns_end();
+		}
+	else {
+		print "<b>$text{'server_noneloc'}</b><p>\n";
+		}
+	print &ui_links_row(\@links);
 
 	print &ui_hr();
 	}
 
 # Show form to edit name, IPs and root
+if (!$in{'new'}) {
+	print &ui_subheading($text{'server_server'});
+	}
 print &ui_form_start("save_server.cgi", "post");
 print &ui_hidden("id", $in{'id'});
 print &ui_hidden("new", $in{'new'});

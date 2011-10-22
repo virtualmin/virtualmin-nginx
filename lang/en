@@ -98,7 +98,7 @@ manual_err=Failed to save configuration file
 server_create=Create Virtual Host
 server_edit=Edit Virtual Host
 server_egone=Virtual host no longer exists!
-server_header=Virtual host settings
+server_header=Virtual host hostname and networking
 opt_server_name=Webserver hostname
 server_delete=Delete Virtual Host
 server_ip=IP address
@@ -126,6 +126,20 @@ server_descnone=Virtual host with no name
 server_erootdir=Root directory must be an absolute path
 server_erootdir2=Root directory $1 does not exist
 server_return=virtual host settings
+server_addloc=Add a new location.
+server_pathloc=URL path
+server_dirloc=Corresponding directory
+server_indexloc=Index files
+server_autoloc=Auto-indexing?
+server_noindex=None set
+server_noneloc=This virtual host does not have any locations yet.
+server_locations=URL Path Locations
+server_settings=Virtual Host Settings
+server_server=Virtual Host Definition
+
+slogs_title=Virtual Host Logging
+
+ssl_title=SSL Configuration
 
 log_net=Changed network configuration
 log_logs=Changed logging settings

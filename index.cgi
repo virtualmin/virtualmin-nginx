@@ -44,8 +44,6 @@ if (!$http) {
 my @servers = &find("server", $http);
 my @links = ( "<a href='edit_server.cgi?new=1'>$text{'index_add'}</a>" );
 if (@servers) {
-	unshift(@links, &select_all_link("d"),
-			&select_invert_link("d"));
 	print &ui_links_row(\@links);
 	my @tds = ( "valign=top", undef, undef, "valign=top" );
 	print &ui_columns_start([ $text{'index_name'},
