@@ -1,4 +1,6 @@
 nginx_config=Full path to Nginx config file,0
+add_to=File or directory for new virtual hosts,3,None (add to main config file)
+add_link=Directory for links to new virtual host files,3,None
 nginx_cmd=Full path to Nginx command,0
 start_cmd=Command to start Nginx,0
 stop_cmd=Command to stop Nginx,0

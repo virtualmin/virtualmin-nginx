@@ -69,7 +69,7 @@ foreach my $l (@listen, { 'words' => [ ] }) {
 			$ipv6 = lc($1);
 			}
 		}
-	my $ipmode = !$ip && !$port ? 3 : $ip eq "::" ? 2 : $ip eq "" ? 1 : 0;
+	my $ipmode = !$ip && !$port ? 3 : !$ip ? 1 : $ip eq "::" ? 2 : 0;
 	# XXX disable inputs when disabled
 	$table .= &ui_columns_row([
 		&ui_radio("ip_def_$i", $ipmode,

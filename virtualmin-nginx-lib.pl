@@ -8,7 +8,7 @@ eval "use WebminCore;";
 &init_config();
 our %access = &get_module_acl();
 our ($get_config_cache, $get_config_parent_cache, %list_directives_cache,
-     @list_modules_cache);
+     @list_modules_cache, @open_config_files);
 our (%config, %text, %in, $module_root_directory);
 
 # get_config()
@@ -47,6 +47,11 @@ return $get_config_parent_cache;
 sub read_config_file
 {
 my ($file) = @_;
+while(-l $file) {
+	my $link = readlink($file);
+	$link || &error("Dangling link $file");
+	$file = $link;
+	}
 my @rv = ( );
 my $addto = \@rv;
 my @stack = ( );
@@ -154,8 +159,10 @@ my $newstructs = [ map { &value_to_struct($name, $_) } @$values ];
 for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 	my $o = $i<@$oldstructs ? $oldstructs->[$i] : undef;
 	my $n = $i<@$newstructs ? $newstructs->[$i] : undef;
-	my $file = $o ? $o->{'file'} : $parent->{'file'};
+	my $file = $o ? $o->{'file'} :
+		   $n && $n->{'file'} ? $n->{'file'} : $parent->{'file'};
 	my $lref = &read_file_lines($file);
+	push(@open_config_files, $file);
 	if ($i<@$newstructs && $i<@$oldstructs) {
 		# Updating some directive
 		# XXX deal with length change
@@ -170,11 +177,21 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 	elsif ($i<@$newstructs) {
 		# Adding a directive
 		my @lines = &make_directive_lines($n, $parent->{'indent'});
-		$n->{'line'} = $parent->{'eline'};
-		$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
-		&renumber($file, $parent->{'eline'}-1, scalar(@lines));
-		$n->{'file'} = $file;
-		$n->{'indent'} = $parent->{'indent'} + 1 if ($n->{'type'});
+		if ($n->{'file'}) {
+			# New file, add at start
+			$n->{'line'} = 0;
+			$n->{'eline'} = scalar(@lines) - 1;
+			$n->{'indent'} = 1 if ($n->{'type'});
+			}
+		else {
+			# Insert into parent
+			$n->{'file'} = $file;
+			$n->{'line'} = $parent->{'eline'};
+			$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
+			&renumber($file, $parent->{'eline'}-1, scalar(@lines));
+			$n->{'indent'} = $parent->{'indent'} + 1
+				if ($n->{'type'});
+			}
 		push(@{$parent->{'members'}}, $n);
 		splice(@$lref, $n->{'line'}, 0, @lines);
 		}
@@ -213,11 +230,10 @@ if ($object->{'type'}) {
 sub flush_config_file_lines
 {
 my ($parent) = @_;
-foreach my $f (&get_all_config_files($parent)) {
-	if ($main::file_cache{$f}) {
-		&flush_file_lines($f);
-		}
+foreach my $f (&unique(@open_config_files)) {
+	&flush_file_lines($f);
 	}
+@open_config_files = ( );
 }
 
 # lock_all_config_files([&parent])
@@ -273,9 +289,9 @@ if ($dir->{'type'}) {
 else {
 	# Single line
 	push(@rv, $dir->{'name'}." ".&join_words(@w).";");
-	}
-foreach my $r (@rv) {
-	$r = ("\t" x $indent).$r;
+	foreach my $r (@rv) {
+		$r = ("\t" x $indent).$r;
+		}
 	}
 return wantarray ? @rv : $rv[0];
 }
@@ -472,6 +488,7 @@ sub nginx_text_input
 my ($name, $parent, $size, $suffix) = @_;
 return undef if (!&supported_directive($name, $parent));
 my $value = &find_value($name, $parent);
+$suffix ||= "";
 return &ui_table_row($text{'opt_'.$name},
 	&ui_textbox($name, $value, $size).$suffix, $size > 40 ? 3 : 1);
 }
@@ -745,6 +762,51 @@ my ($server) = @_;
 my $name = &find_value("server_name", $server);
 return $name ? &text('server_desc', "<tt>".&html_escape($name)."</tt>")
 	     : $text{'server_descnone'};
+}
+
+# create_server_link(&server)
+# Creates a link from a directory like sites-enabled to sites-available for
+# a new virtual host
+sub create_server_link
+{
+my ($server) = @_;
+if ($config{'add_link'}) {
+	my $link = $server->{'file'};
+	$link =~ s/^.*\///;
+	$link = $config{'add_link'}."/".$link;
+	&symlink_logged($server->{'file'}, $link);
+	}
+}
+
+# delete_server_link(&server)
+# Deletes the link from a directory like sites-enabled to sites-available for
+# a virtual host being removed
+sub delete_server_link
+{
+my ($server) = @_;
+if ($config{'add_link'}) {
+        my $link = $server->{'file'};
+        $link =~ s/^.*\///;
+        $link = $config{'add_link'}."/".$link;
+	if (-l $link) {
+		&unlink_logged($link);
+		}
+        }
+}
+
+# delete_server_file_if_empty(&server)
+# If the file for a server is empty, delete it
+sub delete_server_file_if_empty
+{
+my ($server) = @_;
+my $lref = &read_file_lines($server->{'file'}, 1);
+my $count = 0;
+foreach my $l (@$lref) {
+	$count++ if ($l =~ /\S/);
+	}
+if (!$count) {
+	&unlink_logged($server->{'file'});
+	}
 }
 
 1;

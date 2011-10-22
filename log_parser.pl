@@ -20,6 +20,9 @@ elsif ($type eq 'mimes') {
 elsif ($type eq 'manual') {
 	return &text('log_manual', &html_escape($object));
 	}
+elsif ($type eq 'server') {
+	return &text('log_'.$action.'_server', &html_escape($object));
+	}
 else {
 	return $text{'log_'.$action};
 	}

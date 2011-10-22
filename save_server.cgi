@@ -4,7 +4,7 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %in);
+our (%text, %in, %config);
 &ReadParse();
 
 # Get the current server
@@ -17,6 +17,16 @@ if ($in{'new'}) {
 		    'type' => 1,
 		    'words' => [ ],
 		    'members' => [ ] };
+	if (-d $config{'add_to'}) {
+		my $filename = $in{'server_name'};
+		$filename =~ s/[^a-zA-Z0-9\.\_\-]//g;
+		if ($filename) {
+			$server->{'file'} = $config{'add_to'}."/".$filename;
+			}
+		}
+	elsif ($config{'add_to'}) {
+		$server->{'file'} = $config{'add_to'};
+		}
 	}
 else {
 	$server = &find_server($in{'id'});
@@ -126,6 +136,13 @@ else {
 
 &flush_config_file_lines();
 &unlock_all_config_files();
+if ($action eq 'create') {
+	&create_server_link($server);
+	}
+elsif ($action eq 'delete') {
+	&delete_server_link($server);
+	&delete_server_file_if_empty($server);
+	}
 if ($action) {
 	&webmin_log($action, 'server', $name);
 	&redirect("");
