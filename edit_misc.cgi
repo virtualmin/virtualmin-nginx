@@ -7,6 +7,7 @@ require 'virtualmin-nginx-lib.pl';
 our (%text);
 my $parent = &get_config_parent();
 my $events = &find("events", $parent);
+my $http = &find("http", $parent);
 
 &ui_print_header(undef, $text{'events_title'}, "");
 
@@ -19,6 +20,10 @@ print &nginx_opt_input("worker_processes", $parent, 5);
 
 print &nginx_opt_input("worker_priority", $parent, 5, $text{'misc_pri'},
 		       $text{'misc_prisuffix'});
+
+print &nginx_opt_input("index", $http, 60);
+
+print &nginx_opt_input("default_type", $http, 20);
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);

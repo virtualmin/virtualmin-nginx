@@ -86,6 +86,9 @@ misc_egroup=Invalid Unix group name
 opt_eworker_processes=Number of worker processes must be a number greater than zero
 opt_eworker_priority=Worker priority must be a positive or negative number
 misc_pri=Number
+opt_index=Directory index files
+opt_default_type=MIME type for unknown files
+opt_edefault_type=Invalid default MIME type
 
 manual_title=Edit Configuration Files
 manual_file=Editing configuration file:
@@ -138,6 +141,9 @@ server_settings=Virtual Host Settings
 server_server=Virtual Host Definition
 
 slogs_title=Virtual Host Logging
+slogs_header=Log file options
+opt_global=From global settings
+slogs_err=Failed to save log file options
 
 ssl_title=SSL Configuration
 

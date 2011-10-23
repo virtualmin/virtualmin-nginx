@@ -518,7 +518,8 @@ sub nginx_error_log_input
 my ($name, $parent) = @_;
 return undef if (!&supported_directive($name, $parent));
 my $obj = &find($name, $parent);
-my $def = &get_default($name);
+my $def = $parent->{'name'} eq 'server' ? $text{'opt_global'}
+					: &get_default($name);
 $def =~ s/^\$\{prefix\}\///;
 return &ui_table_row($text{'opt_'.$name},
 	&ui_radio($name."_def", $obj ? 0 : 1,
@@ -560,7 +561,8 @@ return undef if (!&supported_directive($name, $parent));
 my $obj = &find($name, $parent);
 my $mode = !$obj ? 1 : $obj->{'value'} eq 'off' ? 2 : 0;
 my $buffer = $mode == 0 && $obj->{'words'}->[2] =~ /buffer=(\S+)/ ? $1 : "";
-my $def = &get_default($name);
+my $def = $parent->{'name'} eq 'server' ? $text{'opt_global'}
+					: &get_default($name);
 return &ui_table_row($text{'opt_'.$name},
 	&ui_radio($name."_def", $mode,
 		[ [ 1, $text{'default'}.($def ? " ($def)" : "")."<br>" ],
