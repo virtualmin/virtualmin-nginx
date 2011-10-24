@@ -24,4 +24,5 @@ print &nginx_logformat_input("log_format", $server);
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
-&ui_print_footer("", $text{'index_return'});
+&ui_print_footer("edit_server.cgi?id=".&urlize($in{'id'}),
+		 $text{'server_return'});

@@ -151,10 +151,21 @@ opt_global=From global settings
 slogs_err=Failed to save log file options
 
 ssl_title=SSL Configuration
+ssl_header=SSL encryption and certification options
+opt_ssl=SSL enabled?
+opt_ssl_certificate=SSL certificate file
+opt_ssl_certificate_key=SSL key file
+ssl_file=Selected file
+ssl_err=Failed to save SSL configuration
+ssl_ecert=SSL cannot be enabled without a certificate file
+ssl_ekey=SSL cannot be enabled without a private key file
 
 log_net=Changed network configuration
 log_logs=Changed logging settings
 log_misc=Changed other settings
+log_stop=Stopped Nginx webserver
+log_start=Started Nginx webserver
+log_restart=Restarted Nginx webserver
 log_create_mime=Created MIME type $1
 log_delete_mime=Deleted MIME type $1
 log_modify_mime=Modified MIME type $1
@@ -163,6 +174,8 @@ log_manual=Manually edited config file $1
 log_create_server=Created virtual host $1
 log_modify_server=Modifed virtual host $1
 log_delete_server=Deleted virtual host $1
+log_slogs_server=Changed logging options for virtual host $1
+log_ssl_server=Change SSL configuration for virtual host $1
 
 stop_err=Failed to stop Nginx
 
