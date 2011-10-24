@@ -17,6 +17,8 @@ print &nginx_error_log_input("error_log", $parent);
 
 print &nginx_access_log_input("access_log", $http);
 
+print &nginx_logformat_input("log_format", $http);
+
 print &nginx_opt_input("pid", $parent, 60, $text{'logs_file'});
 
 print &ui_table_end();

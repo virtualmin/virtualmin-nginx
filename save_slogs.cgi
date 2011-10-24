@@ -15,6 +15,8 @@ $server || &error($text{'server_egone'});
 
 &nginx_access_log_parse("access_log", $server);
 
+&nginx_logformat_parse("log_format", $server);
+
 &flush_config_file_lines();
 &unlock_all_config_files();
 my $name = &find_value("server_name", $server);

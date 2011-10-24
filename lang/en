@@ -70,6 +70,11 @@ logs_disabled=Logging disabled
 logs_format=in format
 logs_buffer=with buffer size
 logs_ebuffer=Buffer size number be like 32k or 32762, or left empty
+opt_log_format=Custom log formats
+logs_fname=Format name
+logs_ftext=Format string
+logs_efname=Log format name $1 can only contain letters, numbers, dot, dash and underscore
+logs_etext=Missing format string for log format $1
 
 misc_title=Other Settings
 misc_header=Users and process options

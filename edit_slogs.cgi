@@ -15,11 +15,11 @@ print &ui_form_start("save_slogs.cgi", "post");
 print &ui_hidden("id", $in{'id'});
 print &ui_table_start($text{'slogs_header'}, undef, 2);
 
-# XXX format
-
 print &nginx_error_log_input("error_log", $server);
 
 print &nginx_access_log_input("access_log", $server);
+
+print &nginx_logformat_input("log_format", $server);
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);

@@ -646,6 +646,48 @@ else {
 	}
 }
 
+# nginx_logformat_input(name, parent)
+# Returns HTML for entering multiple log formats
+sub nginx_logformat_input
+{
+my ($name, $parent) = @_;
+return undef if (!&supported_directive($name, $parent));
+my @obj = &find($name, $parent);
+my $ftable = &ui_columns_start([ $text{'logs_fname'},
+				 $text{'logs_ftext'} ]);
+my $i = 0;
+foreach my $o (@obj, { 'words' => [ ] }) {
+	my @w = @{$o->{'words'}};
+	$ftable .= &ui_columns_row([
+		&ui_textbox($name."_name_$i", shift(@w), 20),
+		&ui_textbox($name."_text_$i", join(" ", @w), 60),
+		]);
+	$i++;
+	}
+$ftable .= &ui_columns_end();
+return &ui_table_row($text{'opt_'.$name}, $ftable, 3);
+}
+
+# nginx_logformat_parse(name, &parent, &in)
+# Validate input from nginx_logformat_input
+sub nginx_logformat_parse
+{
+my ($name, $parent, $in) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+my @obj;
+for(my $i=0; defined(my $fname = $in{$name."_name_$i"}); $i++) {
+	next if (!$fname);
+	my $ftext = $in{$name."_text_$i"};
+	$fname =~ /^[a-zA-Z0-9\-\.\_]+$/ ||
+		&error(&text('logs_efname', $fname));
+	$ftext =~ /\S/ || &error(&text('logs_etext', $fname));
+	push(@obj, { 'name' => $name,
+		     'words' => [ $fname, $ftext ] });
+	}
+&save_directive($parent, $name, \@obj);
+}
+
 # list_log_formats([&server])
 # Returns a list of all log format names
 sub list_log_formats

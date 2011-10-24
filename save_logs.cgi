@@ -17,6 +17,8 @@ my $http = &find("http", $parent);
 
 &nginx_opt_parse("pid", $parent, undef, '^\/\S+$');
 
+&nginx_logformat_parse("log_format", $http);
+
 &flush_config_file_lines();
 &unlock_all_config_files();
 &webmin_log("logs");
