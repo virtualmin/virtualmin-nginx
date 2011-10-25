@@ -477,7 +477,7 @@ if ($in->{$name."_def"}) {
 else {
 	my $v = $in->{$name};
 	$v eq '' && &error(&text('opt_missing', $text{'opt_'.$name}));
-	!$regexp || $v =~ /$regexp/ || &error($text{'opt_e'.$name});
+	!$regexp || $v =~ /$regexp/ || &error($text{'opt_e'.$name} || $name);
 	my $err = $vfunc && &$vfunc($v, $name);
 	$err && &error($err);
 	&save_directive($parent, $name, [ $v ]);
@@ -854,6 +854,52 @@ foreach my $l (@$lref) {
 if (!$count) {
 	&unlink_logged($server->{'file'});
 	}
+}
+
+# valid_cert_file(filename)
+# Returns an error message if a cert file is invalid, or undef if OK
+sub valid_cert_file
+{
+my ($file) = @_;
+-r $file && !-d $file || return $text{'ssl_ecertfile'};
+my $data = &read_file_contents($file);
+my @lines = grep { /\S/ } split(/\r?\n/, $data);
+my $begin = "-----BEGIN CERTIFICATE-----";
+my $end = "-----END CERTIFICATE-----";
+$data =~ /$begin/ ||
+	return &text('ssl_ecertbegin', "-----BEGIN CERTIFICATE-----");
+$data =~ /$end/ ||
+	return &text('ssl_ecertend', "-----END CERTIFICATE-----");
+for(my $i=0; $i<@lines; $i++) {
+        $lines[$i] =~ /^-----(BEGIN|END)/ ||
+            $lines[$i] =~ /^[A-Za-z0-9\+\/=]+$/ ||
+		return &text('ssl_ecertline', $i+1);
+        }
+@lines > 4 || return &text('ssl_ecertlines', scalar(@lines));
+return undef;
+}
+
+# valid_key_file(filename)
+# Returns an error message if a key file is invalid, or undef if OK
+sub valid_key_file
+{
+my ($file) = @_;
+-r $file && !-d $file || return $text{'ssl_ekeyfile'};
+my $data = &read_file_contents($file);
+my @lines = grep { /\S/ } split(/\r?\n/, $data);
+my $begin = "-----BEGIN (RSA )?PRIVATE KEY-----";
+my $end = "-----END (RSA )?PRIVATE KEY-----";
+$data =~ /$begin/ ||
+	return &text('ssl_ekeybegin', "-----BEGIN PRIVATE KEY-----");
+$data =~ /$end/ ||
+	return &text('ssl_ekeyend', "-----END PRIVATE KEY-----");
+for(my $i=0; $i<@lines; $i++) {
+        $lines[$i] =~ /^-----(BEGIN|END)/ ||
+	    $lines[$i] =~ /^[A-Za-z0-9\+\/=]+$/ ||
+		return &text('ssl_ekeyline', $i+1);
+        }
+@lines > 4 || return &text('ssl_ekeylines', scalar(@lines));
+return undef;
 }
 
 1;

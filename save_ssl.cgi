@@ -13,16 +13,15 @@ $server || &error($text{'server_egone'});
 
 &nginx_onoff_parse("ssl", $server);
 
-# XXX
-&nginx_opt_parse("ssl_certificate", $server, undef, \&valid_cert_file);
+&nginx_opt_parse("ssl_certificate", $server, undef, undef, \&valid_cert_file);
 
-&nginx_opt_parse("ssl_certificate_key", $server, undef, \&valid_key_file);
+&nginx_opt_parse("ssl_certificate_key", $server, undef, undef,\&valid_key_file);
 
 if ($in{'ssl'} && $in{"ssl_certificate_def"}) {
 	&error($text{'ssl_ecert'});
 	}
 if ($in{'ssl'} && (&valid_key_file("ssl_certificate") eq "" ||
-		   (&valid_key_file("ssl_certificate_key") eq "")) {
+		   &valid_key_file("ssl_certificate_key") eq "")) {
 	&error($text{'ssl_ekey'});
 	}
 

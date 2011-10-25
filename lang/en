@@ -159,6 +159,16 @@ ssl_file=Selected file
 ssl_err=Failed to save SSL configuration
 ssl_ecert=SSL cannot be enabled without a certificate file
 ssl_ekey=SSL cannot be enabled without a private key file
+ssl_ecertfile=Certificate file does not exist
+ssl_ecertbegin=Certificate data does not start with line $1
+ssl_ecertend=Certificate data does not end with line $1
+ssl_ecertline=Certificate line $1 does not look like PEM format
+ssl_ecertlines=Certificate data online has $1 lines
+ssl_ekeyfile=Private key file does not exist
+ssl_ekeybegin=Private key data does not start with line $1
+ssl_ekeyend=Private key data does not end with line $1
+ssl_ekeyline=Private key line $1 does not look like PEM format
+ssl_ekeylines=Private key data online has $1 lines
 
 log_net=Changed network configuration
 log_logs=Changed logging settings
