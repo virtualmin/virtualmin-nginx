@@ -169,6 +169,11 @@ ssl_ekeybegin=Private key data does not start with line $1
 ssl_ekeyend=Private key data does not end with line $1
 ssl_ekeyline=Private key line $1 does not look like PEM format
 ssl_ekeylines=Private key data online has $1 lines
+opt_ssl_ciphers=SSL ciphers to support
+opt_ssl_protocols=SSL protocols to support
+opt_essl_ciphers=Invalid-looking cipher list - should be like <tt>HIGH:!aNULL:!MD5</tt>
+opt_selected=Selected below
+ssl_clist=Listed ciphers
 
 log_net=Changed network configuration
 log_logs=Changed logging settings

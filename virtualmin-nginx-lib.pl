@@ -688,6 +688,40 @@ for(my $i=0; defined(my $fname = $in{$name."_name_$i"}); $i++) {
 &save_directive($parent, $name, \@obj);
 }
 
+# nginx_multi_input(name, &parent, &options)
+# Returns HTML for selecting multiple options
+sub nginx_multi_input
+{
+my ($name, $parent, $opts) = @_;
+return undef if (!&supported_directive($name, $parent));
+my $def = &get_default($name);
+my $obj = &find($name, $parent);
+return &ui_table_row($text{'opt_'.$name},
+        &ui_radio($name."_def", $obj ? 0 : 1,
+		  [ [ 1, $text{'default'}.($def ? " ($def)" : "") ],
+		    [ 0, $text{'opt_selected'}."<br>" ] ])." ".
+	&ui_select($name, $obj ? $obj->{'words'} : [ ], $opts, scalar(@$opts),
+		   1, 1));
+}
+
+# nginx_multi_parse(name, &parent)
+# Validate input from nginx_multi_input
+sub nginx_multi_parse
+{
+my ($name, $parent, $in) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+if ($in->{$name."_def"} == 1) {
+        &save_directive($parent, $name, [ ]);
+        }
+else {
+	my @w = split(/\0/, $in->{$name});
+	@w || &error(&text('opt_missing', $text{'opt_'.$name}));
+	&save_directive($parent, $name, [ { 'name' => $name,
+					    'words' => \@w } ]);
+	}
+}
+
 # list_log_formats([&server])
 # Returns a list of all log format names
 sub list_log_formats

@@ -20,10 +20,13 @@ $server || &error($text{'server_egone'});
 if ($in{'ssl'} && $in{"ssl_certificate_def"}) {
 	&error($text{'ssl_ecert'});
 	}
-if ($in{'ssl'} && (&valid_key_file("ssl_certificate") eq "" ||
-		   &valid_key_file("ssl_certificate_key") eq "")) {
+if ($in{'ssl'} && $in{"ssl_certificate_key_def"}) {
 	&error($text{'ssl_ekey'});
 	}
+
+&nginx_opt_parse("ssl_ciphers", $server, undef, '^\S+$');
+
+&nginx_multi_parse("ssl_protocols", $server);
 
 &flush_config_file_lines();
 &unlock_all_config_files();

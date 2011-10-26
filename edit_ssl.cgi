@@ -23,7 +23,10 @@ print &nginx_opt_input("ssl_certificate", $server, 50, $text{'ssl_file'},
 print &nginx_opt_input("ssl_certificate_key", $server, 50, $text{'ssl_file'},
 		       &file_chooser_button("ssl_certificate_key"));
 
-# XXX more
+print &nginx_opt_input("ssl_ciphers", $server, 30, $text{'ssl_clist'});
+
+print &nginx_multi_input("ssl_protocols", $server,
+			 [ "SSLv2", "SSLv3", "TLSv1" ]);
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
