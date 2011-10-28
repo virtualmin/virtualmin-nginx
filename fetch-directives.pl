@@ -18,8 +18,8 @@ foreach my $m (@mods) {
 	my ($page, $mod) = @$m;
 	my $dir;
 	foreach my $l (&download("http://wiki.nginx.org/$page")) {
-		if ($l =~ /<b>syntax:<\/b> <i>([^< ]+)/i) {
-			$dir = { 'name' => $1,
+		if ($l =~ /<b>syntax:<\/b> (<i>)?([^< ]+)/i) {
+			$dir = { 'name' => $2,
 				 'mod' => $mod };
 			push(@dirs, $dir);
 			}

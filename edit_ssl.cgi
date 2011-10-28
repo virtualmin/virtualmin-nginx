@@ -9,7 +9,7 @@ our (%text, %in);
 my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
 
-&ui_print_header(undef, $text{'ssl_title'}, "");
+&ui_print_header(&server_desc($server), $text{'ssl_title'}, "");
 
 print &ui_form_start("save_ssl.cgi", "post");
 print &ui_hidden("id", $in{'id'});

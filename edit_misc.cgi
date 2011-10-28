@@ -9,7 +9,7 @@ my $parent = &get_config_parent();
 my $events = &find("events", $parent);
 my $http = &find("http", $parent);
 
-&ui_print_header(undef, $text{'events_title'}, "");
+&ui_print_header(undef, $text{'misc_title'}, "");
 
 print &ui_form_start("save_misc.cgi", "post");
 print &ui_table_start($text{'misc_header'}, undef, 2);

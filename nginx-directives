@@ -76,6 +76,14 @@ http_core	tcp_nopush	off	http,server,location
 http_core	try_files	none	server
 http_core	types	-	http,server,location
 http_core	underscores_in_headers	off	http,server
+http_core	variables_hash_bucket_size	-	http
+http_core	variables_hash_max_size	-	http
+http_access	allow	none	http,server,location,limit_except
+http_access	deny	none	http,server,location,limit_except
+http_browser	ancient_browser	none	http,server,location
+http_browser	ancient_browser_value	-	http,server,location
+http_browser	modern_browser	none	http,server,location
+http_browser	modern_browser_value	-	http,server,location
 mail_core	imap_capabilities	"IMAP4" "IMAP4rev1" "UIDPLUS"	main,server
 mail_core	imap_client_buffer	4K/8K	main,server
 mail_core	listen	no	server
@@ -88,13 +96,19 @@ mail_core	smtp_auth	login plain	main,server
 mail_core	smtp_capabilities	no	main,server
 mail_core	so_keepalive	off	main,server
 mail_core	timeout	60000	main,server
+http_auth_basic	auth_basic	-	http,server,location,limit_except
+http_auth_basic	auth_basic_user_file	none	http,server,location,limit_except
 mail_auth	auth_http	no	mail,server
 mail_auth	auth_http_header	no	mail,server
 mail_auth	auth_http_timeout	60000	mail,server
+http_autoindex	autoindex	-	http,server,location
+http_autoindex	autoindex_exact_size	-	http,server,location
+http_autoindex	autoindex_localtime	-	http,server,location
 http_rewrite	break	none	server,location,if
 http_rewrite	if	none	server,location
 http_rewrite	return	none	server,location,if
 http_rewrite	rewrite	none	server,location,if
+http_rewrite	rewrite_log	-	http,server,if-in-server,location,if-in-location
 http_rewrite	set	none	server,location,if
 http_rewrite	uninitialized_variable_warn	on	http,server,location,if
 http_charset	charset	off	http,server,location,ifinlocation
@@ -145,6 +159,8 @@ http_fcgi	fastcgi_next_upstream	error timeout	http,server,location
 http_fcgi	fastcgi_param	none	http,server,location
 http_fcgi	fastcgi_pass	none	location,ifinlocation
 http_fcgi	fastcgi_pass_header	-	http,server,location
+http_fcgi	fastcgi_pass_request_body	-	http,server,location
+http_fcgi	fastcgi_pass_request_headers	-	http,server,location
 http_fcgi	fastcgi_read_timeout	60	http,server,location
 http_fcgi	fastcgi_redirect_errors	-	-
 http_fcgi	fastcgi_send_timeout	60	http,server,location
@@ -171,6 +187,7 @@ http_image_filter	image_filter	none	location
 http_image_filter	image_filter_buffer	1M	http,server,location
 http_image_filter	image_filter_jpeg_quality	75	http,server,location
 http_image_filter	image_filter_transparency	on	http,server,location
+http_index	index	-	http,server,location
 http_upstream	ip_hash	none	upstream
 http_upstream	server	none	upstream
 http_upstream	upstream	none	http

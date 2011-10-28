@@ -399,7 +399,7 @@ if (!@list_modules_cache) {
 				'http_memcached', 'http_proxy',
 				'http_referer', 'http_rewrite',
 				'http_scgi', 'http_split_clients',
-				'http_ssi', 'http_userid', 
+				'http_ssi', 'http_userid', 'http_index',
 				'http_uwsgi', 'http_log', 'core' );
 	my $out = &backquote_command("$config{'nginx_cmd'} -V 2>&1 </dev/null");
 	while($out =~ s/--with-(\S+)_module\s+//) {

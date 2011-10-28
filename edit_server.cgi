@@ -22,7 +22,7 @@ else {
 if ($in{'id'}) {
 	# Show icons for server settings types
 	print &ui_subheading($text{'server_settings'});
-	my @spages = ( "slogs", "ssl" );
+	my @spages = ( "slogs", "sdocs", "ssl", "fcgi", "ssi", "gzip", "proxy", );
 	&icons_table(
 		[ map { "edit_".$_.".cgi?id=".&urlize($in{'id'}) } @spages ],
 		[ map { $text{$_."_title"} } @spages ],
