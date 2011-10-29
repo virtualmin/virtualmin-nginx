@@ -25,12 +25,11 @@ if (!&has_command($config{'nginx_cmd'})) {
 # Show icons for global config types
 print &ui_subheading($text{'index_global'});
 my $conf = &get_config();
-my @gpages = ( "net", "mime", "logs", "docs", "misc", "manual" );
+my @gpages = ( "net", "mime", "logs", "docs", "ssi", "misc", "manual" );
 &icons_table(
 	[ map { "edit_".$_.".cgi" } @gpages ],
 	[ map { $text{$_."_title"} } @gpages ],
 	[ map { "images/".$_.".gif" } @gpages ],
-	scalar(@gpages),
 	);
 print &ui_hr();
 

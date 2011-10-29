@@ -122,6 +122,18 @@ opt_fastcgi_buffer_size=Buffer size for headers
 fcgi_buffer=Size like 4k
 opt_efastcgi_buffer_size=Buffer size must be like 4k or 1M.
 
+ssi_title=Server-Side Include Settings
+sssi_title=Server-Side Include Settings
+ssi_header=Options for server-parsed HTML
+opt_ssi=Enabled server-side includes?
+opt_ssi_silent_errors=Hide errors processing HTML?
+opt_ssi_types=MIME types for files to process
+ssi_types=Listed types, like <tt>text/html</tt>
+opt_ssi_value_length=Maximum parameter length
+ssi_err=Failed to save server-side include settings
+opt_essi_types=$1 is not a valid MIME type
+opt_essi_value_length=Maximum parameter length must be a number
+
 manual_title=Edit Configuration Files
 manual_file=Editing configuration file:
 manual_ok=Switch
@@ -206,6 +218,7 @@ log_net=Changed network configuration
 log_logs=Changed logging settings
 log_misc=Changed other settings
 log_docs=Changed document options
+log_ssi=Change server-side include settings
 log_stop=Stopped Nginx webserver
 log_start=Started Nginx webserver
 log_restart=Restarted Nginx webserver
@@ -217,10 +230,11 @@ log_manual=Manually edited config file $1
 log_create_server=Created virtual host $1
 log_modify_server=Modifed virtual host $1
 log_delete_server=Deleted virtual host $1
-log_slogs_server=Changed logging options for virtual host $1
-log_ssl_server=Change SSL configuration for virtual host $1
-log_sdocs_server=Changed document options for virtual host $1
-log_fcgi_server=Change FastCGI options for virtual host $1
+log_slogs_server=Changed logging options for $1
+log_ssl_server=Change SSL configuration for $1
+log_sdocs_server=Changed document options for $1
+log_fcgi_server=Change FastCGI options for $1
+log_ssi_server=Change server-side include settings for $1
 
 stop_err=Failed to stop Nginx
 
