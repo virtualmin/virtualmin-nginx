@@ -214,6 +214,13 @@ opt_essl_ciphers=Invalid-looking cipher list - should be like <tt>HIGH:!aNULL:!M
 opt_selected=Selected below
 ssl_clist=Listed ciphers
 
+gzip_title=GZip Compression Options
+sgzip_title=GZip Compression Options
+gzip_header=Settings for response compression with gzip
+opt_gzip_comp_level=Compression level
+opt_egzip_comp_level=Compression level must be a number between 1 and 9
+gzip_level=1=least, 9=best
+
 log_net=Changed network configuration
 log_logs=Changed logging settings
 log_misc=Changed other settings
@@ -235,6 +242,7 @@ log_ssl_server=Change SSL configuration for $1
 log_sdocs_server=Changed document options for $1
 log_fcgi_server=Change FastCGI options for $1
 log_ssi_server=Change server-side include settings for $1
+log_gzip_server=Change gzip options for $1
 
 stop_err=Failed to stop Nginx
 

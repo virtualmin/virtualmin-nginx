@@ -722,6 +722,87 @@ else {
 	}
 }
 
+# nginx_param_input(name, &parent)
+# Returns HTML for entering multiple name value paramters
+sub nginx_param_input
+{
+my ($name, $parent) = @_;
+return undef if (!&supported_directive($name, $parent));
+my @obj = &find($name, $parent);
+my $ftable = &ui_columns_start([ $text{'fcgi_pname'},
+				 $text{'fcgi_pvalue'} ]);
+my $i = 0;
+foreach my $o (@obj, { 'words' => [ ] }) {
+	my @w = @{$o->{'words'}};
+	$ftable .= &ui_columns_row([
+		&ui_textbox($name."_name_$i", shift(@w), 20),
+		&ui_textbox($name."_value_$i", join(" ", @w), 60),
+		]);
+	$i++;
+	}
+$ftable .= &ui_columns_end();
+return &ui_table_row($text{'opt_'.$name}, $ftable, 3);
+}
+
+# nginx_params_parse(name, &parent, &in)
+# Parses inputs from nginx_param_input
+sub nginx_params_parse
+{
+my ($name, $parent, $in) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+my @obj;
+for(my $i=0; defined(my $pname = $in{$name."_name_$i"}); $i++) {
+	next if (!$pname);
+	my $pvalue = $in{$name."_value_$i"};
+	$pname =~ /^[a-zA-Z0-9\-\.\_]+$/ ||
+		&error(&text('fcgi_epname', $pname));
+	$pvalue =~ /\S/ || &error(&text('fcgi_epvalue', $pname));
+	push(@obj, { 'name' => $name,
+		     'words' => [ $pname, $pvalue ] });
+	}
+&save_directive($parent, $name, \@obj);
+}
+
+# nginx_opt_list_input(name, &parent, size, prefix, suffix)
+# Returns HTML for an optional text field with multiple values
+sub nginx_opt_list_input
+{
+my ($name, $parent, $size, $prefix, $suffix) = @_;
+return undef if (!&supported_directive($name, $parent));
+my $obj = &find($name, $parent);
+my $value = $obj ? join(" ", @{$obj->{'words'}}) : "";
+my $def = &get_default($name);
+return &ui_table_row($text{'opt_'.$name},
+	&ui_opt_textbox($name, $value, $size,
+			$text{'default'}.($def ? " ($def)" : ""), $prefix).
+	$suffix, $size > 40 ? 3 : 1);
+}
+
+# nginx_opt_list_parse(name, &parent, &in, [regex], [&validator])
+# Updates the config with input from nginx_opt_list_input
+sub nginx_opt_list_parse
+{
+my ($name, $parent, $in, $regexp, $vfunc) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+if ($in->{$name."_def"}) {
+	&save_directive($parent, $name, [ ]);
+	}
+else {
+	my @v = &split_quoted_string($in->{$name});
+	@v || &error(&text('opt_missing', $text{'opt_'.$name}));
+	foreach my $v (@v) {
+		!$regexp || $v =~ /$regexp/ ||
+			&error(&text('opt_e'.$name, $v) || $name);
+		my $err = $vfunc && &$vfunc($v, $name);
+		$err && &error($err);
+		}
+	&save_directive($parent, $name, [ { 'name' => $name,
+					    'words' => \@v } ]);
+	}
+}
+
 # list_log_formats([&server])
 # Returns a list of all log format names
 sub list_log_formats
