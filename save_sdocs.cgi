@@ -11,6 +11,8 @@ our (%text, %in);
 my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
 
+&nginx_opt_parse("root", $server, undef, '^\/.*$');
+
 &nginx_opt_parse("index", $server, undef);
 
 &nginx_opt_parse("default_type", $server, undef,

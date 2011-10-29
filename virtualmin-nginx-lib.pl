@@ -804,11 +804,14 @@ return undef if (!$http);
 my @servers = &find("server", $http);
 my ($idname, $idrootdir) = split(/;/, $id);
 foreach my $s (@servers) {
-	my $name = &find_value("server_name", $s->{'members'});
+	my $name = &find_value("server_name", $s);
 	next if ($idname ne $name);
-	my @locs = &find("location", $s->{'members'});
-	my ($rootloc) = grep { $_->{'value'} eq '/' } @locs;
-	my $rootdir = $rootloc ? &find_value("root", $rootloc) : "";
+	my $rootdir = &find_value("root", $s);
+	if (!$rootdir) {
+		my @locs = &find("location", $s);
+		my ($rootloc) = grep { $_->{'value'} eq '/' } @locs;
+		$rootdir = $rootloc ? &find_value("root", $rootloc) : "";
+		}
 	next if ($idrootdir ne $rootdir);
 	return $s;
 	}

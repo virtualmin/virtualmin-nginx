@@ -11,6 +11,8 @@ my $http = &find("http", $parent);
 &error_setup($text{'docs_err'});
 &ReadParse();
 
+&nginx_opt_parse("root", $http, undef, '^\/.*$');
+
 &nginx_opt_parse("index", $http, undef);
 
 &nginx_opt_parse("default_type", $http, undef,

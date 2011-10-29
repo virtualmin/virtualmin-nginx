@@ -40,8 +40,6 @@ if ($in{'delete'}) {
 	if ($in{'confirm'}) {
 		# Got confirmation, delete it
 		&save_directive($http, [ $server ], [ ]);
-		# XXX empty file
-		# XXX symlink
 		$action = 'delete';
 		}
 	else {
@@ -142,6 +140,7 @@ else {
 				  'words' => [ $in{'rootdir'} ] },
 				],
 			  } ]);
+		&save_directive($server, "root", $in{'rootdir'});
 		}
 	}
 

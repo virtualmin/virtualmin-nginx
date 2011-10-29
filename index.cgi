@@ -63,16 +63,20 @@ if (@servers) {
 			push(@ports, $port);
 			}
 
-		my @locs = &find("location", $s);
-		my ($rootloc) = grep { $_->{'value'} eq '/' } @locs;
-		my $root;
-		my $rootdir = "";
-		if ($rootloc) {
-			$rootdir = &find_value("root", $rootloc);
-			$root = $rootdir || "<i>$text{'index_noroot'}</i>";
-			}
-		else {
-			$root = "<i>$text{'index_norootloc'}</i>";
+		my $rootdir = &find_value("root", $s);
+		my $root = $rootdir;
+		if (!$root) {
+			my @locs = &find("location", $s);
+			my ($rootloc) = grep { $_->{'value'} eq '/' } @locs;
+			if ($rootloc) {
+				$rootdir = &find_value("root", $rootloc);
+				$root = $rootdir ||
+					"<i>$text{'index_noroot'}</i>";
+				}
+			else {
+				$rootdir = "";
+				$root = "<i>$text{'index_norootloc'}</i>";
+				}
 			}
 		my $id = $name.";".$rootdir;
 		print &ui_columns_row([
