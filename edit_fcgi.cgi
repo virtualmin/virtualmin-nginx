@@ -15,6 +15,16 @@ print &ui_form_start("save_fcgi.cgi", "post");
 print &ui_hidden("id", $in{'id'});
 print &ui_table_start($text{'fcgi_header'}, undef, 2);
 
+# XXX should be in location section
+#print &nginx_opt_input("fastcgi_pass", $server, 50, $text{'fcgi_hostport'});
+
+print &nginx_opt_input("fastcgi_index", $server, 20, $text{'fcgi_index'});
+
+print &nginx_param_input("fastcgi_param", $server);
+
+print &nginx_opt_input("fastcgi_buffer_size", $server, 10,
+		       $text{'fcgi_buffer'});
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 
