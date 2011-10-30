@@ -22,6 +22,8 @@ print &nginx_opt_input("gzip_disable", $server, 60, $text{'net_regexp'});
 print &nginx_opt_input("gzip_comp_level", $server, 5,
 		       $text{'gzip_level'});
 
+print &nginx_opt_list_input("gzip_types", $server, 60, $text{'ssi_types'});
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 

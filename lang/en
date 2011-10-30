@@ -220,6 +220,25 @@ gzip_header=Settings for response compression with gzip
 opt_gzip_comp_level=Compression level
 opt_egzip_comp_level=Compression level must be a number between 1 and 9
 gzip_level=1=least, 9=best
+opt_gzip_types=MIME types to compress
+opt_egzip_types=$1 is not a valid MIME type
+
+proxy_title=Proxy Settings
+sproxy_title=Proxy Settings
+proxy_header=Settings for proxying requests
+opt_proxy_set_header=Additional HTTP headers to send
+opt_proxy_buffer_size=Buffer size for response
+opt_eproxy_buffer_size=Buffer size must be like 4k or 1M.
+opt_proxy_bind=Local address to send from
+opt_eproxy_bind=Local address must be an IP address
+proxy_ip=IP address
+proxy_err=Failed to save proxy settings
+proxy_name=Header name
+proxy_value=Header value
+opt_proxy_pass_header=Headers to always pass through
+opt_proxy_hide_header=Headers to never pass through
+opt_eproxy_pass_header=$1 is not a valid header name
+opt_eproxy_hide_header=$1 is not a valid header name
 
 log_net=Changed network configuration
 log_logs=Changed logging settings

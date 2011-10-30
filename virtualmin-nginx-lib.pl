@@ -722,15 +722,16 @@ else {
 	}
 }
 
-# nginx_param_input(name, &parent)
+# nginx_param_input(name, &parent, [name-text, value-text])
 # Returns HTML for entering multiple name value paramters
 sub nginx_param_input
 {
-my ($name, $parent) = @_;
+my ($name, $parent, $ntext, $vtext) = @_;
+$ntext ||= $text{'fcgi_pname'};
+$vtext ||= $text{'fcgi_pvalue'};
 return undef if (!&supported_directive($name, $parent));
 my @obj = &find($name, $parent);
-my $ftable = &ui_columns_start([ $text{'fcgi_pname'},
-				 $text{'fcgi_pvalue'} ]);
+my $ftable = &ui_columns_start([ $ntext, $vtext ]);
 my $i = 0;
 foreach my $o (@obj, { 'words' => [ ] }) {
 	my @w = @{$o->{'words'}};
@@ -801,6 +802,39 @@ else {
 	&save_directive($parent, $name, [ { 'name' => $name,
 					    'words' => \@v } ]);
 	}
+}
+
+# nginx_textarea_input(name, &parent, width, height)
+# Returns HTML for entering the values of multiple directives of the same type,
+# in a text area
+sub nginx_textarea_input
+{
+my ($name, $parent, $width, $height) = @_;
+return undef if (!&supported_directive($name, $parent));
+my @obj = &find($name, $parent);
+return &ui_table_row($text{'opt_'.$name},
+		     &ui_textarea($name,
+			join("\n", map { $_->{'words'}->[0] } @obj),
+			$height, $width), 3);
+}
+
+# nginx_textarea_parse(name, &parent, &in, [&regex], [&validator])
+# Parses inputs from nginx_param_input
+sub nginx_textarea_parse
+{
+my ($name, $parent, $in, $regexp, $vfunc) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+my @obj;
+foreach my $v (split(/\r?\n/, $in->{$name})) {
+	!$regexp || $v =~ /$regexp/ ||
+		&error(&text('opt_e'.$name, $v) || $name);
+	my $err = $vfunc && &$vfunc($v, $name);
+	$err && &error($err);
+	push(@obj, { 'name' => $name,
+		     'words' => [ $v ] });
+	}
+&save_directive($parent, $name, \@obj);
 }
 
 # list_log_formats([&server])

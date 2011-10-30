@@ -31,6 +31,7 @@ foreach my $m (@mods) {
 			    $dir->{'default'} =~ /No value specified/) {
 				$dir->{'default'} = '';
 				}
+			$dir->{'default'} =~ s/;\s*$//;
 			}
 		elsif ($l =~ /<b>context:<\/b> <i>([^<]+)</i && $dir) {
 			$dir->{'context'} = $1;
