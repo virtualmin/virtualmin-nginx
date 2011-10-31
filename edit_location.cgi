@@ -27,7 +27,8 @@ if ($in{'path'}) {
 	print &ui_subheading($text{'location_settings'});
 	my @lpages = ( "ldocs", "lfcgi", "lssi", "lgzip", "lproxy", );
 	&icons_table(
-		[ map { "edit_".$_.".cgi?id=".&urlize($in{'id'}) } @lpages ],
+		[ map { "edit_".$_.".cgi?id=".&urlize($in{'id'}).
+			"&path=".&urlize($in{'path'}) } @lpages ],
 		[ map { $text{$_."_title"} } @lpages ],
 		[ map { "images/".$_.".gif" } @lpages ],
 		);
@@ -42,7 +43,7 @@ if (!$in{'new'}) {
 print &ui_form_start("save_location.cgi", "post");
 print &ui_hidden("id", $in{'id'});
 print &ui_hidden("new", $in{'new'});
-print &ui_hidden("path", $in{'path'});
+print &ui_hidden("oldpath", $in{'path'});
 print &ui_table_start($text{'location_header'}, "width=100%", 2);
 
 # Location path

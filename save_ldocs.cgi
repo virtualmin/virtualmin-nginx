@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl
-# Save document options
+# Save per-location document options
 
 use strict;
 use warnings;
@@ -10,17 +10,19 @@ our (%text, %in);
 &ReadParse();
 my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
+my $location = &find_location($server, $in{'path'});
+$location || &error($text{'location_egone'});
 
-&nginx_opt_parse("root", $server, undef, '^\/.*$');
+&nginx_opt_parse("index", $location, undef);
 
-&nginx_opt_parse("index", $server, undef);
-
-&nginx_opt_parse("default_type", $server, undef,
+&nginx_opt_parse("default_type", $location, undef,
 		 '^[a-zA-Z0-9\.\_\-]+\/[a-zA-Z0-9\.\_\-]+$');
 
 &flush_config_file_lines();
 &unlock_all_config_files();
 my $name = &find_value("server_name", $server);
-&webmin_log("sdocs", "server", $name);
-&redirect("edit_server.cgi?id=".&urlize($in{'id'}));
+&webmin_log("ldocs", "location", $location->{'words'}->[0], 
+	    { 'server' => $name });
+&redirect("edit_location.cgi?id=".&urlize($in{'id'}).
+	  "&path=".&urlize($in{'path'}));
 

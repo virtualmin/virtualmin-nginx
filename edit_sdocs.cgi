@@ -13,7 +13,7 @@ $server || &error($text{'server_egone'});
 
 print &ui_form_start("save_sdocs.cgi", "post");
 print &ui_hidden("id", $in{'id'});
-print &ui_table_start($text{'sdocs_header'}, undef, 2);
+print &ui_table_start($text{'docs_header'}, undef, 2);
 
 print &nginx_opt_input("root", $server, 60, undef,
 		       &file_chooser_button("root", 1));

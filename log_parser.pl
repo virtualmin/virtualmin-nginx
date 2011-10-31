@@ -12,16 +12,24 @@ sub parse_webmin_log
 {
 my ($user, $script, $action, $type, $object, $p) = @_;
 if ($type eq 'mime') {
-	return &text('log_'.$action.'_mime', &html_escape($object));
+	return &text('log_'.$action.'_mime',
+		     "<tt>".&html_escape($object)."</tt>");
 	}
 elsif ($type eq 'mimes') {
 	return &text('log_'.$action.'_mimes', $object);
 	}
 elsif ($type eq 'manual') {
-	return &text('log_manual', &html_escape($object));
+	return &text('log_manual',
+		     "<tt>".&html_escape($object)."</tt>");
 	}
 elsif ($type eq 'server') {
-	return &text('log_'.$action.'_server', &html_escape($object));
+	return &text('log_'.$action.'_server',
+		     "<tt>".&html_escape($object)."</tt>");
+	}
+elsif ($type eq 'location') {
+	return &text('log_'.$action.'_location',
+		     "<tt>".&html_escape($object)."</tt>",
+		     "<tt>".&html_escape($p->{'server'})."</tt>");
 	}
 else {
 	return $text{'log_'.$action};

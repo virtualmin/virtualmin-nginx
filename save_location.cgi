@@ -9,7 +9,7 @@ our (%text, %in, %config);
 
 # Get the current location
 &lock_all_config_files();
-my $server = &find_server($in{'id'}):
+my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
 my $conf = &get_config();
 my @locations = &find("location", $server);
@@ -22,12 +22,12 @@ if ($in{'new'}) {
 		      'members' => [ ] };
 	}
 else {
-	$location = &find_location($server, $in{'id'});
+	$location = &find_location($server, $in{'oldpath'});
         $location || &error($text{'location_egone'});
         }
 
 # Check for clash
-if ($in{'new'} || $in{'path'} ne $location->{'words'}->[0]) {
+if ($in{'new'} || $in{'oldpath'} ne $in{'path'}) {
 	foreach my $l (@locations) {
 		$l->{'words'}->[0] eq $in{'path'} &&
 			&error($text{'location_eclash'});
@@ -51,19 +51,19 @@ if ($in{'delete'}) {
 			&text('location_rusure',
 			      "<tt>".&html_escape($location->{'words'}->[0])."</tt>"),
 			[ [ 'id', $in{'id'} ],
-			  [ 'path', $in{'path'} ],
+			  [ 'oldpath', $in{'oldpath'} ],
 			  [ 'delete', 1 ] ],
 			[ [ 'confirm', $text{'server_confirm'} ] ],
 			);
 
 		&ui_print_footer("edit_location.cgi?id=".&urlize($in{'id'}).
-				   "&path=".&urlize($in{'path'}),
+				   "&path=".&urlize($in{'oldpath'}),
 				 $text{'server_return'});
 		}
 	}
 else {
 	# Validate path
-	$in{'path'} =~ /^\/\S+$/ || &error($text{'location_epath'});
+	$in{'path'} =~ /^\/\S*$/ || &error($text{'location_epath'});
 
 	if ($in{'new'}) {
 		# Create a new location object
@@ -85,8 +85,9 @@ else {
 &unlock_all_config_files();
 if ($action) {
 	my $name = &find_value("server_name", $server);
-	&webmin_log($action, 'location', $name, { 'server' => $name });
-	&redirect("");
+	&webmin_log($action, 'location', $location->{'words'}->[0],
+		    { 'server' => $name });
+	&redirect("edit_server.cgi?id=".&urlize($in{'id'}));
 	}
 
 

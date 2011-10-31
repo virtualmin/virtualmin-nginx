@@ -96,16 +96,15 @@ opt_default_type=MIME type for unknown files
 opt_edefault_type=Invalid default MIME type
 
 docs_title=Document Options
+sdocs_title=Document Options
+ldocs_title=Document Options
 docs_header=File, page and document settings
 docs_err=Failed to save document options
 opt_root=Default root directory
 opt_eroot=Default root directory must be an absolute path
 
-sdocs_title=Document Options
-sdocs_header=File, page and document settings
-sdocs_err=Failed to save document options
-
 fcgi_title=FastCGI Options
+lfcgi_title=FastCGI Options
 fcgi_header=FastCGI server and protocol options
 opt_fastcgi_pass=Host and port for FastCGI server
 fcgi_hostport=hostname:port
@@ -124,6 +123,7 @@ opt_efastcgi_buffer_size=Buffer size must be like 4k or 1M.
 
 ssi_title=Server-Side Include Settings
 sssi_title=Server-Side Include Settings
+lssi_title=Server-Side Include Settings
 ssi_header=Options for server-parsed HTML
 opt_ssi=Enabled server-side includes?
 opt_ssi_silent_errors=Hide errors processing HTML?
@@ -217,6 +217,7 @@ ssl_clist=Listed ciphers
 
 gzip_title=GZip Compression Options
 sgzip_title=GZip Compression Options
+lgzip_title=GZip Compression Options
 gzip_header=Settings for response compression with gzip
 opt_gzip_comp_level=Compression level
 opt_egzip_comp_level=Compression level must be a number between 1 and 9
@@ -226,6 +227,7 @@ opt_egzip_types=$1 is not a valid MIME type
 
 proxy_title=Proxy Settings
 sproxy_title=Proxy Settings
+lproxy_title=Proxy Settings
 proxy_header=Settings for proxying requests
 opt_proxy_set_header=Additional HTTP headers to send
 opt_proxy_buffer_size=Buffer size for response
@@ -253,6 +255,7 @@ location_err=Failed to save location
 location_eclash=A location with the same path already exists in this virtual host
 location_rusure=Are you sure you want to delete the location $1? All configuration settings within it will also be removed.
 location_epath=Missing or non-absolute URL path
+location_return=location
 
 log_net=Changed network configuration
 log_logs=Changed logging settings
@@ -276,6 +279,10 @@ log_sdocs_server=Changed document options for $1
 log_fcgi_server=Change FastCGI options for $1
 log_ssi_server=Change server-side include settings for $1
 log_gzip_server=Change gzip options for $1
+log_create_location=Created location $1 in $2
+log_delete_location=Deleted location $1 in $2
+log_modify_location=Modified location $1 in $2
+log_ldocs_location=Changed document options for location $1 in $2
 
 stop_err=Failed to stop Nginx
 
