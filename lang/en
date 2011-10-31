@@ -183,6 +183,7 @@ server_noneloc=This virtual host does not have any locations yet.
 server_locations=URL Path Locations
 server_settings=Virtual Host Settings
 server_server=Virtual Host Definition
+server_eclash=A virtual host with the same name already exists
 
 slogs_title=Virtual Host Logging
 slogs_header=Log file options
@@ -239,6 +240,15 @@ opt_proxy_pass_header=Headers to always pass through
 opt_proxy_hide_header=Headers to never pass through
 opt_eproxy_pass_header=$1 is not a valid header name
 opt_eproxy_hide_header=$1 is not a valid header name
+
+location_create=Create Location
+location_edit=Edit Location
+location_desc=Location $2 in virtual host $1
+location_descnone=Location $1 in virtual host with no name
+location_header=URL path location options
+location_path=URL path
+location_egone=This location no longer exists!
+location_delete=Delete Location
 
 log_net=Changed network configuration
 log_logs=Changed logging settings

@@ -65,6 +65,7 @@ foreach (@lines) {
 	if (/^\s*(\S+)\s+((\S+)\s+)?\{/) {
 		# Start of a section
 		my $ns = { 'name' => $1,
+			   'words' => [ $3 ],
 			   'value' => $3,
 			   'type' => 1,
 			   'indent' => scalar(@stack),
@@ -933,6 +934,17 @@ foreach my $s (@servers) {
 return undef;
 }
 
+# find_location(&server, path)
+# Finds the location with some path in a given server object
+sub find_location
+{
+my ($server, $path) = @_;
+foreach my $l (&find("location", $server)) {
+	return $l if ($l->{'words'}->[0] eq $path);
+	}
+return undef;
+}
+
 # split_ip_port(string)
 # Given an ip:port pair as used in a listen directive, split them up
 sub split_ip_port
@@ -955,6 +967,8 @@ else {
 	}
 }
 
+# server_desc(&server)
+# Returns a description of a virtual host
 sub server_desc
 {
 my ($server) = @_;
@@ -962,6 +976,20 @@ my $name = &find_value("server_name", $server);
 return $name ? &text('server_desc', "<tt>".&html_escape($name)."</tt>")
 	     : $text{'server_descnone'};
 }
+
+# location_desc(&server, &location)
+# Returns a description of a location in a virtual host
+sub location_desc
+{
+my ($server, $location) = @_;
+my $name = &find_value("server_name", $server);
+return $name ? &text('location_desc', "<tt>".&html_escape($name)."</tt>",
+		     "<tt>".&html_escape($location->{'value'})."</tt>")
+	     : &text('location_descnone',
+		     "<tt>".&html_escape($location->{'value'})."</tt>");
+}
+
+
 
 # create_server_link(&server)
 # Creates a link from a directory like sites-enabled to sites-available for
