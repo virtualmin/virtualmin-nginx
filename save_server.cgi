@@ -11,7 +11,9 @@ our (%text, %in, %config);
 &lock_all_config_files();
 my $conf = &get_config();
 my $http = &find("http", $conf);
+my @servers = &find("server", $http);
 my $server;
+my $old_name;
 if ($in{'new'}) {
 	$server = { 'name' => 'server',
 		    'type' => 1,
@@ -31,7 +33,17 @@ if ($in{'new'}) {
 else {
 	$server = &find_server($in{'id'});
         $server || &error($text{'server_egone'});
+	$old_name = &find_value("server_name", $server);
         }
+
+# Check for clash
+if ($in{'new'} || $in{'server_name'} ne $old_name) {
+	foreach my $c (@servers) {
+		my $cname = &find_value("server_name", $c);
+		$cname eq $in{'server_name'} &&
+			&error($text{'server_eclash'});
+		}
+	}
 
 my $action;
 my $name;
@@ -48,7 +60,8 @@ if ($in{'delete'}) {
 				 $text{'server_edit'}, "");
 
 		print &ui_confirmation_form("save_server.cgi",
-			&text('server_rusure', $name),
+			&text('server_rusure',
+			      "<tt>".&html_escape($name)."</tt>"),
 			[ [ 'id', $in{'id'} ],
 			  [ 'delete', 1 ] ],
 			[ [ 'confirm', $text{'server_confirm'} ] ],

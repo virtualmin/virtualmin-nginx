@@ -249,6 +249,10 @@ location_header=URL path location options
 location_path=URL path
 location_egone=This location no longer exists!
 location_delete=Delete Location
+location_err=Failed to save location
+location_eclash=A location with the same path already exists in this virtual host
+location_rusure=Are you sure you want to delete the location $1? All configuration settings within it will also be removed.
+location_epath=Missing or non-absolute URL path
 
 log_net=Changed network configuration
 log_logs=Changed logging settings
