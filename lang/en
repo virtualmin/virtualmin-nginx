@@ -256,7 +256,7 @@ location_err=Failed to save location
 location_eclash=A location with the same path already exists in this virtual host
 location_rusure=Are you sure you want to delete the location $1? All configuration settings within it will also be removed.
 location_epath=Missing or non-absolute URL path
-location_return=location
+location_return=location options
 
 log_net=Changed network configuration
 log_logs=Changed logging settings
@@ -280,10 +280,15 @@ log_sdocs_server=Changed document options for $1
 log_fcgi_server=Change FastCGI options for $1
 log_ssi_server=Change server-side include settings for $1
 log_gzip_server=Change gzip options for $1
+log_proxy_server=Changed proxy settings for $1
 log_create_location=Created location $1 in $2
 log_delete_location=Deleted location $1 in $2
 log_modify_location=Modified location $1 in $2
-log_ldocs_location=Changed document options for location $1 in $2
+log_docs_location=Changed document options for location $1 in $2
+log_fcgi_location=Changed FastCGI options for location $1 in $2
+log_ssi_location=Changed server-side include settings for location $1 in $2
+log_gzip_location=Changed gzip options for location $1 in $2
+log_proxy_location=Changed proxy settings for location $1 in $2
 
 stop_err=Failed to stop Nginx
 

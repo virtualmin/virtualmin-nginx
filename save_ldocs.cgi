@@ -21,7 +21,7 @@ $location || &error($text{'location_egone'});
 &flush_config_file_lines();
 &unlock_all_config_files();
 my $name = &find_value("server_name", $server);
-&webmin_log("ldocs", "location", $location->{'words'}->[0], 
+&webmin_log("docs", "location", $location->{'words'}->[0], 
 	    { 'server' => $name });
 &redirect("edit_location.cgi?id=".&urlize($in{'id'}).
 	  "&path=".&urlize($in{'path'}));
