@@ -19,7 +19,7 @@ index_stop=Stop Nginx Webserver
 index_stopdesc=Shut down all running Nginx webserver processes.
 index_start=Start Nginx Webserver
 index_startdesc=Start up the Nginx webserver using the current configuration.
-index_restart=Re-start Nginx Webserver
+index_restart=Restart Nginx Webserver
 index_restartdesc=Apply the current configuration by stopping and re-starting the Nginx webserver.
 
 net_title=Network Configuration
@@ -243,6 +243,9 @@ opt_proxy_pass_header=Headers to always pass through
 opt_proxy_hide_header=Headers to never pass through
 opt_eproxy_pass_header=$1 is not a valid header name
 opt_eproxy_hide_header=$1 is not a valid header name
+opt_proxy_pass=Proxy requests to
+proxy_url=URL
+proxy_err=Failed to save proxy settings
 
 location_create=Create Location
 location_edit=Edit Location
