@@ -107,6 +107,7 @@ fcgi_title=FastCGI Options
 lfcgi_title=FastCGI Options
 fcgi_header=FastCGI server and protocol options
 opt_fastcgi_pass=Host and port for FastCGI server
+opt_efastcgi_pass=FastCGI server must be in hostname:port or IP:port format
 fcgi_hostport=hostname:port
 opt_fastcgi_index=Script to use for directory URLs
 fcgi_index=Script like <tt>index.php</tt>
