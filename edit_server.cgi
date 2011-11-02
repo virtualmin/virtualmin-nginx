@@ -38,6 +38,7 @@ if ($in{'id'}) {
 	if (@locations) {
 		print &ui_links_row(\@links);
 		print &ui_columns_start([ $text{'server_pathloc'},
+					  $text{'server_matchtype'},
 					  $text{'server_dirloc'},
 					  $text{'server_indexloc'},
 					  $text{'server_autoloc'} ]);
@@ -46,11 +47,13 @@ if ($in{'id'}) {
 			my @indexes = map { @{$_->{'words'}} }
 					  &find("index", $l);
 			my $auto = &find_value("autoindex", $l);
+			my @w = @{$l->{'words'}};
 			print &ui_columns_row([
 				"<a href='edit_location.cgi?id=".
 				  &urlize($in{'id'})."&path=".
-				  &urlize($l->{'value'})."'>".
-				  $l->{'value'}."</a>",
+				  &urlize($w[$#w])."'>".
+				  &html_escape($w[$#w])."</a>",
+				&match_desc(@w > 1 ? $w[0] : ""),
 				$rootdir || "<i>$text{'index_noroot'}</i>",
 				join(" ", @indexes) ||
 				  "<i>$text{'server_noindex'}</i>",

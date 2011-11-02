@@ -176,6 +176,7 @@ server_erootdir2=Root directory $1 does not exist
 server_return=virtual host settings
 server_addloc=Add a new location.
 server_pathloc=URL path
+server_matchtype=Match type
 server_dirloc=Corresponding directory
 server_indexloc=Index files
 server_autoloc=Auto-indexing?
@@ -253,12 +254,13 @@ location_desc=Location $2 in virtual host $1
 location_descnone=Location $1 in virtual host with no name
 location_header=URL path location options
 location_path=URL path
+location_match=Match type
 location_egone=This location no longer exists!
 location_delete=Delete Location
 location_err=Failed to save location
 location_eclash=A location with the same path already exists in this virtual host
 location_rusure=Are you sure you want to delete the location $1? All configuration settings within it will also be removed.
-location_epath=Missing or non-absolute URL path
+location_epath=URL path cannot be empty or contain spaces
 location_return=location options
 
 log_net=Changed network configuration
@@ -299,3 +301,10 @@ start_err=Failed to start Nginx
 
 restart_err=Failed to apply Nginx configuration
 restart_etest=Configuration is invalid : $1
+
+match_default=Sub-directory
+match_exact=Exact directory
+match_case=Case sensitive regular expression
+match_nocase=Case insensitive regular expression
+match_noregexp=Disable regular expressions
+match_named=Named location

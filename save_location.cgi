@@ -15,10 +15,12 @@ my $conf = &get_config();
 my @locations = &find("location", $server);
 my $location;
 my $old_name;
+my @words = ( $in{'path'} );
+unshift(@words, $in{'match'}) if ($in{'match'});
 if ($in{'new'}) {
 	$location = { 'name' => 'location',
 		      'type' => 1,
-		      'words' => [ $in{'path'} ],
+		      'words' => \@words,
 		      'members' => [ ] };
 	}
 else {
@@ -63,7 +65,7 @@ if ($in{'delete'}) {
 	}
 else {
 	# Validate path
-	$in{'path'} =~ /^\/\S*$/ || &error($text{'location_epath'});
+	$in{'path'} =~ /^\S+$/ || &error($text{'location_epath'});
 
 	if ($in{'new'}) {
 		# Create a new location object
@@ -72,7 +74,7 @@ else {
 		}
 	else {
 		# Update path in existing one
-		$location->{'words'}->[0] = $in{'path'};
+		$location->{'words'} = \@words;
 		&save_directive($server, [ $location ], [ $location ]);
 		$action = 'modify';
 		}

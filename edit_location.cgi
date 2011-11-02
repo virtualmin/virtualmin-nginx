@@ -13,6 +13,7 @@ my $location;
 if ($in{'new'}) {
 	&ui_print_header(&server_desc($server), $text{'location_create'}, "");
 	$location = { 'name' => 'location',
+		      'words' => [ ],
 		      'members' => [ ] };
 	}
 else {
@@ -47,8 +48,15 @@ print &ui_hidden("oldpath", $in{'path'});
 print &ui_table_start($text{'location_header'}, "width=100%", 2);
 
 # Location path
+my @w = @{$location->{'words'}};
 print &ui_table_row($text{'location_path'},
-	&ui_textbox("path", $location->{'words'}->[0], 60));
+	&ui_textbox("path", @w ? $w[$#w] : "", 60));
+
+# Match type
+print &ui_table_row($text{'location_match'},
+	&ui_select("match", @w > 1 ? $w[0] : "",
+		   [ map { [ $_, &match_desc($_) ] } &list_match_types() ],
+		   1, 0, 1));
 
 # Root directory
 print &nginx_text_input("root", $location, 60,

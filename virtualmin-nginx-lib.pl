@@ -62,17 +62,18 @@ my @lines = <$fh>;
 close($fh);
 foreach (@lines) {
 	s/#.*$//;
-	if (/^\s*(\S+)\s+((\S+)\s+)?\{/) {
+	if (/^\s*(\S+)(\s+.*)\{/) {
 		# Start of a section
 		my $ns = { 'name' => $1,
-			   'words' => [ $3 ],
-			   'value' => $3,
 			   'type' => 1,
 			   'indent' => scalar(@stack),
 			   'file' => $file,
 			   'line' => $lnum,
 			   'eline' => $lnum,
 			   'members' => [ ] };
+		my $value = $2;
+		$ns->{'words'} = [ &split_words($value) ];
+		$ns->{'value'} = $ns->{'words'}->[0];
 		push(@stack, $addto);
 		push(@$addto, $ns);
 		$addto = $ns->{'members'};
@@ -85,12 +86,7 @@ foreach (@lines) {
 	elsif (/^\s*(\S+)((\s+("([^"]*)"|'([^']*)'|\S+))*);/) {
 		# Found a directive
 		my ($name, $value) = ($1, $2);
-		my @words;
-		while($value =~ s/^\s+"([^"]+)"// ||
-		      $value =~ s/^\s+'([^']+)'// ||
-		      $value =~ s/^\s+(\S+)//) {
-			push(@words, $1);
-			}
+		my @words = &split_words($value);
 		if ($name eq "include") {
 			# Include a file or glob
 			if ($words[0] !~ /^\//) {
@@ -118,6 +114,20 @@ foreach (@lines) {
 	$lnum++;
 	}
 return \@rv;
+}
+
+# split_words(string)
+# Convert a string of bare or quoted words into a list
+sub split_words
+{
+my ($value) = @_;
+my @words;
+while($value =~ s/^\s+"([^"]+)"// ||
+      $value =~ s/^\s+'([^']+)'// ||
+      $value =~ s/^\s+(\S+)//) {
+	push(@words, $1);
+	}
+return @words;
 }
 
 # find(name, [&config|&parent])
@@ -940,7 +950,8 @@ sub find_location
 {
 my ($server, $path) = @_;
 foreach my $l (&find("location", $server)) {
-	return $l if ($l->{'words'}->[0] eq $path);
+	my @w = @{$l->{'words'}};
+	return $l if ($w[$#w] eq $path);
 	}
 return undef;
 }
@@ -989,7 +1000,24 @@ return $name ? &text('location_desc', "<tt>".&html_escape($name)."</tt>",
 		     "<tt>".&html_escape($location->{'value'})."</tt>");
 }
 
+# match_desc(string)
+# Converts a location match type like ~ into a human-readable mode
+sub match_desc
+{
+my ($m) = @_;
+return $m eq "=" ? $text{'match_exact'} :
+       $m eq "~" ? $text{'match_case'} :
+       $m eq "~*" ? $text{'match_nocase'} :
+       $m eq "^~" ? $text{'match_noregexp'} :
+       $m eq "\@" ? $text{'match_named'} :
+       $m eq "" ? $text{'match_default'} :
+		  "Unknown match type $m";
+}
 
+sub list_match_types
+{
+return ("", "=", "~", "~*", "^~", "\@");
+}
 
 # create_server_link(&server)
 # Creates a link from a directory like sites-enabled to sites-available for
