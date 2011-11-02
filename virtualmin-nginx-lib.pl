@@ -848,6 +848,35 @@ foreach my $v (split(/\r?\n/, $in->{$name})) {
 &save_directive($parent, $name, \@obj);
 }
 
+# nginx_access_input(name1, name2, &parent)
+# Returns HTML for setting allow and deny directives
+sub nginx_access_input
+{
+my ($allow, $deny, $parent) = @_;
+return undef if (!&supported_directive($allow, $parent));
+my @obj = sort { $a->{'line'} <=> $b->{'line'} }
+	       (&find($allow, $parent), &find($deny, $parent));
+my $table = &ui_columns_start([ $text{'access_mode'},
+				$text{'access_value'} ]);
+my $i =0;
+foreach my $o (@obj, { }) {
+	my $v = $o->{'value'};
+	$v = "" if (lc($v) eq "all");
+	$table .= &ui_columns_row([
+		&ui_select($allow."_mode_".$i,
+			   $o->{'name'},
+			   [ [ "", "&nbsp;" ],
+			     [ "allow", $text{'access_allow'} ],
+			     [ "deny", $text{'access_deny'} ] ]),
+		&ui_opt_text($allow."_addr_".$i, $v, 30,
+			     $text{'access_all'}, $text{'access_addr'}),
+		]);
+	$i++;
+	}
+$table .= &ui_columns_end();
+return &ui_table_row($text{'opt_'.$allow}, $table, 3);
+}
+
 # list_log_formats([&server])
 # Returns a list of all log format names
 sub list_log_formats
