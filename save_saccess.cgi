@@ -15,6 +15,8 @@ $server || &error($text{'server_egone'});
 
 &nginx_realm_parse("auth_basic", $server);
 
+&nginx_passfile_parse("auth_basic_user_file", $server);
+
 &flush_config_file_lines();
 &unlock_all_config_files();
 my $name = &find_value("server_name", $server);

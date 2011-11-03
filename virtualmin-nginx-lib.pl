@@ -946,6 +946,31 @@ else {
 	}
 }
 
+# nginx_passfile_input(name, &parent)
+# Returns HTML for a password file field
+sub nginx_passfile_input
+{
+my ($name, $parent) = @_;
+my $value = &find_value($name, $parent);
+my $edit;
+if ($value =~ /^\/\S/) {
+	$edit = " <a href='list_users.cgi?file=".&urlize($value)."'>".
+		$text{'access_edit'}."</a>";
+	}
+return &nginx_opt_input($name, $parent, 50, $text{'access_pfile'},
+			&file_chooser_button($name).$edit);
+}
+
+# nginx_passfile_parse(name, &parent, &in)
+# Parse input from nginx_passfile_input
+sub nginx_passfile_parse
+{
+my ($name, $parent, $in) = @_;
+&nginx_opt_parse($name, $parent, $in, undef,
+		 sub { return $_[0] !~ /^\// ? $text{'access_eabsolute'} :
+			      -d $_[0] ? $text{'access_edir'} : undef });
+}
+
 # list_log_formats([&server])
 # Returns a list of all log format names
 sub list_log_formats
