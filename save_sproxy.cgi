@@ -6,7 +6,7 @@ use warnings;
 require 'virtualmin-nginx-lib.pl';
 our (%text, %in);
 &lock_all_config_files();
-&error_setup($text{'fcgi_err'});
+&error_setup($text{'proxy_err'});
 &ReadParse();
 my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
@@ -29,6 +29,6 @@ $server || &error($text{'server_egone'});
 &flush_config_file_lines();
 &unlock_all_config_files();
 my $name = &find_value("server_name", $server);
-&webmin_log("fcgi", "server", $name);
+&webmin_log("proxy", "server", $name);
 &redirect("edit_server.cgi?id=".&urlize($in{'id'}));
 

@@ -857,9 +857,10 @@ return undef if (!&supported_directive($allow, $parent));
 my @obj = sort { $a->{'line'} <=> $b->{'line'} }
 	       (&find($allow, $parent), &find($deny, $parent));
 my $table = &ui_columns_start([ $text{'access_mode'},
-				$text{'access_value'} ]);
+				$text{'access_value'} ], 100, 0,
+			      [ "nowrap", "nowrap" ]);
 my $i =0;
-foreach my $o (@obj, { }) {
+foreach my $o (@obj, { }, { }) {
 	my $v = $o->{'value'};
 	$v = "" if (lc($v) eq "all");
 	$table .= &ui_columns_row([
@@ -868,13 +869,43 @@ foreach my $o (@obj, { }) {
 			   [ [ "", "&nbsp;" ],
 			     [ "allow", $text{'access_allow'} ],
 			     [ "deny", $text{'access_deny'} ] ]),
-		&ui_opt_text($allow."_addr_".$i, $v, 30,
-			     $text{'access_all'}, $text{'access_addr'}),
+		&ui_opt_textbox($allow."_addr_".$i, $v, 30,
+			        $text{'access_all'}, $text{'access_addr'}),
 		]);
 	$i++;
 	}
 $table .= &ui_columns_end();
 return &ui_table_row($text{'opt_'.$allow}, $table, 3);
+}
+
+# nginx_access_parse(name1, name2, &parent, &in)
+# Parse inputs from nginx_access_input
+sub nginx_access_parse
+{
+my ($allow, $deny, $parent, $in) = @_;
+return undef if (!&supported_directive($allow, $parent));
+$in ||= \%in;
+my @obj;
+my @old = sort { $a->{'line'} <=> $b->{'line'} }
+               (&find($allow, $parent), &find($deny, $parent));
+for(my $i=0; defined(my $mode = $in->{$allow."_mode_".$i}); $i++) {
+	next if (!$mode);
+	my $addr;
+	if ($in->{$allow."_addr_".$i."_def"}) {
+		$addr = "all";
+		}
+	else {
+		$addr = $in->{$allow."_addr_".$i};
+		$addr || &error(&text('access_eaddrnone', $i+1));
+		&check_ipaddress($addr) ||
+		   $addr =~ /^(\S+)\/(\d+)$/ &&
+		     &check_ipaddress("$1") && $2 > 0 && $2 <= 32 ||
+			&error(&text('access_eaddr', $addr));
+		}
+	push(@obj, { 'name' => $mode,
+		     'words' => [ $addr ] });
+	}
+&save_directive($parent, \@old, \@obj);
 }
 
 # list_log_formats([&server])

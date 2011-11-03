@@ -248,6 +248,7 @@ opt_proxy_pass=Proxy requests to
 proxy_url=URL
 proxy_err=Failed to save proxy settings
 
+access_title=Access Control
 saccess_title=Access Control
 laccess_title=Access Control
 access_header=IP address and password access control options
@@ -255,8 +256,12 @@ access_mode=Access rule
 access_value=Matching addresses
 access_allow=Allow
 access_deny=Deny
-access_all=All
+access_all=Any address
 access_addr=IP or network/CIDR
+opt_allow=Access control rules
+access_err=Failed to save access control
+access_eaddrnone=Missing address in row $1
+access_eaddr=$1 is not a valid address or address/CIDR
 
 location_create=Create Location
 location_edit=Edit Location
