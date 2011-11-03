@@ -17,6 +17,8 @@ print &ui_table_start($text{'access_header'}, undef, 2);
 
 print &nginx_access_input("allow", "deny", $server);
 
+print &nginx_realm_input("auth_basic", $server);
+
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);
 

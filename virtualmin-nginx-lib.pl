@@ -908,6 +908,44 @@ for(my $i=0; defined(my $mode = $in->{$allow."_mode_".$i}); $i++) {
 &save_directive($parent, \@old, \@obj);
 }
 
+# nginx_realm_input(name, &parent)
+# Returns HTML for entering an authentication realm
+sub nginx_realm_input
+{
+my ($name, $parent) = @_;
+return undef if (!&supported_directive($name, $parent));
+my $value = &find_value($name, $parent);
+my $def = &get_default($name);
+return &ui_table_row($text{'opt_'.$name},
+	&ui_radio($name."_def",
+		  !$value ? 1 : $value eq "off" ? 2 : 0,
+		  [ [ 1, $text{'default'}.($def ? " ($def)" : "") ],
+		    [ 2, $text{'access_off'} ],
+		    [ 0, $text{'access_realm'}." ".
+			 &ui_textbox($name, $value eq "off" ? "" : $value, 40) ]
+		  ]), 3);
+}
+
+# nginx_realm_parse(name, &parent, &in)
+# Updates the config with input from nginx_realm_input
+sub nginx_realm_parse
+{
+my ($name, $parent, $in) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+if ($in->{$name."_def"} == 1) {
+	&save_directive($parent, $name, [ ]);
+	}
+elsif ($in->{$name."_def"} == 2) {
+	&save_directive($parent, $name, [ "off" ]);
+	}
+else {
+	my $v = $in->{$name};
+	$v eq '' && &error(&text('opt_missing', $text{'opt_'.$name}));
+	&save_directive($parent, $name, [ $v ]);
+	}
+}
+
 # list_log_formats([&server])
 # Returns a list of all log format names
 sub list_log_formats

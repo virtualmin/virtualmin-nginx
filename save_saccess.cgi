@@ -13,6 +13,8 @@ $server || &error($text{'server_egone'});
 
 &nginx_access_parse("allow", "deny", $server);
 
+&nginx_realm_parse("auth_basic", $server);
+
 &flush_config_file_lines();
 &unlock_all_config_files();
 my $name = &find_value("server_name", $server);

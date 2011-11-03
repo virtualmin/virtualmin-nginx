@@ -262,6 +262,9 @@ opt_allow=Access control rules
 access_err=Failed to save access control
 access_eaddrnone=Missing address in row $1
 access_eaddr=$1 is not a valid address or address/CIDR
+opt_auth_basic=Basic authentication realm
+access_off=No authentication needed
+access_realm=Realm named
 
 location_create=Create Location
 location_edit=Edit Location
