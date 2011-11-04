@@ -946,15 +946,16 @@ else {
 	}
 }
 
-# nginx_passfile_input(name, &parent)
+# nginx_passfile_input(name, &parent, server-id, path)
 # Returns HTML for a password file field
 sub nginx_passfile_input
 {
-my ($name, $parent) = @_;
+my ($name, $parent, $id, $path) = @_;
 my $value = &find_value($name, $parent);
 my $edit;
 if ($value =~ /^\/\S/) {
-	$edit = " <a href='list_users.cgi?file=".&urlize($value)."'>".
+	$edit = " <a href='list_users.cgi?file=".&urlize($value).
+		"&id=".&urlize($id)."&path=".&urlize($path)."'>".
 		$text{'access_edit'}."</a>";
 	}
 return &nginx_opt_input($name, $parent, 50, $text{'access_pfile'},

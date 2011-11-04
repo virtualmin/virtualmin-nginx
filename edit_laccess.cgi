@@ -22,7 +22,8 @@ print &nginx_access_input("allow", "deny", $location);
 
 print &nginx_realm_input("auth_basic", $location);
 
-print &nginx_passfile_input("auth_basic_user_file", $location);
+print &nginx_passfile_input("auth_basic_user_file", $location,
+			    $in{'id'}, $in{'path'});
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);

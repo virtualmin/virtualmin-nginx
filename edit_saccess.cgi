@@ -19,7 +19,7 @@ print &nginx_access_input("allow", "deny", $server);
 
 print &nginx_realm_input("auth_basic", $server);
 
-print &nginx_passfile_input("auth_basic_user_file", $server);
+print &nginx_passfile_input("auth_basic_user_file", $server, $in{'id'});
 
 print &ui_table_end();
 print &ui_form_end([ [ undef, $text{'save'} ] ]);

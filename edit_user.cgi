@@ -26,6 +26,8 @@ print &ui_form_start("save_user.cgi", "post");
 print &ui_hidden("new", $in{'new'});
 print &ui_hidden("file", $in{'file'});
 print &ui_hidden("old", $in{'user'});
+print &ui_hidden("id", $in{'id'});
+print &ui_hidden("path", $in{'path'});
 print &ui_table_start($text{'user_header'}, undef, 2);
 
 # Username
@@ -56,6 +58,7 @@ else {
 			     [ 'delete', $text{'delete'} ] ]);
 	}
 
-&ui_print_footer("list_users.cgi?file=".&urlize($in{'file'}),
+&ui_print_footer("list_users.cgi?file=".&urlize($in{'file'}).
+	  	   "&id=".&urlize($in{'id'})."&path=".&urlize($in{'path'}),
 		 $text{'users_return'});
 
