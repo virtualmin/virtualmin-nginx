@@ -31,6 +31,11 @@ elsif ($type eq 'location') {
 		     "<tt>".&html_escape($object)."</tt>",
 		     "<tt>".&html_escape($p->{'server'})."</tt>");
 	}
+elsif ($type eq 'user') {
+	return &text('log_'.$action.'_user',
+		     "<tt>".&html_escape($object)."</tt>",
+		     "<tt>".&html_escape($p->{'file'})."</tt>");
+	}
 else {
 	return $text{'log_'.$action};
 	}

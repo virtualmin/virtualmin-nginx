@@ -265,7 +265,7 @@ access_eaddr=$1 is not a valid address or address/CIDR
 opt_auth_basic=Basic authentication realm
 access_off=No authentication needed
 access_realm=Realm named
-access_edit=Edit Users..
+access_edit=Manage Users..
 access_pfile=Password file
 opt_auth_basic_user_file=Basic authentication file
 access_eabsolute=Password file must be an absolute path
@@ -319,6 +319,9 @@ log_ssi_location=Changed server-side include settings for location $1 in $2
 log_gzip_location=Changed gzip options for location $1 in $2
 log_proxy_location=Changed proxy settings for location $1 in $2
 log_access_location=Changed access control for location $1 in $2
+log_create_user=Created user $1 in $2
+log_modify_user=Modified user $1 in $2
+log_delete_user=Deleted user $1 in $2
 
 stop_err=Failed to stop Nginx
 
@@ -333,3 +336,20 @@ match_case=Case sensitive regular expression
 match_nocase=Case insensitive regular expression
 match_noregexp=Disable regular expressions
 match_named=Named location
+
+users_title=Manage Users
+users_none=This password file does not contain any users yet.
+users_add=Add a new user.
+users_efile=Missing file parameter!
+users_return=user list
+
+user_create=Create User
+user_edit=Edit User
+user_header=Password protected directory user details
+user_user=Username
+user_pass=Password
+user_passleave=Don't change
+user_passset=Set to
+user_enabled=Login enabled?
+user_egone=User no longer exists!
+user_err=Failed to save user
