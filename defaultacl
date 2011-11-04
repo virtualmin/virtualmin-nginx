@@ -1,0 +1,4 @@
+vhosts=
+root=/
+global=1
+user=root

@@ -353,3 +353,7 @@ user_passset=Set to
 user_enabled=Login enabled?
 user_egone=User no longer exists!
 user_err=Failed to save user
+
+acl_vhosts=Allowed virtual hosts
+acl_hosts1=All
+acl_hosts0=Listed below ..
