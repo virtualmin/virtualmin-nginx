@@ -4,10 +4,11 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text);
+our (%text, %access);
 my $parent = &get_config_parent();
 my $events = &find("events", $parent);
 my $http = &find("http", $parent);
+$access{'global'} || &error($text{'index_eglobal'});
 
 &ui_print_header(undef, $text{'misc_title'}, "");
 

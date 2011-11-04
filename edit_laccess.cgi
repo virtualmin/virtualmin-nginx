@@ -4,10 +4,11 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %in);
+our (%text, %in, %access);
 &ReadParse();
 my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
+&can_edit_server($server) || &error($text{'server_ecannot'});
 my $location = &find_location($server, $in{'path'});
 $location || &error($text{'location_egone'});
 

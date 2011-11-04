@@ -4,12 +4,13 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text);
+our (%text, %access);
 &lock_all_config_files();
 my $conf = &get_config();
 my $http = &find("http", $conf);
 &error_setup($text{'net_err'});
 &ReadParse();
+$access{'global'} || &error($text{'index_eglobal'});
 
 &nginx_onoff_parse("sendfile", $http);
 

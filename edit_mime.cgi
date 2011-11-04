@@ -4,11 +4,12 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %in);
+our (%text, %in, %access);
 &ReadParse();
 my $conf = &get_config();
 my $http = &find("http", $conf);
 my $types = &find("types", $http);
+$access{'global'} || &error($text{'index_eglobal'});
 
 &ui_print_header(undef, $text{'mime_title'}, "");
 

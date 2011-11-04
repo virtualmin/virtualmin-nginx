@@ -5,7 +5,7 @@ use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
 &foreign_require("htaccess-htpasswd");
-our (%text, %in);
+our (%text, %in, %access);
 &ReadParse();
 &error_setup($text{'user_err'});
 $in{'file'} || &error($text{'users_efile'});

@@ -4,11 +4,12 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text);
+our (%text, %access);
 &lock_all_config_files();
 my $parent = &get_config_parent();
 my $http = &find("http", $parent);
 &error_setup($text{'misc_err'});
+$access{'global'} || &error($text{'index_eglobal'});
 &ReadParse();
 
 &nginx_onoff_parse("ssi", $http);

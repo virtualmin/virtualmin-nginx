@@ -4,9 +4,10 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text);
+our (%text, %access);
 my $conf = &get_config();
 my $http = &find("http", $conf);
+$access{'global'} || &error($text{'index_eglobal'});
 
 &ui_print_header(undef, $text{'net_title'}, "");
 

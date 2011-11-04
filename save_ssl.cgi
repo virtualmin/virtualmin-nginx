@@ -4,12 +4,13 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %in);
+our (%text, %in, %access);
 &lock_all_config_files();
 &error_setup($text{'ssl_err'});
 &ReadParse();
 my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
+&can_edit_server($server) || &error($text{'server_ecannot'});
 
 &nginx_onoff_parse("ssl", $server);
 

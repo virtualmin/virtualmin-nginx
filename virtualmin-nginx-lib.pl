@@ -10,6 +10,7 @@ our %access = &get_module_acl();
 our ($get_config_cache, $get_config_parent_cache, %list_directives_cache,
      @list_modules_cache, @open_config_files);
 our (%config, %text, %in, $module_root_directory);
+our %access = &get_module_acl();
 
 # get_config()
 # Parses the Nginx config file into an array ref
@@ -1232,6 +1233,17 @@ for(my $i=0; $i<@lines; $i++) {
         }
 @lines > 4 || return &text('ssl_ekeylines', scalar(@lines));
 return undef;
+}
+
+# can_edit_server(&server)
+# Returns 1 if some server can be managed
+sub can_edit_server
+{
+my ($server) = @_;
+return 1 if (!$access{'vhosts'});
+my $name = &find_value("server_name", $server);
+return 0 if (!$name);
+return &indexoflc($name, split(/\s+/, $access{'vhosts'})) >= 0;
 }
 
 1;

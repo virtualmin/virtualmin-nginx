@@ -5,7 +5,8 @@ use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
 &ReadParse();
-our (%text, %in);
+our (%text, %in, %access);
+$access{'global'} || &error($text{'index_eglobal'});
 
 &ui_print_header(undef, $text{'manual_title'}, "");
 

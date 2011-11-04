@@ -5,8 +5,9 @@ use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
 &ReadParseMime();
-our (%text, %in);
+our (%text, %in, %access);
 &error_setup($text{'manual_err'});
+$access{'global'} || &error($text{'index_eglobal'});
 
 my @files = &get_all_config_files();
 &indexof($in{'file'}, @files) >= 0 || &error($text{'manual_efile'});

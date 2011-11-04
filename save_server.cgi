@@ -4,8 +4,9 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %in, %config);
+our (%text, %in, %config, %access);
 &ReadParse();
+$access{'edit'} || &error($text{'server_ecannotedit'});
 
 # Get the current server
 &lock_all_config_files();
@@ -15,6 +16,7 @@ my @servers = &find("server", $http);
 my $server;
 my $old_name;
 if ($in{'new'}) {
+	$access{'vhosts'} && &error($text{'server_ecannotcreate'});
 	$server = { 'name' => 'server',
 		    'type' => 1,
 		    'words' => [ ],
@@ -33,6 +35,7 @@ if ($in{'new'}) {
 else {
 	$server = &find_server($in{'id'});
         $server || &error($text{'server_egone'});
+	&can_edit_server($server) || &error($text{'server_ecannot'});
 	$old_name = &find_value("server_name", $server);
         }
 

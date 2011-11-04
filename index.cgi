@@ -5,7 +5,7 @@ use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
 my $ver = &get_nginx_version();
-our (%text, %module_info, %config, $module_name);
+our (%text, %module_info, %config, $module_name, %access);
 
 &ui_print_header($ver ? &text('index_version', $ver) : undef,
 		 $module_info{'desc'}, "", undef, 1, 1);
@@ -22,16 +22,18 @@ if (!&has_command($config{'nginx_cmd'})) {
 		"../config.cgi?$module_name"));
 	}
 
-# Show icons for global config types
-print &ui_subheading($text{'index_global'});
 my $conf = &get_config();
-my @gpages = ( "net", "mime", "logs", "docs", "ssi", "misc", "manual" );
-&icons_table(
-	[ map { "edit_".$_.".cgi" } @gpages ],
-	[ map { $text{$_."_title"} } @gpages ],
-	[ map { "images/".$_.".gif" } @gpages ],
-	);
-print &ui_hr();
+if ($access{'global'}) {
+	# Show icons for global config types
+	print &ui_subheading($text{'index_global'});
+	my @gpages = ( "net", "mime", "logs", "docs", "ssi", "misc", "manual" );
+	&icons_table(
+		[ map { "edit_".$_.".cgi" } @gpages ],
+		[ map { $text{$_."_title"} } @gpages ],
+		[ map { "images/".$_.".gif" } @gpages ],
+		);
+	print &ui_hr();
+	}
 
 # Show list of virtual hosts
 print &ui_subheading($text{'index_virts'});
@@ -40,8 +42,12 @@ if (!$http) {
 	&ui_print_endpage(
 		&text('index_ehttp', "<tt>$config{'nginx_config'}</tt>"));
 	}
-my @servers = &find("server", $http);
-my @links = ( "<a href='edit_server.cgi?new=1'>$text{'index_add'}</a>" );
+my @allservers = &find("server", $http);
+my @servers = grep { &can_edit_server($_) } @allservers;
+my @links;
+if (!$access{'vhosts'}) {
+	push(@links, "<a href='edit_server.cgi?new=1'>$text{'index_add'}</a>");
+	}
 if (@servers) {
 	print &ui_links_row(\@links);
 	my @tds = ( "valign=top", undef, undef, "valign=top" );
@@ -88,6 +94,9 @@ if (@servers) {
 		}
 	print &ui_columns_end();
 	}
+elsif (@allservers) {
+	print "<b>$text{'index_noneaccess'}</b><p>\n";
+	}
 else {
 	print "<b>$text{'index_none'}</b><p>\n";
 	}
@@ -97,12 +106,14 @@ print &ui_links_row(\@links);
 print &ui_hr();
 print &ui_buttons_start();
 if (&is_nginx_running()) {
-	print &ui_buttons_row("stop.cgi", $text{'index_stop'},
-			      $text{'index_stopdesc'});
+	if ($access{'stop'}) {
+		print &ui_buttons_row("stop.cgi", $text{'index_stop'},
+				      $text{'index_stopdesc'});
+		}
 	print &ui_buttons_row("restart.cgi", $text{'index_restart'},
 			      $text{'index_restartdesc'});
 	}
-else {
+elsif ($access{'stop'}) {
 	print &ui_buttons_row("start.cgi", $text{'index_start'},
 			      $text{'index_startdesc'});
 	}

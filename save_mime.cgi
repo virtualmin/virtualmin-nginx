@@ -4,9 +4,10 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %in);
+our (%text, %in, %access);
 &ReadParse();
 &error_setup($text{'mime_err'});
+$access{'global'} || &error($text{'index_eglobal'});
 &lock_all_config_files();
 my $conf = &get_config();
 my $http = &find("http", $conf);

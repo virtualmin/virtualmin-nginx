@@ -4,13 +4,14 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %in, %config);
+our (%text, %in, %config, %access);
 &ReadParse();
 
 # Get the current location
 &lock_all_config_files();
 my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
+&can_edit_server($server) || &error($text{'server_ecannot'});
 my $conf = &get_config();
 my @locations = &find("location", $server);
 my $location;

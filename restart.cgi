@@ -4,7 +4,7 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text);
+our (%text, %access);
 &error_setup($text{'restart_err'});
 
 my $test = &test_config();
