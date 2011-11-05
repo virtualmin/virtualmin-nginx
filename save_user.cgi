@@ -12,6 +12,7 @@ $in{'file'} || &error($text{'users_efile'});
 
 # Get the user being edited
 &lock_file($in{'file'});
+&switch_write_user(1);
 my $users = &htaccess_htpasswd::list_users($in{'file'});
 my $user;
 if (!$in{'new'}) {
@@ -47,6 +48,7 @@ else {
 		&htaccess_htpasswd::modify_user($user);
 		}
 	}
+&switch_write_user(0);
 
 &unlock_file($in{'file'});
 &webmin_log($in{'new'} ? "create" : $in{'delete'} ? "delete" : "modify",

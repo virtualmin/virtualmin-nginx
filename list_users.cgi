@@ -12,7 +12,9 @@ $in{'file'} || &error($text{'users_efile'});
 &ui_print_header("<tt>".&html_escape($in{'file'})."</tt>",
 		 $text{'users_title'}, "");
 
+&switch_write_user(1);
 my $users = &htaccess_htpasswd::list_users($in{'file'});
+&switch_write_user(0);
 my @links = ( "<a href='edit_user.cgi?new=1&file=".&urlize($in{'file'})."'>".
 	      $text{'users_add'}."</a>" );
 if (@$users) {

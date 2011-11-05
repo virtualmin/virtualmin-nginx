@@ -968,6 +968,10 @@ return &nginx_opt_input($name, $parent, 50, $text{'access_pfile'},
 sub nginx_passfile_parse
 {
 my ($name, $parent, $in) = @_;
+$in->{$name."_def"} || &can_directory($in->{$name}) ||
+	&error(&text('access_ecannot',
+		     "<tt>".&html_escape($in->{$name})."</tt>",
+		     "<tt>".&html_escape($access{'root'})."</tt>"));
 &nginx_opt_parse($name, $parent, $in, undef,
 		 sub { return $_[0] !~ /^\// ? $text{'access_eabsolute'} :
 			      -d $_[0] ? $text{'access_edir'} : undef });
@@ -1244,6 +1248,36 @@ return 1 if (!$access{'vhosts'});
 my $name = &find_value("server_name", $server);
 return 0 if (!$name);
 return &indexoflc($name, split(/\s+/, $access{'vhosts'})) >= 0;
+}
+
+# can_directory(dir)
+# Check if some directory is under one of the allowed roots
+sub can_directory
+{
+my ($dir) = @_;
+foreach my $root (split(/\s+/, $access{'root'})) {
+	return 1 if (&is_under_directory($root, $dir));
+	}
+return 0;
+}
+
+# switch_write_user(mode)
+# If mode is 1, switch to another user for writing password files.
+# If 0, switch back to root.
+sub switch_write_user
+{
+my ($mode) = @_;
+return if ($access{'user'} eq 'root');
+if ($mode) {
+	my @uinfo = getpwnam($access{'user'});
+	@uinfo || &error("Write user $access{'user'} does not exist!");
+	$) = $uinfo[3]." ".join(" ", $uinfo[2], &other_groups($uinfo[0]));
+	$> = $uinfo[2];
+	}
+else {
+	$) = 0;
+	$> = 0;
+	}
 }
 
 1;

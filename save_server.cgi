@@ -147,6 +147,10 @@ else {
 		$in{'rootdir'} =~ /^\// || &error($text{'server_erootdir'});
 		-d $in{'rootdir'} || &error(&text('server_erootdir2',
 						  $in{'rootdir'}));
+		&can_directory($in{'rootdir'}) ||
+			&error(&text('location_ecannot',
+			     "<tt>".&html_escape($in{'rootdir'})."</tt>",
+			     "<tt>".&html_escape($access{'root'})."</tt>"));
 		&save_directive($server, [ ],
 			[ { 'name' => 'location',
 			    'words' => [ '/' ],

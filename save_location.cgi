@@ -82,6 +82,10 @@ else {
 
 	# Update root directory
 	&nginx_text_parse("root", $location, undef, '^\/\S+$');
+	&can_directory($in{'root'}) ||
+		&error(&text('location_ecannot',
+			     "<tt>".&html_escape($in{'root'})."</tt>",
+			     "<tt>".&html_escape($access{'root'})."</tt>"));
 	}
 
 &flush_config_file_lines();

@@ -275,6 +275,7 @@ access_pfile=Password file
 opt_auth_basic_user_file=Basic authentication file
 access_eabsolute=Password file must be an absolute path
 access_edir=Password file cannot be a directory
+access_ecannot=The password file $1 is not under your allowed directory $2
 
 location_create=Create Location
 location_edit=Edit Location
@@ -290,6 +291,7 @@ location_eclash=A location with the same path already exists in this virtual hos
 location_rusure=Are you sure you want to delete the location $1? All configuration settings within it will also be removed.
 location_epath=URL path cannot be empty or contain spaces
 location_return=location options
+location_ecannot=The root directory $1 is not under your allowed directory $2
 
 log_net=Changed network configuration
 log_logs=Changed logging settings

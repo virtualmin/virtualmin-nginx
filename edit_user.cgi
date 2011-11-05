@@ -9,7 +9,9 @@ our (%text, %in, %access);
 &ReadParse();
 $in{'file'} || &error($text{'users_efile'});
 
+&switch_write_user(1);
 my $users = &htaccess_htpasswd::list_users($in{'file'});
+&switch_write_user(0);
 my $desc = "<tt>".&html_escape($in{'file'})."</tt>";
 my $user;
 if ($in{'new'}) {
