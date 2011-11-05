@@ -277,6 +277,18 @@ else {
 	}
 }
 
+# feature_validate(&domain)
+# Checks if this feature is properly setup for the virtual server, and returns
+# an error message if any problem is found
+sub feature_validate
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return &text('feat_evalidate',
+	"<tt>".&virtual_server::show_domain_name($d)."</tt>") if (!$server);
+return undef;
+}
+
 # print_apply_nginx()
 # Restart Nginx, and print a message
 sub print_apply_nginx
