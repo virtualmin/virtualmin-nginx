@@ -21,16 +21,7 @@ if ($in{'new'}) {
 		    'type' => 1,
 		    'words' => [ ],
 		    'members' => [ ] };
-	if (-d $config{'add_to'}) {
-		my $filename = $in{'server_name'};
-		$filename =~ s/[^a-zA-Z0-9\.\_\-]//g;
-		if ($filename) {
-			$server->{'file'} = $config{'add_to'}."/".$filename;
-			}
-		}
-	elsif ($config{'add_to'}) {
-		$server->{'file'} = $config{'add_to'};
-		}
+	$server->{'file'} = &get_add_to_file($in{'server_name'});
 	}
 else {
 	$server = &find_server($in{'id'});

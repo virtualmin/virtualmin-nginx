@@ -10,7 +10,6 @@ our %access = &get_module_acl();
 our ($get_config_cache, $get_config_parent_cache, %list_directives_cache,
      @list_modules_cache, @open_config_files);
 our (%config, %text, %in, $module_root_directory);
-our %access = &get_module_acl();
 
 # get_config()
 # Parses the Nginx config file into an array ref
@@ -48,11 +47,9 @@ return $get_config_parent_cache;
 sub read_config_file
 {
 my ($file) = @_;
-while(-l $file) {
-	my $link = readlink($file);
-	$link || &error("Dangling link $file");
-	$file = $link;
-	}
+my $link = &resolve_links($file);
+$link || &error("Dangling link $file");
+$file = $link;
 my @rv = ( );
 my $addto = \@rv;
 my @stack = ( );
@@ -129,6 +126,23 @@ while($value =~ s/^\s+"([^"]+)"// ||
 	push(@words, $1);
 	}
 return @words;
+}
+
+# get_add_to_file(name)
+# Returns the file to add new servers to, if any
+sub get_add_to_file
+{
+my ($name) = @_;
+if (-d $config{'add_to'}) {
+	$name =~ s/[^a-zA-Z0-9\.\_\-]//g;
+	if ($name) {
+		return $config{'add_to'}."/".$name;
+		}
+	}
+elsif ($config{'add_to'}) {
+	return $config{'add_to'};
+	}
+return undef;
 }
 
 # find(name, [&config|&parent])
@@ -1069,6 +1083,28 @@ foreach my $s (@servers) {
 		}
 	next if ($idrootdir ne $rootdir);
 	return $s;
+	}
+return undef;
+}
+
+# find_domain_server(&domain)
+# Returns the object for a server for some domain
+sub find_domain_server
+{
+my ($d) = @_;
+my $conf = &get_config();
+my $http = &find("http", $conf);
+return undef if (!$http);
+my @servers = &find("server", $http);
+foreach my $s (@servers) {
+	my $obj = &find("server_name", $s);
+	foreach my $name (@{$obj->{'words'}}) {
+		if (lc($name) eq lc($d->{'dom'}) ||
+		    lc($name) eq "www.".lc($d->{'dom'}) ||
+		    lc($name) eq "*.".lc($d->{'dom'})) {
+			return $s;
+			}
+		}
 	}
 return undef;
 }
