@@ -77,7 +77,7 @@ else {
 
 	# Validate and update existing directives, starting with hostname
 	# or regexp
-	&nginx_text_parse("server_name", $server, undef, '^\S+$');
+	&nginx_text_parse("server_name", $server, undef, '^\S+$', undef, 1);
 	$name = $in{'server_name'};
 
 	# Addresses to accept connections on

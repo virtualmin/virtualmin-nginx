@@ -510,31 +510,36 @@ else {
 	}
 }
 
-# nginx_text_input(name, &parent, size, suffix)
+# nginx_text_input(name, &parent, size, suffix, [multi-value])
 # Returns HTML for a non-optional text field
 sub nginx_text_input
 {
-my ($name, $parent, $size, $suffix) = @_;
+my ($name, $parent, $size, $suffix, $multi) = @_;
 return undef if (!&supported_directive($name, $parent));
-my $value = &find_value($name, $parent);
+my $obj = &find($name, $parent);
+my $value = $multi ? &join_words(@{$obj->{'words'}}) : $obj->{'value'};
 $suffix ||= "";
 return &ui_table_row($text{'opt_'.$name},
 	&ui_textbox($name, $value, $size).$suffix, $size > 40 ? 3 : 1);
 }
 
-# nginx_text_parse(name, &parent, &in, [regex], [&validator])
+# nginx_text_parse(name, &parent, &in, [regex], [&validator], [multi-value])
 # Updates the config with input from nginx_text_input
 sub nginx_text_parse
 {
-my ($name, $parent, $in, $regexp, $vfunc) = @_;
+my ($name, $parent, $in, $regexp, $vfunc, $multi) = @_;
 return undef if (!&supported_directive($name, $parent));
 $in ||= \%in;
 my $v = $in->{$name};
-$v eq '' && &error(&text('opt_missing', $text{'opt_'.$name}));
-!$regexp || $v =~ /$regexp/ || &error($text{'opt_e'.$name});
-my $err = $vfunc && &$vfunc($v, $name);
-$err && &error($err);
-&save_directive($parent, $name, [ $v ]);
+my @w = $multi ? &split_quoted_string($v) : ( $v );
+foreach my $wv (@w) {
+	$wv eq '' && &error(&text('opt_missing', $text{'opt_'.$name}));
+	!$regexp || $wv =~ /$regexp/ || &error($text{'opt_e'.$name});
+	my $err = $vfunc && &$vfunc($wv, $name);
+	$err && &error($err);
+	}
+&save_directive($parent, $name, [ { 'name' => $name,
+				    'words' => \@w } ]);
 }
 
 # nginx_error_log_input(name, &parent)

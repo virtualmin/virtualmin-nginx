@@ -83,7 +83,7 @@ if ($access{'edit'}) {
 	print &ui_table_start($text{'server_header'}, "width=100%", 2);
 
 	# Server name
-	print &nginx_text_input("server_name", $server, 50);
+	print &nginx_text_input("server_name", $server, 70, undef, 1);
 
 	# IP addresses / ports to listen on
 	my @listen;
