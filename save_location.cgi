@@ -5,6 +5,7 @@ use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
 our (%text, %in, %config, %access);
+&error_setup($text{'location_err'});
 &ReadParse();
 
 # Get the current location

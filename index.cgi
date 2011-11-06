@@ -79,9 +79,9 @@ if (@servers) {
 					"<i>$text{'index_noroot'}</i>";
 				}
 			else {
-				$rootdir = "";
 				$root = "<i>$text{'index_norootloc'}</i>";
 				}
+			$rootdir ||= "";
 			}
 		my $id = $name.";".$rootdir;
 		print &ui_columns_row([

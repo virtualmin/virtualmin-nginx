@@ -1092,6 +1092,24 @@ foreach my $s (@servers) {
 return undef;
 }
 
+# server_id(&server)
+# Given a server, return a unique ID for it as used by the module
+sub server_id
+{
+my ($s) = @_;
+my $name = &find_value("server_name", $s);
+my $rootdir = &find_value("root", $s);
+if (!$rootdir) {
+	my @locs = &find("location", $s);
+	my ($rootloc) = grep { $_->{'value'} eq '/' } @locs;
+	if ($rootloc) {
+		$rootdir = &find_value("root", $rootloc);
+		}
+	$rootdir ||= "";
+	}
+return $name.";".$rootdir;
+}
+
 # find_domain_server(&domain)
 # Returns the object for a server for some domain
 sub find_domain_server
@@ -1318,6 +1336,32 @@ if ($mode) {
 else {
 	$) = 0;
 	$> = 0;
+	}
+}
+
+# recursive_change_directives(&parent, old-value, new-value, [suffix-too])
+# Change all directives who have a value that is the old value to the new one
+sub recursive_change_directives
+{
+my ($parent, $oldv, $newv, $suffix) = @_;
+foreach my $dir (@{$parent->{'members'}}) {
+	my $changed;
+	foreach my $w (@{$dir->{'words'}}) {
+		if ($suffix && $w =~ /\Q$oldv\E$/) {
+			$w =~ s/\Q$oldv\E$/$newv/g;
+			$changed++;
+			}
+		elsif ($w eq $oldv) {
+			$w = $newv;
+			$changed++;
+			}
+		}
+	if ($changed) {
+		&save_directive($parent, [ $dir ], [ $dir ]);
+		}
+	if ($dir->{'type'}) {
+		&recursive_change_directives($dir, $oldv, $newv, $suffix);
+		}
 	}
 }
 

@@ -13,6 +13,10 @@ $server || &error($text{'server_egone'});
 &can_edit_server($server) || &error($text{'server_ecannot'});
 
 &nginx_opt_parse("root", $server, undef, '^\/.*$');
+$in{'root_def'} || &can_directory($in{'root'}) ||
+	&error(&text('location_ecannot',
+		     "<tt>".&html_escape($in{'root'})."</tt>",
+		     "<tt>".&html_escape($access{'root'})."</tt>"));
 
 &nginx_opt_parse("index", $server, undef);
 

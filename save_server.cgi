@@ -6,6 +6,7 @@ use warnings;
 require 'virtualmin-nginx-lib.pl';
 our (%text, %in, %config, %access);
 &ReadParse();
+&error_setup($text{'server_err'});
 $access{'edit'} || &error($text{'server_ecannotedit'});
 
 # Get the current server

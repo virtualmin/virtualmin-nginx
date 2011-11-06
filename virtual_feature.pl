@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %config);
+our (%text, %config, $module_name);
 
 # feature_name()
 # Returns a short name for this feature
@@ -207,6 +207,100 @@ else {
 	}
 }
 
+# feature_modify(&domain, &old-domain)
+# Change the Nginx domain name or home directory
+sub feature_modify
+{
+my ($d, $oldd) = @_;
+
+if (!$d->{'alias'}) {
+	# Changing a real virtual host
+	&lock_all_config_files();
+	my $changed = 0;
+
+	# Update domain name in server_name
+	if ($d->{'dom'} ne $oldd->{'dom'}) {
+		&$virtual_server::first_print($text{'feat_modifydom'});
+		my $server = &find_domain_server($oldd);
+		if (!$server) {
+			&$virtual_server::second_print(
+				&text('feat_efind', $oldd->{'dom'}));
+			return 0;
+			}
+		my $obj = &find("server_name", $server);
+		foreach my $n (&domain_server_names($oldd)) {
+			@{$obj->{'words'}} = grep { $_ ne $n }
+						  @{$obj->{'words'}};
+			}
+		foreach my $n (&domain_server_names($d)) {
+			if (&indexoflc($n, @{$obj->{'words'}}) < 0) {
+				push(@{$obj->{'words'}}, $n);
+				}
+			}
+		&save_directive($server, "server_name", [ $obj ]);
+		&$virtual_server::second_print(
+			$virtual_server::text{'setup_done'});
+		$changed++;
+		}
+
+	# Update home directory in all directives
+	if ($d->{'home'} ne $oldd->{'home'}) {
+		&$virtual_server::first_print($text{'feat_modifydom'});
+		my $server = &find_domain_server($d);
+		if (!$server) {
+			&$virtual_server::second_print(
+				&text('feat_efind', $d->{'dom'}));
+			return 0;
+			}
+		&recursive_change_directives(
+			$server, $oldd->{'home'}, $d->{'home'});
+		&$virtual_server::second_print(
+			$virtual_server::text{'setup_done'});
+		$changed++;
+		}
+
+	# Update IP address
+	if ($d->{'ip'} ne $oldd->{'ip'}) {
+		&$virtual_server::first_print($text{'feat_modifydom'});
+		my $server = &find_domain_server($d);
+		if (!$server) {
+			&$virtual_server::second_print(
+				&text('feat_efind', $d->{'dom'}));
+			return 0;
+			}
+		my @listen = &find("listen", $server);
+		foreach my $l (@$listen) {
+			if ($l->{'words'}->[0] eq $oldd->{'ip'}) {
+				$l->{'words'}->[0] = $d->{'ip'};
+				}
+			elsif ($l->{'words'}->[0] =~ /^(\S+):(\d+)$/ &&
+			       $1 eq $oldd->{'ip'}) {
+				$l->{'words'}->[0] = $d->{'ip'}.":".$2;
+				}
+			}
+		&save_directive($server, "listen", \@listen);
+		&$virtual_server::second_print(
+			$virtual_server::text{'setup_done'});
+		$changed++;
+		}
+
+	# Flush files and restart
+	&flush_config_file_lines();
+	&unlock_all_config_files();
+	if ($changed) {
+		&virtual_server::register_post_action(\&print_apply_nginx);
+		}
+	# XXX
+
+	# Update fcgid user
+	# XXX
+	}
+else {
+	# Changing inside an alias
+	# XXX
+	}
+}
+
 # feature_delete(&domain)
 # Remove the Nginx virtual host for a domain
 sub feature_delete
@@ -289,6 +383,42 @@ return &text('feat_evalidate',
 return undef;
 }
 
+# feature_webmin(&main-domain, &all-domains)
+# Returns a list of webmin module names and ACL hash references to be set for
+# the Webmin user when this feature is enabled
+# (optional)
+sub feature_webmin
+{
+my ($d, $alld) = @_;
+my @doms = map { $_->{'dom'} } grep { $_->{$module_name} } @$alld;
+if (@doms) {
+	return ( [ $module_name,
+		   { 'vhosts' => join(' ', @doms),
+		     'root' => $d->{'home'},
+		     'global' => 0,
+		     'user' => $d->{'user'},
+		     'edit' => 0,
+		     'stop' => 0,
+		   } ] );
+	}
+else {
+	return ( );
+	}
+}
+
+# feature_links(&domain)
+# Returns an array of link objects for webmin modules for this feature
+sub feature_links
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return ( ) if (!$server);
+return ( { 'mod' => $module_name,
+	   'desc' => $text{'feat_edit'},
+	   'page' => 'edit_server.cgi?id='.&server_id($server),
+	   'cat' => 'services' } );
+}
+
 # print_apply_nginx()
 # Restart Nginx, and print a message
 sub print_apply_nginx
@@ -316,6 +446,12 @@ if (&is_nginx_running()) {
 else {
 	&$virtual_server::second_print($text{'feat_notrunning'});
 	}
+}
+
+# feature_provides_web()
+sub feature_provides_web
+{
+return 1;	# Nginx is a webserver
 }
 
 # domain_server_names(&domain)

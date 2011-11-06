@@ -391,3 +391,4 @@ feat_delete=Removing Nginx virtual host ..
 feat_deletelogs=Deleting Nginx webserver log files ..
 feat_efind=.. no virtual host named $1 exists
 feat_evalidate=No Nginx virtual host for $1 was found
+feat_edit=Configure Nginx Website
