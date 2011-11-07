@@ -42,6 +42,14 @@ if (!$get_config_parent_cache) {
 return $get_config_parent_cache;
 }
 
+# flush_config_cache()
+# Delete all in-memory config caches
+sub flush_config_cache
+{
+undef($get_config_parent_cache);
+undef($get_config_cache);
+}
+
 # read_config_file(file)
 # Returns an array ref of nginx config objects
 sub read_config_file
@@ -1339,16 +1347,21 @@ else {
 	}
 }
 
-# recursive_change_directives(&parent, old-value, new-value, [suffix-too])
+# recursive_change_directives(&parent, old-value, new-value, [suffix-too],
+# 			      [prefix-too])
 # Change all directives who have a value that is the old value to the new one
 sub recursive_change_directives
 {
-my ($parent, $oldv, $newv, $suffix) = @_;
+my ($parent, $oldv, $newv, $suffix, $prefix) = @_;
 foreach my $dir (@{$parent->{'members'}}) {
-	my $changed;
+	my $changed = 0;
 	foreach my $w (@{$dir->{'words'}}) {
 		if ($suffix && $w =~ /\Q$oldv\E$/) {
 			$w =~ s/\Q$oldv\E$/$newv/g;
+			$changed++;
+			}
+		elsif ($prefix && $w =~ /^\Q$oldv\E/) {
+			$w =~ s/^\Q$oldv\E/$newv/g;
 			$changed++;
 			}
 		elsif ($w eq $oldv) {
@@ -1360,7 +1373,8 @@ foreach my $dir (@{$parent->{'members'}}) {
 		&save_directive($parent, [ $dir ], [ $dir ]);
 		}
 	if ($dir->{'type'}) {
-		&recursive_change_directives($dir, $oldv, $newv, $suffix);
+		&recursive_change_directives($dir, $oldv, $newv,
+					     $suffix, $prefix);
 		}
 	}
 }

@@ -161,6 +161,7 @@ if (!$d->{'alias'}) {
 	&unlock_all_config_files();
 	&create_server_link($server);
 	&virtual_server::setup_apache_logs($d, $alog, $elog);
+	&virtual_server::link_apache_logs($d, $alog, $elog);
 	&virtual_server::register_post_action(\&print_apply_nginx);
 
 	# Set up fcgid server
@@ -245,7 +246,7 @@ if (!$d->{'alias'}) {
 
 	# Update home directory in all directives
 	if ($d->{'home'} ne $oldd->{'home'}) {
-		&$virtual_server::first_print($text{'feat_modifydom'});
+		&$virtual_server::first_print($text{'feat_modifyhome'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
 			&$virtual_server::second_print(
@@ -253,7 +254,7 @@ if (!$d->{'alias'}) {
 			return 0;
 			}
 		&recursive_change_directives(
-			$server, $oldd->{'home'}, $d->{'home'});
+			$server, $oldd->{'home'}, $d->{'home'}, 0, 1);
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
@@ -261,7 +262,7 @@ if (!$d->{'alias'}) {
 
 	# Update IP address
 	if ($d->{'ip'} ne $oldd->{'ip'}) {
-		&$virtual_server::first_print($text{'feat_modifydom'});
+		&$virtual_server::first_print($text{'feat_modifyip'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
 			&$virtual_server::second_print(
@@ -269,7 +270,7 @@ if (!$d->{'alias'}) {
 			return 0;
 			}
 		my @listen = &find("listen", $server);
-		foreach my $l (@$listen) {
+		foreach my $l (@listen) {
 			if ($l->{'words'}->[0] eq $oldd->{'ip'}) {
 				$l->{'words'}->[0] = $d->{'ip'};
 				}
@@ -284,13 +285,53 @@ if (!$d->{'alias'}) {
 		$changed++;
 		}
 
+	# Rename log files if needed
+	my $old_alog = &get_nginx_log($d, 0);
+	my $old_elog = &get_nginx_log($d, 1);
+	my $new_alog = &virtual_server::get_apache_template_log($d, 0);
+	my $new_elog = &virtual_server::get_apache_template_log($d, 1);
+	if ($old_alog ne $new_alog) {
+		&$virtual_server::first_print($text{'feat_modifylog'});
+		my $server = &find_domain_server($d);
+		if (!$server) {
+			&$virtual_server::second_print(
+				&text('feat_efind', $oldd->{'dom'}));
+			return 0;
+			}
+		&save_directive($server, "access_log", [ $new_alog ]);
+		&rename_logged($old_alog, $new_alog);
+		if ($old_elog ne $new_elog) {
+			&save_directive($server, "error_log", [ $new_elog ]);
+			&rename_logged($old_elog, $new_elog);
+			}
+		&virtual_server::link_apache_logs($d, $new_alog, $new_elog);
+		&$virtual_server::second_print(
+			$virtual_server::text{'setup_done'});
+		}
+
 	# Flush files and restart
 	&flush_config_file_lines();
 	&unlock_all_config_files();
 	if ($changed) {
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
-	# XXX
+
+	# Rename config file name, if changed
+	if ($d->{'dom'} ne $oldd->{'dom'}) {
+		my $newfile = &get_add_to_file($d->{'dom'});
+		my $server = &find_domain_server($d);
+		if ($server->{'file'} ne $newfile &&
+		    $server->{'file'} =~ /\Q$oldd->{'dom'}\E/) {
+			&$virtual_server::first_print($text{'feat_modifyfile'});
+			&delete_server_link($server);
+			&rename_logged($server->{'file'}, $newfile);
+			$server->{'file'} = $newfile;
+			&create_server_link($server);
+			&flush_config_cache();
+			&$virtual_server::second_print(
+				$virtual_server::text{'setup_done'});
+			}
+		}
 
 	# Update fcgid user
 	# XXX
@@ -377,9 +418,19 @@ else {
 sub feature_validate
 {
 my ($d) = @_;
+
+# Does server exist?
 my $server = &find_domain_server($d);
 return &text('feat_evalidate',
 	"<tt>".&virtual_server::show_domain_name($d)."</tt>") if (!$server);
+
+# Check root directory
+my $rootdir = &find_value("root", $server);
+my $phd = &virtual_server::public_html_dir($d);
+return &text('feat_evalidateroot',
+	      "<tt>".&html_escape($rootdir)."</tt>",
+	      "<tt>".&html_escape($phd)."</tt>") if ($rootdir ne $phd);
+
 return undef;
 }
 
