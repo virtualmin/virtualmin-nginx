@@ -338,7 +338,39 @@ if (!$d->{'alias'}) {
 	}
 else {
 	# Changing inside an alias
-	# XXX
+	&lock_all_config_files();
+	my $changed = 0;
+
+	# Change domain name in alias target
+	if ($d->{'dom'} ne $oldd->{'dom'}) {
+		&$virtual_server::first_print($text{'feat_modifyalias'});
+		my $target = &virtual_server::get_domain($d->{'alias'});
+		my $server = &find_domain_server($target);
+		if (!$server) {
+			&unlock_all_config_files();
+			&$virtual_server::second_print(
+				&text('feat_efind', $target->{'dom'}));
+			return 0;
+			}
+		my $obj = &find("server_name", $server);
+		foreach my $n (&domain_server_names($oldd)) {
+			@{$obj->{'words'}} = grep { $_ ne $n }
+						  @{$obj->{'words'}};
+			}
+		foreach my $n (&domain_server_names($d)) {
+			push(@{$obj->{'words'}}, $n);
+			}
+		&save_directive($server, "server_name", [ $obj ]);
+		$changed++;
+		}
+
+	# Flush files and restart
+	&flush_config_file_lines();
+	&unlock_all_config_files();
+	if ($changed) {
+		&virtual_server::register_post_action(\&print_apply_nginx);
+		}
+
 	}
 }
 

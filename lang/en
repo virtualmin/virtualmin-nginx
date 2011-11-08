@@ -401,3 +401,4 @@ feat_modifyhome=Changing home directory in Nginx configuration ..
 feat_modifyip=Changing IP address in Nginx configuration ..
 feat_modifyfile=Renaming Nginx configuration file ..
 feat_modifylog=Renaming Nginx log files ..
+feat_modifyalias=Updating target Nginx virtual host ..
