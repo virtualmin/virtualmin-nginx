@@ -425,11 +425,25 @@ return &text('feat_evalidate',
 	"<tt>".&virtual_server::show_domain_name($d)."</tt>") if (!$server);
 
 # Check root directory
-my $rootdir = &find_value("root", $server);
-my $phd = &virtual_server::public_html_dir($d);
-return &text('feat_evalidateroot',
-	      "<tt>".&html_escape($rootdir)."</tt>",
-	      "<tt>".&html_escape($phd)."</tt>") if ($rootdir ne $phd);
+if (!$d->{'alias'}) {
+	my $rootdir = &find_value("root", $server);
+	my $phd = &virtual_server::public_html_dir($d);
+	return &text('feat_evalidateroot',
+		      "<tt>".&html_escape($rootdir)."</tt>",
+		      "<tt>".&html_escape($phd)."</tt>") if ($rootdir ne $phd);
+	}
+
+# Is alias target what we expect?
+if ($d->{'alias'}) {
+	my $target = &virtual_server::get_domain($d->{'alias'});
+	my $targetserver = &find_domain_server($target);
+	return &text('feat_evalidatetarget',
+		     "<tt>".&virtual_server::show_domain_name($target)."</tt>")
+		if (!$targetserver);
+	return &text('feat_evalidatediff',
+		     "<tt>".&virtual_server::show_domain_name($target)."</tt>")
+		if ($targetserver ne $server);
+	}
 
 return undef;
 }
