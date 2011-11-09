@@ -122,9 +122,11 @@ if (!$d->{'alias'}) {
 		  'words' => [ &domain_server_names($d) ] });
 
 	# Add listen on the correct IP
+	my @ips = ( $d->{'ip'} );
+	push(@ips, $d->{'ip6'}) if ($d->{'virt6'});
 	push(@{$server->{'members'}},
 		{ 'name' => 'listen',
-		  'words' => [ $d->{'ip'} ] });
+		  'words' => \@ips });
 
 	# Set the root correctly
 	push(@{$server->{'members'}},
@@ -260,7 +262,7 @@ if (!$d->{'alias'}) {
 		$changed++;
 		}
 
-	# Update IP address
+	# Update IPv4 address
 	if ($d->{'ip'} ne $oldd->{'ip'}) {
 		&$virtual_server::first_print($text{'feat_modifyip'});
 		my $server = &find_domain_server($d);
@@ -280,6 +282,52 @@ if (!$d->{'alias'}) {
 				}
 			}
 		&save_directive($server, "listen", \@listen);
+		&$virtual_server::second_print(
+			$virtual_server::text{'setup_done'});
+		$changed++;
+		}
+
+	# Update IPv6 address (or add or remove)
+	if ($d->{'ip6'} ne $oldd->{'ip6'} ||
+	    $d->{'virt6'} != $oldd->{'virt6'}) {
+		&$virtual_server::first_print($text{'feat_modifyip6'});
+		my $server = &find_domain_server($d);
+		if (!$server) {
+			&$virtual_server::second_print(
+				&text('feat_efind', $d->{'dom'}));
+			return 0;
+			}
+		my @listen = &find("listen", $server);
+		my @newlisten;
+		my $ob = $oldd->{'virt6'} ? "[".$oldd->{'ip6'}."]" : "";
+		my $nb = $d->{'virt6'} ? "[".$d->{'ip6'}."]" : "";
+		foreach my $l (@listen) {
+			my @w = @{$l->{'words'}};
+			if ($ob && $w[0] eq $ob) {
+				# Found old address with no port - replace
+				# or remove
+				if ($nb) {
+					$w[0] = $nb;
+					push(@newlisten, { 'words' => \@w });
+					}
+				}
+			elsif ($ob && $w[0] =~ /^\Q$ob\E:(\d+)$/) {
+				# Found old address with a port - replace with
+				# same port or remove
+				if ($nb) {
+					$w[0] = $nb.":".$1;
+					push(@newlisten, { 'words' => \@w });
+					}
+				}
+			else {
+				# Found un-related address, save it
+				push(@newlisten, { 'words' => \@w });
+				}
+			}
+		if ($d->{'virt6'} && !$oldd->{'virt6'}) {
+			push(@newlisten, { 'words' => [ $nb ] });
+			}
+		&save_directive($server, "listen", \@newlisten);
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
@@ -477,6 +525,25 @@ if ($d->{'alias'}) {
 	return &text('feat_evalidatediff',
 		     "<tt>".&virtual_server::show_domain_name($target)."</tt>")
 		if ($targetserver ne $server);
+	}
+
+# Check for IPs
+if (!$d->{'alias'}) {
+	my @listen = &find_value("listen", $server);
+	my $found = 0;
+	foreach my $l (@listen) {
+		$found++ if ($l eq $d->{'ip'} ||
+			     $l =~ /^\Q$d->{'ip'}\E:/);
+		}
+	$found || return &text('feat_evalidateip', $d->{'ip'});
+	if ($d->{'virt6'}) {
+		my $found6 = 0;
+		foreach my $l (@listen) {
+			$found6++ if ($l eq "[".$d->{'ip6'}."]" ||
+				      $l =~ /^\[\Q$d->{'ip'}\E\]:/);
+			}
+		$found6 || return &text('feat_evalidateip6', $d->{'ip6'});
+		}
 	}
 
 return undef;

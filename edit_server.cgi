@@ -69,13 +69,12 @@ if ($in{'id'}) {
 		print "<b>$text{'server_noneloc'}</b><p>\n";
 		}
 	print &ui_links_row(\@links);
-
-	print &ui_hr();
 	}
 
 if ($access{'edit'}) {
 	# Show form to edit name, IPs and root
 	if (!$in{'new'}) {
+		print &ui_hr();
 		print &ui_subheading($text{'server_server'});
 		}
 	print &ui_form_start("save_server.cgi", "post");
