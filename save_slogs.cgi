@@ -11,6 +11,7 @@ our (%text, %in, %access);
 my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
 &can_edit_server($server) || &error($text{'server_ecannot'});
+$access{'logs'} || &error($text{'logs_ecannot'});
 
 &nginx_error_log_parse("error_log", $server);
 

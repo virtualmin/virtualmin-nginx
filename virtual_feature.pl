@@ -362,6 +362,8 @@ else {
 			}
 		&save_directive($server, "server_name", [ $obj ]);
 		$changed++;
+		&$virtual_server::second_print(
+			$virtual_server::text{'setup_done'});
 		}
 
 	# Flush files and restart
@@ -493,6 +495,7 @@ if (@doms) {
 		   { 'vhosts' => join(' ', @doms),
 		     'root' => $d->{'home'},
 		     'global' => 0,
+		     'logs' => 0,
 		     'user' => $d->{'user'},
 		     'edit' => 0,
 		     'stop' => 0,

@@ -4,3 +4,4 @@ global=1
 user=root
 edit=1
 stop=1
+logs=1

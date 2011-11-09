@@ -77,6 +77,7 @@ logs_fname=Format name
 logs_ftext=Format string
 logs_efname=Log format name $1 can only contain letters, numbers, dot, dash and underscore
 logs_etext=Missing format string for log format $1
+logs_ecannot=You are not allowed to configure log files
 
 misc_title=Other Settings
 misc_header=Users and process options
@@ -369,6 +370,7 @@ acl_hosts0=Listed below ..
 acl_edit=Can change virtual host names and IPs?
 acl_root=Allowed directories for locations
 acl_global=Can edit global settings?
+acl_logs=Can configure log files?
 acl_user=Write password files as user
 
 feat_name=Nginx website

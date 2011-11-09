@@ -9,8 +9,9 @@ our (%text, %in, %access);
 my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
 &can_edit_server($server) || &error($text{'server_ecannot'});
+$access{'logs'} || &error($text{'logs_ecannot'});
 
-&ui_print_header(undef, $text{'slogs_title'}, "");
+&ui_print_header(&server_desc($server), $text{'slogs_title'}, "");
 
 print &ui_form_start("save_slogs.cgi", "post");
 print &ui_hidden("id", $in{'id'});

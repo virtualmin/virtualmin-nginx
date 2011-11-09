@@ -32,6 +32,10 @@ print &ui_table_row($text{'acl_root'},
 print &ui_table_row($text{'acl_global'},
 	&ui_yesno_radio("global", $o->{'global'}));
 
+# Can edit log files?
+print &ui_table_row($text{'acl_logs'},
+	&ui_yesno_radio("logs", $o->{'logs'}));
+
 # Write password files as user
 print &ui_table_row($text{'acl_user'},
 	&ui_user_textbox("user", $o->{'user'}));
@@ -48,6 +52,7 @@ $o->{'vhosts'} = $in{'vhosts_def'} ? ""
 $o->{'edit'} = $in{'edit'};
 $o->{'root'} = $in{'root'};
 $o->{'global'} = $in{'global'};
+$o->{'logs'} = $in{'logs'};
 $o->{'user'} = $in{'user'};
 $o->{'stop'} = $in{'stop'};
 }
