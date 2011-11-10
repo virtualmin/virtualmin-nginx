@@ -389,6 +389,8 @@ feat_econfig=.. configuration is invalid : $1
 feat_eapply=.. restart failed : $1
 feat_notrunning=.. Nginx webserver is not running
 feat_setupalias=Updating target Nginx virtual host ..
+feat_phpfcgid=Starting PHP FastCGI server ..
+feat_failed=.. failed : $1
 feat_delete=Removing Nginx virtual host ..
 feat_deletelogs=Deleting Nginx webserver log files ..
 feat_deletealias=Updating target Nginx virtual host ..
@@ -407,3 +409,5 @@ feat_modifyip6=Changing IPv6 address in Nginx configuration ..
 feat_modifyfile=Renaming Nginx configuration file ..
 feat_modifylog=Renaming Nginx log files ..
 feat_modifyalias=Updating target Nginx virtual host ..
+
+fcgid_ecmd=No PHP command found!

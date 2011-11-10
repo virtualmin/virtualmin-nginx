@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use Socket;
 
 BEGIN { push(@INC, ".."); };
 eval "use WebminCore;";
@@ -217,14 +218,15 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 			$n->{'line'} = 0;
 			$n->{'eline'} = scalar(@lines) - 1;
 			$n->{'indent'} = 0 if ($n->{'type'});
+			&recursive_set_file($n, $n->{'line'});
 			}
 		else {
 			# Insert into parent
 			@lines = &make_directive_lines(
 					$n, $parent->{'indent'} + 1);
-			$n->{'file'} = $file;
 			$n->{'line'} = $parent->{'eline'};
 			$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
+			&recursive_set_file($n, $file);
 			&renumber($file, $parent->{'eline'}-1, scalar(@lines));
 			$n->{'indent'} = $parent->{'indent'} + 1
 				if ($n->{'type'});
@@ -259,6 +261,24 @@ if ($object->{'type'}) {
 	foreach my $m (@{$object->{'members'}}) {
 		&renumber($file, $line, $offset, $m);
 		}
+	}
+}
+
+# recursive_set_file(&parent, filename, start-line)
+# Sets the file on some object and all children
+sub recursive_set_file
+{
+my ($parent, $file, $line) = @_;
+$parent->{'file'} ||= $file;
+$parent->{'line'} ||= $line;
+$parent->{'eline'} ||= $parent->{'line'};
+if ($parent->{'type'}) {
+	my $n = 0;
+	foreach my $dir (@{$parent->{'members'}}) {
+		&recursive_set_file($dir, $file, $parent->{'line'} + $n);
+		$n += ($dir->{'eline'} - $dir->{'line'} + 1);
+		}
+	$parent->{'eline'} = $parent->{'line'} + $n + 1;
 	}
 }
 
@@ -1377,6 +1397,103 @@ foreach my $dir (@{$parent->{'members'}}) {
 					     $suffix, $prefix);
 		}
 	}
+}
+
+# setup_php_fcgi_server(&domain)
+# Starts up a PHP process running as the domain user, and enables it at boot.
+# Returns an OK flag and the port number selected to listen on.
+sub setup_php_fcgi_server
+{
+my ($d) = @_;
+
+# Get the PHP command
+my @vers = sort { $a->[1] <=> $b->[1] }
+		&virtual_server::list_available_php_versions(undef, "fcgid");
+@vers || return (0, $text{'fcgid_ecmd'});
+my $cmd = $vers[0]->[1];
+$cmd || return (0, $text{'fcgid_ecmd'});
+
+# Find a free port
+my $port = 9000;
+my $s;
+socket($s, PF_INET, SOCK_STREAM, getprotobyname('tcp')) ||
+	return (0, "Socket failed : $!");
+setsockopt($s, SOL_SOCKET, SO_REUSEADDR, pack("l", 1));
+while(1) {
+	last if (bind($s, sockaddr_in($port, INADDR_ANY)));
+	$port++;
+	}
+close($s);
+
+my $log = "$d->{'home'}/logs/php.log";
+my $pidfile = "$d->{'home'}/logs/php.pid";
+$cmd .= " -b localhost:$port";
+
+# Launch it, and save the PID
+my $pid = fork();
+if (!$pid) {
+	untie(*STDIN); untie(*STDOUT); untie(*STDERR);
+	close(STDIN); close(STDOUT); close(STDERR);
+	open(STDOUT, ">$log");
+	open(STDERR, ">&STDOUT");
+	my @u = getpwnam($d->{'user'});
+	&switch_to_unix_user(\@u);
+	exec($cmd);
+	exit(1);
+	}
+my $fh = "PIDFILE";
+&virtual_server::open_tempfile_as_domain_user($d, $fh, ">$pidfile");
+&print_tempfile($fh, $pid."\n");
+&virtual_server::close_tempfile_as_domain_user($d, $fh);
+
+# Create init script
+# XXX
+# XXX use $log and save $pid
+
+return (1, $port);
+}
+
+# delete_php_fcgi_server(&domain)
+# Shut down the fcgid server process, and delete it from starting at boot
+sub delete_php_fcgi_server
+{
+my ($d) = @_;
+
+# Stop the server
+my $pidfile = "$d->{'home'}/logs/php.pid";
+my $pid = &check_pid_file($pidfile);
+if ($pid) {
+	&virtual_server::run_as_domain_user($d, "kill -9 ".quotemeta($pid));
+	}
+&virtual_server::unlink_file_as_domain_user($d, $pidfile);
+
+# Delete init script
+# XXX
+}
+
+# list_fastcgi_params()
+# Returns a list of param names and values needed for fastCGI
+sub list_fastcgi_params
+{
+return (
+	[ 'GATEWAY_INTERFACE', 'CGI/1.1' ],
+	[ 'SERVER_SOFTWARE',   'nginx' ],
+	[ 'QUERY_STRING',      '$query_string' ],
+	[ 'REQUEST_METHOD',    '$request_method' ],
+	[ 'CONTENT_TYPE',      '$content_type' ],
+	[ 'CONTENT_LENGTH',    '$content_length' ],
+	[ 'SCRIPT_FILENAME',   '$document_root$fastcgi_script_name' ],
+	[ 'SCRIPT_NAME',       '$fastcgi_script_name' ],
+	[ 'REQUEST_URI',       '$request_uri' ],
+	[ 'DOCUMENT_URI',      '$document_uri' ],
+	[ 'DOCUMENT_ROOT',     '$document_root' ],
+	[ 'SERVER_PROTOCOL',   '$server_protocol' ],
+	[ 'REMOTE_ADDR',       '$remote_addr' ],
+	[ 'REMOTE_PORT',       '$remote_port' ],
+	[ 'SERVER_ADDR',       '$server_addr' ],
+	[ 'SERVER_PORT',       '$server_port' ],
+	[ 'SERVER_NAME',       '$server_name' ],
+       );
 }
 
 1;

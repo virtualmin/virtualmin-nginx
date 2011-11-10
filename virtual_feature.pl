@@ -122,11 +122,14 @@ if (!$d->{'alias'}) {
 		  'words' => [ &domain_server_names($d) ] });
 
 	# Add listen on the correct IP
-	my @ips = ( $d->{'ip'} );
-	push(@ips, $d->{'ip6'}) if ($d->{'virt6'});
 	push(@{$server->{'members'}},
 		{ 'name' => 'listen',
-		  'words' => \@ips });
+		  'words' => [ $d->{'ip'} ] });
+	if ($d->{'virt6'}) {
+		push(@{$server->{'members'}},
+			{ 'name' => 'listen',
+			  'words' => [ "[".$d->{'ip6'}."]" ] });
+		}
 
 	# Set the root correctly
 	push(@{$server->{'members'}},
@@ -165,11 +168,36 @@ if (!$d->{'alias'}) {
 	&virtual_server::setup_apache_logs($d, $alog, $elog);
 	&virtual_server::link_apache_logs($d, $alog, $elog);
 	&virtual_server::register_post_action(\&print_apply_nginx);
+	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
 	# Set up fcgid server
-	# XXX
+	&$virtual_server::first_print($text{'feat_phpfcgid'});
+	my ($ok, $port) = &setup_php_fcgi_server($d);
+	if ($ok) {
+		# Configure domain to use it for .php files
+		&lock_all_config_files();
+		&save_directive($server, "fastcgi_param",
+			[ map { { 'words' => $_ } } &list_fastcgi_params() ]);
+		my $ploc = { 'name' => 'location',
+			     'words' => [ '~', '\.php$' ],
+			     'type' => 1,
+			     'members' => [
+				{ 'name' => 'fastcgi_pass',
+				  'words' => [ 'localhost:'.$port ],
+				},
+			     ],
+			   };
+		&save_directive($server, [ ], [ $ploc ]);
+		&flush_config_file_lines();
+		&unlock_all_config_files();
 
-	&$virtual_server::second_print($virtual_server::text{'setup_done'});
+		&$virtual_server::second_print(
+			$virtual_server::text{'setup_done'});
+		}
+	else {
+		&$virtual_server::second_print(&text('feat_failed', $port));
+		}
+
 
 	# Add the user nginx runs as to the domain's group
 	my $web_user = &get_nginx_user();
@@ -450,6 +478,7 @@ if (!$d->{'alias'}) {
 	&unlock_all_config_files();
 	&delete_server_link($server);
 	&delete_server_file_if_empty($server);
+	&delete_php_fcgi_server($d);
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
