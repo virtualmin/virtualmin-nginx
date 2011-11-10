@@ -218,7 +218,7 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 			$n->{'line'} = 0;
 			$n->{'eline'} = scalar(@lines) - 1;
 			$n->{'indent'} = 0 if ($n->{'type'});
-			&recursive_set_file($n, $n->{'line'});
+			&recursive_set_file($n, $n->{'file'}, $n->{'line'});
 			}
 		else {
 			# Insert into parent
@@ -226,7 +226,7 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 					$n, $parent->{'indent'} + 1);
 			$n->{'line'} = $parent->{'eline'};
 			$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
-			&recursive_set_file($n, $file);
+			&recursive_set_file($n, $file, $n->{'line'});
 			&renumber($file, $parent->{'eline'}-1, scalar(@lines));
 			$n->{'indent'} = $parent->{'indent'} + 1
 				if ($n->{'type'});
@@ -1434,10 +1434,10 @@ my $pid = fork();
 if (!$pid) {
 	untie(*STDIN); untie(*STDOUT); untie(*STDERR);
 	close(STDIN); close(STDOUT); close(STDERR);
-	open(STDOUT, ">$log");
-	open(STDERR, ">&STDOUT");
 	my @u = getpwnam($d->{'user'});
 	&switch_to_unix_user(\@u);
+	open(STDOUT, ">$log");
+	open(STDERR, ">&STDOUT");
 	exec($cmd);
 	exit(1);
 	}
@@ -1447,8 +1447,20 @@ my $fh = "PIDFILE";
 &virtual_server::close_tempfile_as_domain_user($d, $fh);
 
 # Create init script
-# XXX
-# XXX use $log and save $pid
+&foreign_require("init");
+my $old_init_mode = $init::init_mode;
+if ($init::init_mode eq "upstart") {
+	$init::init_mode = "init";
+	}
+my $name = "php-fcgi-$d->{'dom'}";
+&init::enable_at_boot($name,
+		      "Start Nginx PHP fcgi server for $d->{'dom'}",
+		      &command_as_user($d->{'user'}, 0,
+			"$cmd >$log 2>&1 </dev/null & echo \$! >$pidfile"),
+		      &command_as_user($d->{'user'}, 0,
+			"kill -9 `cat $pidfile`"),
+		      );
+$init::init_mode = $old_init_mode;
 
 return (1, $port);
 }
@@ -1468,7 +1480,21 @@ if ($pid) {
 &virtual_server::unlink_file_as_domain_user($d, $pidfile);
 
 # Delete init script
-# XXX
+&foreign_require("init");
+my $old_init_mode = $init::init_mode;
+if ($init::init_mode eq "upstart") {
+        $init::init_mode = "init";
+        }
+my $name = "php-fcgi-$d->{'dom'}";
+&init::disable_at_boot($name);
+if ($init::init_mode eq "init") {
+	my $fn = &init::action_filename($name);
+	&unlink_logged($fn);
+	}
+elsif ($init::init_mode eq "rc") {
+	&init::delete_rc_script($name);
+	}
+$init::init_mode = $old_init_mode;
 }
 
 # list_fastcgi_params()

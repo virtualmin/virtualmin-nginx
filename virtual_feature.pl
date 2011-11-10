@@ -191,10 +191,12 @@ if (!$d->{'alias'}) {
 		&flush_config_file_lines();
 		&unlock_all_config_files();
 
+		$d->{'nginx_php_port'} = $port;
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		}
 	else {
+		delete($d->{'nginx_php_port'});
 		&$virtual_server::second_print(&text('feat_failed', $port));
 		}
 
@@ -409,8 +411,15 @@ if (!$d->{'alias'}) {
 			}
 		}
 
-	# Update fcgid user
-	# XXX
+	# Update fcgid user, by tearing down and re-running. Killing needs to
+	# be done in the new home, as it may have been moved already
+	if ($d->{'user'} ne $oldd->{'user'}) {
+		my $oldd_copy = { %$oldd };
+		$oldd_copy->{'home'} = $d->{'home'};
+		&delete_php_fcgi_server($oldd_copy);
+		&delete_php_fcgi_server($oldd);
+		&setup_php_fcgi_server($d);
+		}
 	}
 else {
 	# Changing inside an alias
@@ -479,6 +488,7 @@ if (!$d->{'alias'}) {
 	&delete_server_link($server);
 	&delete_server_file_if_empty($server);
 	&delete_php_fcgi_server($d);
+	delete($d->{'nginx_php_port'});
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
