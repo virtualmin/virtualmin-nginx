@@ -181,11 +181,11 @@ my @rv = map { $_->{'value'} } &find($name, $conf);
 return wantarray ? @rv : $rv[0];
 }
 
-# save_directive(&parent, name|&oldobjects, &newvalues|&newobjects)
+# save_directive(&parent, name|&oldobjects, &newvalues|&newobjects, [at-top])
 # Updates the values of some named directive
 sub save_directive
 {
-my ($parent, $name_or_oldstructs, $values) = @_;
+my ($parent, $name_or_oldstructs, $values, $at_top) = @_;
 my $oldstructs = ref($name_or_oldstructs) ? $name_or_oldstructs :
 			[ &find($name_or_oldstructs, $parent) ];
 my $name = !ref($name_or_oldstructs) ? $name_or_oldstructs :
@@ -220,8 +220,19 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 			$n->{'indent'} = 0 if ($n->{'type'});
 			&recursive_set_file($n, $n->{'file'}, $n->{'line'});
 			}
+		elsif ($at_top) {
+			# Insert into parent at start
+			@lines = &make_directive_lines(
+					$n, $parent->{'indent'} + 1);
+			$n->{'line'} = $parent->{'line'} + 1;
+			$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
+			&recursive_set_file($n, $file, $n->{'line'});
+			&renumber($file, $parent->{'line'}, scalar(@lines));
+			$n->{'indent'} = $parent->{'indent'} + 1
+				if ($n->{'type'});
+			}
 		else {
-			# Insert into parent
+			# Insert into parent at end
 			@lines = &make_directive_lines(
 					$n, $parent->{'indent'} + 1);
 			$n->{'line'} = $parent->{'eline'};

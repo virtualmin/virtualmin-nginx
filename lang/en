@@ -409,5 +409,7 @@ feat_modifyip6=Changing IPv6 address in Nginx configuration ..
 feat_modifyfile=Renaming Nginx configuration file ..
 feat_modifylog=Renaming Nginx log files ..
 feat_modifyalias=Updating target Nginx virtual host ..
+feat_disable=Blocking access to Nginx website ..
+feat_enable=Un-blocking access to Nginx website ..
 
 fcgid_ecmd=No PHP command found!

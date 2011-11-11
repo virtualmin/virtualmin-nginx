@@ -190,8 +190,6 @@ if (!$d->{'alias'}) {
 		&save_directive($server, [ ], [ $ploc ]);
 		&flush_config_file_lines();
 		&unlock_all_config_files();
-
-		$d->{'nginx_php_port'} = $port;
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		}
@@ -488,7 +486,6 @@ if (!$d->{'alias'}) {
 	&delete_server_link($server);
 	&delete_server_file_if_empty($server);
 	&delete_php_fcgi_server($d);
-	delete($d->{'nginx_php_port'});
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
@@ -530,6 +527,135 @@ else {
 
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 	return 1;
+	}
+}
+
+# feature_disable(&domain)
+# Disable the website by adding a redirect from /
+sub feature_disable
+{
+my ($d) = @_;
+if ($d->{'alias'}) {
+	# Disabling is the same as deletion for an alias
+	my $target = &virtual_server::get_domain($d->{'alias'});
+	if ($target->{'disabled'}) {
+		return 1;
+		}
+	$d->{'disable_alias_nginx_delete'} = 1;
+	return &feature_delete($d);
+	}
+else {
+	&$virtual_server::first_print($text{'feat_disable'});
+	&lock_all_config_files();
+	my $server = &find_domain_server($d);
+	if (!$server) {
+                &unlock_all_config_files();
+                &$virtual_server::second_print(
+                        &text('feat_efind', $d->{'dom'}));
+                return 0;
+		}
+	my $tmpl = &virtual_server::get_template($d->{'template'});
+	my @locs = &find("location", $server);
+	my ($clash) = grep { $_->{'words'}->[0] eq '~' &&
+			     $_->{'words'}->[1] eq '/.*' } @locs;
+
+	if ($tmpl->{'disabled_url'} eq 'none') {
+		# Disable is done via local HTML
+		my $dis = &virtual_server::disabled_website_html($d);
+		my $msg = $tmpl->{'disabled_web'} eq 'none' ?
+			"<h1>Website Disabled</h1>\n" :
+			join("\n", split(/\t/, $tmpl->{'disabled_web'}));
+		$msg = &virtual_server::substitute_domain_template($msg, $d);
+		my $fh = "DISABLED";
+		&open_lock_tempfile($fh, ">$dis");
+		&print_tempfile($fh, $msg);
+		&close_tempfile($fh);
+		&set_ownership_permissions(
+			undef, undef, 0644, $virtual_server::disabled_website);
+
+		# Add location to force use of it
+		if (!$clash) {
+			$dis =~ /^(.*)(\/[^\/]+)$/;
+			my ($disdir, $disfile) = ($1, $2);
+			my $loc =
+			    { 'name' => 'location',
+			      'words' => [ '~', '/.*' ],
+			      'type' => 1,
+			      'members' => [
+				{ 'name' => 'root',
+				  'words' => [ $disdir ] },
+				{ 'name' => 'rewrite',
+				  'words' => [ '^/.*', $disfile, 'break' ] },
+			      ],
+			    };
+			&save_directive($server, [ ], [ $loc ], 1);
+			}
+		}
+	else {
+		# Disable is done via redirect
+		my $url = &virtual_server::substitute_domain_template(
+				$tmpl->{'disabled_url'}, $d);
+		if (!$clash) {
+			my $loc =
+			    { 'name' => 'location',
+			      'words' => [ '~', '/.*' ],
+			      'type' => 1,
+			      'members' => [
+				{ 'name' => 'rewrite',
+				  'words' => [ '^/.*', $url, 'break' ] },
+			      ],
+			    };
+			&save_directive($server, [ ], [ $loc ], 1);
+			}
+		}
+
+	&flush_config_file_lines();
+        &unlock_all_config_files();
+        &virtual_server::register_post_action(\&print_apply_nginx);
+
+	&$virtual_server::second_print($virtual_server::text{'setup_done'});
+	}
+}
+
+# feature_enable(&domain)
+# Undo the effects of feature_disable
+sub feature_enable
+{
+my ($d) = @_;
+if ($d->{'alias'}) {
+	# Enabling alias is the same as re-setting it up
+	if ($d->{'disable_alias_nginx_delete'}) {
+		delete($d->{'disable_alias_nginx_delete'});
+		return &feature_setup($d);
+		}
+	return 1;
+	}
+else {
+	&$virtual_server::first_print($text{'feat_enable'});
+	&lock_all_config_files();
+	my $server = &find_domain_server($d);
+	if (!$server) {
+                &unlock_all_config_files();
+                &$virtual_server::second_print(
+                        &text('feat_efind', $d->{'dom'}));
+                return 0;
+		}
+
+	my @locs = &find("location", $server);
+	my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
+			   $_->{'words'}->[1] eq '/.*' } @locs;
+	if ($loc) {
+		my $rewrite = &find_value("rewrite", $loc);
+		if ($rewrite eq '^/.*') {
+			&save_directive($server, [ $loc ], [ ]);
+			}
+		}
+
+	&flush_config_file_lines();
+        &unlock_all_config_files();
+        &virtual_server::register_post_action(\&print_apply_nginx);
+
+	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 	}
 }
 
