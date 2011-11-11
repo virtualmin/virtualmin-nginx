@@ -1447,7 +1447,7 @@ if (!$pid) {
 	close(STDIN); close(STDOUT); close(STDERR);
 	my @u = getpwnam($d->{'user'});
 	&switch_to_unix_user(\@u);
-	open(STDOUT, ">$log");
+	open(STDOUT, ">>$log");
 	open(STDERR, ">&STDOUT");
 	exec($cmd);
 	exit(1);
@@ -1467,7 +1467,7 @@ my $name = "php-fcgi-$d->{'dom'}";
 &init::enable_at_boot($name,
 		      "Start Nginx PHP fcgi server for $d->{'dom'}",
 		      &command_as_user($d->{'user'}, 0,
-			"$cmd >$log 2>&1 </dev/null & echo \$! >$pidfile"),
+			"$cmd >>$log 2>&1 </dev/null & echo \$! >$pidfile"),
 		      &command_as_user($d->{'user'}, 0,
 			"kill -9 `cat $pidfile`"),
 		      );
@@ -1508,10 +1508,13 @@ elsif ($init::init_mode eq "rc") {
 $init::init_mode = $old_init_mode;
 }
 
-# list_fastcgi_params()
+# list_fastcgi_params(&server)
 # Returns a list of param names and values needed for fastCGI
 sub list_fastcgi_params
 {
+my ($server) = @_;
+my $root = &find_value("root", $server);
+$root ||= '$document_root';
 return (
 	[ 'GATEWAY_INTERFACE', 'CGI/1.1' ],
 	[ 'SERVER_SOFTWARE',   'nginx' ],
@@ -1519,11 +1522,11 @@ return (
 	[ 'REQUEST_METHOD',    '$request_method' ],
 	[ 'CONTENT_TYPE',      '$content_type' ],
 	[ 'CONTENT_LENGTH',    '$content_length' ],
-	[ 'SCRIPT_FILENAME',   '$document_root$fastcgi_script_name' ],
+	[ 'SCRIPT_FILENAME',   $root.'$fastcgi_script_name' ],
 	[ 'SCRIPT_NAME',       '$fastcgi_script_name' ],
 	[ 'REQUEST_URI',       '$request_uri' ],
 	[ 'DOCUMENT_URI',      '$document_uri' ],
-	[ 'DOCUMENT_ROOT',     '$document_root' ],
+	[ 'DOCUMENT_ROOT',     $root ],
 	[ 'SERVER_PROTOCOL',   '$server_protocol' ],
 	[ 'REMOTE_ADDR',       '$remote_addr' ],
 	[ 'REMOTE_PORT',       '$remote_port' ],

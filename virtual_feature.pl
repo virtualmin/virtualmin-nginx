@@ -177,7 +177,8 @@ if (!$d->{'alias'}) {
 		# Configure domain to use it for .php files
 		&lock_all_config_files();
 		&save_directive($server, "fastcgi_param",
-			[ map { { 'words' => $_ } } &list_fastcgi_params() ]);
+			[ map { { 'words' => $_ } }
+				&list_fastcgi_params($server) ]);
 		my $ploc = { 'name' => 'location',
 			     'words' => [ '~', '\.php$' ],
 			     'type' => 1,
