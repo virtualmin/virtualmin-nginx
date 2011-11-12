@@ -787,6 +787,75 @@ sub feature_provides_web
 return 1;	# Nginx is a webserver
 }
 
+# feature_get_web_php_mode(&domain)
+sub feature_get_web_php_mode
+{
+my ($d) = @_;
+return 'fcgid';		# Only mode we can run
+}
+
+# feature_save_web_php_mode(&domain, mode)
+sub feature_save_web_php_mode
+{
+my ($d, $mode) = @_;
+$mode eq 'fcgid' || &error($text{'feat_ephpmode'});
+}
+
+# feature_list_web_php_directories(&domain)
+# Only one version is supported in Nginx
+sub feature_list_web_php_directories
+{
+my ($d) = @_;
+my ($defver) = &get_default_php_version();
+return ( { 'dir' => &virtual_server::public_html_dir($d),
+	   'mode' => 'fcgid',
+	   'version' => $defver } );
+}
+
+# feature_save_web_php_directory(&domain, dir, version)
+# Cannot set the version for any sub-directory
+sub feature_save_web_php_directory
+{
+my ($d, $dir, $ver) = @_;
+$dir eq &virtual_server::public_html_dir($d) ||
+	&error($text{'feat_ephpdir'});
+my ($defver) = &get_default_php_version();
+$defver eq $ver ||
+	&error($text{'feat_ephpdirver'});
+}
+
+# feature_delete_web_php_directory(&domain, dir)
+# Cannot delete the PHP version for a directory ever
+sub feature_delete_web_php_directory
+{
+my ($d, $dir) = @_;
+&error($text{'feat_ephpdirdelete'});
+}
+
+# feature_get_fcgid_max_execution_time(&domain)
+# Returns the timeout set by fastcgi_read_timeout
+sub feature_get_fcgid_max_execution_time
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+if ($server) {
+	my $t = &find_value("fastcgi_read_timeout", $server);
+	return $t == 9999 ? undef : $t if ($t);
+	}
+return &get_default("fastcgi_read_timeout");
+}
+
+# feature_set_fcgid_max_execution_time(&domain, timeout)
+# Sets the fcgi timeout with fastcgi_read_timeout
+sub feature_set_fcgid_max_execution_time
+{
+my ($d, $max) = @_;
+my $server = &find_domain_server($d);
+if ($server) {
+	&save_directive($server, [ "fastcgi_read_timeout" ], [ $max || 9999 ]);
+	}
+}
+
 # domain_server_names(&domain)
 # Returns the list of server_name words for a domain
 sub domain_server_names

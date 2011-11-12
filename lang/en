@@ -411,5 +411,11 @@ feat_modifylog=Renaming Nginx log files ..
 feat_modifyalias=Updating target Nginx virtual host ..
 feat_disable=Blocking access to Nginx website ..
 feat_enable=Un-blocking access to Nginx website ..
+feat_ephpmode=PHP execution mode cannot be changed from FastCGI for Nginx websites
+feat_ephpdir=The PHP version cannot be set for any directroy except the default for Nginx websites
+feat_ephpdirver=The PHP version cannot be changed to any version except the default for Nginx websites
+feat_ephpdirdelete=The PHP version cannot be removed for Nginx websites
 
 fcgid_ecmd=No PHP command found!
+
+__norefs=1

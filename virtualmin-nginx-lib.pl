@@ -1410,6 +1410,18 @@ foreach my $dir (@{$parent->{'members'}}) {
 	}
 }
 
+# get_default_php_version()
+# Returns the PHP version number and binary path for the best PHP installed
+sub get_default_php_version
+{
+my @vers = sort { $a->[0] <=> $b->[0] }
+                &virtual_server::list_available_php_versions(undef, "fcgid");
+@vers || return ( );
+my $cmd = $vers[0]->[1];
+$cmd || return ( );
+return @{$vers[0]};
+}
+
 # setup_php_fcgi_server(&domain)
 # Starts up a PHP process running as the domain user, and enables it at boot.
 # Returns an OK flag and the port number selected to listen on.
@@ -1418,10 +1430,7 @@ sub setup_php_fcgi_server
 my ($d) = @_;
 
 # Get the PHP command
-my @vers = sort { $a->[1] <=> $b->[1] }
-		&virtual_server::list_available_php_versions(undef, "fcgid");
-@vers || return (0, $text{'fcgid_ecmd'});
-my $cmd = $vers[0]->[1];
+my (undef, $cmd) = &get_default_php_version();
 $cmd || return (0, $text{'fcgid_ecmd'});
 
 # Find a free port
