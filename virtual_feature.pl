@@ -191,6 +191,11 @@ if (!$d->{'alias'}) {
 		&save_directive($server, [ ], [ $ploc ]);
 		&flush_config_file_lines();
 		&unlock_all_config_files();
+
+		# This function sets up php.ini for the domain
+		&virtual_server::save_domain_php_mode($d, "fcgid");
+
+		$d->{'nginx_php_port'} = $port;
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		}
@@ -852,7 +857,23 @@ sub feature_set_fcgid_max_execution_time
 my ($d, $max) = @_;
 my $server = &find_domain_server($d);
 if ($server) {
-	&save_directive($server, [ "fastcgi_read_timeout" ], [ $max || 9999 ]);
+	&save_directive($server, "fastcgi_read_timeout", [ $max || 9999 ]);
+	}
+}
+
+# feature_restart_web_php(&domain)
+# Restart the fcgi server for this domain, if one is running
+sub feature_restart_web_php
+{
+my ($d) = @_;
+if ($d->{'nginx_php_port'}) {
+	&stop_php_fcgi_server_command($d);
+	my ($cmd, $envs_to_set, $log, $pidfile) = &get_php_fcgi_server_command(
+			$d, $d->{'nginx_php_port'});
+	if ($cmd) {
+		&start_php_fcgi_server_command(
+			$d, $cmd, $envs_to_set, $log, $pidfile);
+		}
 	}
 }
 

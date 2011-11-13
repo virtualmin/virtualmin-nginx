@@ -1422,16 +1422,64 @@ $cmd || return ( );
 return @{$vers[0]};
 }
 
+# get_php_fcgi_server_command(&domain, port)
+# Returns the PHP CGI command and a hash ref of environment variables
+sub get_php_fcgi_server_command
+{
+my ($d, $port) = @_;
+my ($ver, $cmd) = &get_default_php_version();
+$cmd || return ( );
+my $log = "$d->{'home'}/logs/php.log";
+my $pidfile = "$d->{'home'}/logs/php.pid";
+$cmd .= " -b localhost:$port";
+my %envs_to_set = ( 'PHPRC', $d->{'home'}."/etc/php".$ver );
+return ($cmd, \%envs_to_set, $log, $pidfile);
+}
+
+# start_php_fcgi_server_command(&domain, cmd, &envs, logfile, pidfile)
+# Actually start the PHP fcgid server for a domain
+sub start_php_fcgi_server_command
+{
+my ($d, $cmd, $envs_to_set, $log, $pidfile) = @_;
+my $pid = fork();
+if (!$pid) {
+	untie(*STDIN); untie(*STDOUT); untie(*STDERR);
+	close(STDIN); close(STDOUT); close(STDERR);
+	my @u = getpwnam($d->{'user'});
+	&switch_to_unix_user(\@u);
+	open(STDOUT, ">>$log");
+	open(STDERR, ">&STDOUT");
+	foreach my $e (keys %$envs_to_set) {
+		$ENV{$e} = $envs_to_set->{$e};
+		}
+	exec($cmd);
+	exit(1);
+	}
+my $fh = "PIDFILE";
+&virtual_server::open_tempfile_as_domain_user($d, $fh, ">$pidfile");
+&print_tempfile($fh, $pid."\n");
+&virtual_server::close_tempfile_as_domain_user($d, $fh);
+}
+
+# stop_php_fcgi_server_command(&domain)
+# Kills the running PHP server process for a domain
+sub stop_php_fcgi_server_command
+{
+my ($d) = @_;
+my $pidfile = "$d->{'home'}/logs/php.pid";
+my $pid = &check_pid_file($pidfile);
+if ($pid) {
+	&virtual_server::run_as_domain_user($d, "kill -9 ".quotemeta($pid));
+	}
+&virtual_server::unlink_file_as_domain_user($d, $pidfile);
+}
+
 # setup_php_fcgi_server(&domain)
 # Starts up a PHP process running as the domain user, and enables it at boot.
 # Returns an OK flag and the port number selected to listen on.
 sub setup_php_fcgi_server
 {
 my ($d) = @_;
-
-# Get the PHP command
-my (undef, $cmd) = &get_default_php_version();
-$cmd || return (0, $text{'fcgid_ecmd'});
 
 # Find a free port
 my $port = 9000;
@@ -1445,26 +1493,13 @@ while(1) {
 	}
 close($s);
 
-my $log = "$d->{'home'}/logs/php.log";
-my $pidfile = "$d->{'home'}/logs/php.pid";
-$cmd .= " -b localhost:$port";
+# Get the command
+my ($cmd, $envs_to_set, $log, $pidfile) =
+	&get_php_fcgi_server_command($d, $port);
+$cmd || return (0, $text{'fcgid_ecmd'});
 
 # Launch it, and save the PID
-my $pid = fork();
-if (!$pid) {
-	untie(*STDIN); untie(*STDOUT); untie(*STDERR);
-	close(STDIN); close(STDOUT); close(STDERR);
-	my @u = getpwnam($d->{'user'});
-	&switch_to_unix_user(\@u);
-	open(STDOUT, ">>$log");
-	open(STDERR, ">&STDOUT");
-	exec($cmd);
-	exit(1);
-	}
-my $fh = "PIDFILE";
-&virtual_server::open_tempfile_as_domain_user($d, $fh, ">$pidfile");
-&print_tempfile($fh, $pid."\n");
-&virtual_server::close_tempfile_as_domain_user($d, $fh);
+&start_php_fcgi_server_command($d, $cmd, $envs_to_set, $log, $pidfile);
 
 # Create init script
 &foreign_require("init");
@@ -1473,13 +1508,14 @@ if ($init::init_mode eq "upstart") {
 	$init::init_mode = "init";
 	}
 my $name = "php-fcgi-$d->{'dom'}";
+my $envs = join(" ", map { $_."=".$envs_to_set->{$_} } keys %$envs_to_set);
 &init::enable_at_boot($name,
-		      "Start Nginx PHP fcgi server for $d->{'dom'}",
-		      &command_as_user($d->{'user'}, 0,
-			"$cmd >>$log 2>&1 </dev/null & echo \$! >$pidfile"),
-		      &command_as_user($d->{'user'}, 0,
-			"kill -9 `cat $pidfile`"),
-		      );
+	      "Start Nginx PHP fcgi server for $d->{'dom'}",
+	      &command_as_user($d->{'user'}, 0,
+		"$envs $cmd >>$log 2>&1 </dev/null & echo \$! >$pidfile"),
+	      &command_as_user($d->{'user'}, 0,
+		"kill -9 `cat $pidfile`"),
+	      );
 $init::init_mode = $old_init_mode;
 
 return (1, $port);
@@ -1492,12 +1528,7 @@ sub delete_php_fcgi_server
 my ($d) = @_;
 
 # Stop the server
-my $pidfile = "$d->{'home'}/logs/php.pid";
-my $pid = &check_pid_file($pidfile);
-if ($pid) {
-	&virtual_server::run_as_domain_user($d, "kill -9 ".quotemeta($pid));
-	}
-&virtual_server::unlink_file_as_domain_user($d, $pidfile);
+&stop_php_fcgi_server_command($d);
 
 # Delete init script
 &foreign_require("init");
