@@ -892,6 +892,45 @@ my ($d, $children) = @_;
 &error("The number of PHP child processes cannot be set when using Nginx");
 }
 
+# feature_startstop()
+# Returns info for restarting Nginx
+sub feature_startstop
+{
+my $pid = &is_nginx_running();
+my @links = ( { 'link' => '/'.$module_name.'/',
+		'desc' => $text{'feat_manage'},
+		'manage' => 1 } );
+if ($pid) {
+	return ( { 'status' => 1,
+		   'name' => $text{'feat_sname'},
+		   'desc' => $text{'feat_sstop'},
+		   'restartdesc' => $text{'feat_srestart'},
+		   'longdesc' => $text{'feat_sstopdesc'},
+		   'links' => \@links } );
+	}
+else {
+	return ( { 'status' => 0,
+		   'name' => $text{'feat_sname'},
+		   'desc' => $text{'feat_sstart'},
+		   'longdesc' => $text{'feat_sstartdesc'},
+		   'links' => \@links } );
+	}
+}
+
+# feature_stop_service()
+# Stop the Nginx webserver, from the System Information page
+sub feature_stop_service
+{
+return &stop_nginx();
+}
+
+# feature_start_service()
+# Start the Nginx webserver, from the System Information page
+sub feature_start_service
+{
+return &start_nginx();
+}
+
 # domain_server_names(&domain)
 # Returns the list of server_name words for a domain
 sub domain_server_names
