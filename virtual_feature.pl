@@ -274,6 +274,10 @@ if (!$d->{'alias'}) {
 				push(@{$obj->{'words'}}, $n);
 				}
 			}
+		my $oldstar = &indexof("*.".$oldd->{'dom'}, @{$obj->{'words'}});
+		if ($oldstar >= 0) {
+			$obj->{'words'}->[$oldstar] = "*.".$d->{'dom'};
+			}
 		&save_directive($server, "server_name", [ $obj ]);
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
@@ -449,6 +453,10 @@ else {
 		foreach my $n (&domain_server_names($d)) {
 			push(@{$obj->{'words'}}, $n);
 			}
+		my $oldstar = &indexof("*.".$oldd->{'dom'}, @{$obj->{'words'}});
+		if ($oldstar >= 0) {
+			$obj->{'words'}->[$oldstar] = "*.".$d->{'dom'};
+			}
 		&save_directive($server, "server_name", [ $obj ]);
 		$changed++;
 		&$virtual_server::second_print(
@@ -522,7 +530,7 @@ else {
 		}
 
 	my $obj = &find("server_name", $server);
-	foreach my $n (&domain_server_names($d)) {
+	foreach my $n (&domain_server_names($d), "*.".$d->{'dom'}) {
 		@{$obj->{'words'}} = grep { $_ ne $n } @{$obj->{'words'}};
 		}
 	&save_directive($server, "server_name", [ $obj ]);
@@ -929,6 +937,57 @@ return &stop_nginx();
 sub feature_start_service
 {
 return &start_nginx();
+}
+
+# feature_get_web_domain_star(&domain)
+# Checks if all sub-domains are matched for this domain
+sub feature_get_web_domain_star
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return undef if (!$server);
+my $obj = &find("server_name", $server);
+foreach my $w (@{$obj->{'words'}}) {
+	if ($w eq "*.".$d->{'dom'}) {
+		return 1;
+		}
+	}
+return 0;
+}
+
+# feature_save_web_domain_star(&domain, star)
+# Add *.domain to server_name if missing
+sub feature_save_web_domain_star
+{
+my ($d, $star) = @_;
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+return undef if (!$server);
+my $obj = &find("server_name", $server);
+my $idx = &indexof("*.".$d->{'dom'}, @{$obj->{'words'}});
+if ($star && $idx < 0) {
+	# Need to add
+	push(@{$obj->{'words'}}, "*.".$d->{'dom'});
+	&save_directive($server, "server_name", [ $obj ]);
+	}
+elsif (!$star && $idx >= 0) {
+	# Need to remove
+	splice(@{$obj->{'words'}}, $idx, 1);
+	&save_directive($server, "server_name", [ $obj ]);
+	}
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+}
+
+# feature_get_web_log(&domain, port, errorlog)
+# Returns the path to the access or error log
+sub feature_get_web_log
+{
+my ($d, $port, $errorlog) = @_;
+my $server = &find_domain_server($d);
+return undef if (!$server);
+return &find_value($errorlog ? "error_log" : "access_log", $server);
 }
 
 # domain_server_names(&domain)
