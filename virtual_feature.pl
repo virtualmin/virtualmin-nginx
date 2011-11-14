@@ -830,11 +830,10 @@ $defver eq $ver ||
 }
 
 # feature_delete_web_php_directory(&domain, dir)
-# Cannot delete the PHP version for a directory ever
+# Cannot delete the PHP version for a directory ever, so this does nothing
 sub feature_delete_web_php_directory
 {
 my ($d, $dir) = @_;
-&error($text{'feat_ephpdirdelete'});
 }
 
 # feature_get_fcgid_max_execution_time(&domain)
@@ -875,6 +874,22 @@ if ($d->{'nginx_php_port'}) {
 			$d, $cmd, $envs_to_set, $log, $pidfile);
 		}
 	}
+}
+
+# feature_get_web_php_children(&domain)
+# Cannot be changed, so return -2
+sub feature_get_web_php_children
+{
+my ($d) = @_;
+return -2;
+}
+
+# feature_save_web_php_children(&domain, children)
+# Cannot be changed currently
+sub feature_save_web_php_children
+{
+my ($d, $children) = @_;
+&error("The number of PHP child processes cannot be set when using Nginx");
 }
 
 # domain_server_names(&domain)
