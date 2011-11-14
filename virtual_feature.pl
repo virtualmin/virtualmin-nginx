@@ -800,6 +800,11 @@ sub feature_provides_web
 return 1;	# Nginx is a webserver
 }
 
+sub feature_web_supported_php_modes
+{
+return ('fcgid');	# Only mode we can run
+}
+
 # feature_get_web_php_mode(&domain)
 sub feature_get_web_php_mode
 {
