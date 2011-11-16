@@ -177,7 +177,7 @@ return wantarray ? @rv : $rv[0];
 sub find_value
 {
 my ($name, $conf) = @_;
-my @rv = map { $_->{'value'} } &find($name, $conf);
+my @rv = map { $_->{'words'}->[0] || $_->{'value'} } &find($name, $conf);
 return wantarray ? @rv : $rv[0];
 }
 
@@ -204,7 +204,7 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 		my $olen = $o->{'eline'} - $o->{'line'} + 1;
 		my @lines = &make_directive_lines($n, $parent->{'indent'}+1);
 		$o->{'name'} = $n->{'name'};
-		$o->{'value'} = $n->{'value'};
+		$o->{'value'} = $n->{'words'}->[0];
 		$o->{'words'} = $n->{'words'};
 		splice(@$lref, $o->{'line'}, $o->{'eline'}-$o->{'line'}+1,
 		       @lines);
@@ -212,6 +212,7 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 	elsif ($i<@$newstructs) {
 		# Adding a directive
 		my @lines;
+		$n->{'value'} = $n->{'words'}->[0];
 		if ($n->{'file'}) {
 			# New file, add at start
 			@lines = &make_directive_lines($n, 0);

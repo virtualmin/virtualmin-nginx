@@ -340,7 +340,7 @@ if (!$d->{'alias'}) {
 
 	# Update IPv6 address (or add or remove)
 	if ($d->{'ip6'} ne $oldd->{'ip6'} ||
-	    $d->{'virt6'} != $oldd->{'virt6'}) {
+	    int($d->{'virt6'}) != int($oldd->{'virt6'})) {
 		&$virtual_server::first_print($text{'feat_modifyip6'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
@@ -1010,14 +1010,15 @@ elsif (!$star && $idx >= 0) {
 &virtual_server::register_post_action(\&print_apply_nginx);
 }
 
-# feature_get_web_log(&domain, port, errorlog)
+# feature_get_web_log(&domain, errorlog)
 # Returns the path to the access or error log
 sub feature_get_web_log
 {
-my ($d, $port, $errorlog) = @_;
+my ($d, $errorlog) = @_;
 my $server = &find_domain_server($d);
 return undef if (!$server);
-return &find_value($errorlog ? "error_log" : "access_log", $server);
+my $rv = &find_value($errorlog ? "error_log" : "access_log", $server);
+return $rv;
 }
 
 # domain_server_names(&domain)
