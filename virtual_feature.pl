@@ -204,12 +204,25 @@ if (!$d->{'alias'}) {
 		&$virtual_server::second_print(&text('feat_failed', $port));
 		}
 
-
 	# Add the user nginx runs as to the domain's group
 	my $web_user = &get_nginx_user();
 	if ($web_user) {
 		&virtual_server::add_user_to_domain_group(
 			$d, $web_user, 'setup_webuser');
+		}
+
+	# Create empty log files and make them writable by Nginx and
+	# the domain owner
+	if ($web_user) {
+		my @uinfo = getpwnam($web_user);
+		my $web_group = getgrgid($uinfo[3]) || $uinfo[3];
+		foreach my $l ($alog, $elog) {
+			my $fh = "LOG";
+			&open_tempfile($fh, ">>$l", 0, 1);
+			&close_tempfile($fh);
+			&set_ownership_permissions(
+				$d->{'uid'}, $web_group, 0660, $l);
+			}
 		}
 
 	return 1;
@@ -427,6 +440,11 @@ if (!$d->{'alias'}) {
 		&delete_php_fcgi_server($oldd_copy);
 		&delete_php_fcgi_server($oldd);
 		&setup_php_fcgi_server($d);
+		}
+
+	# Update owner of log files
+	if ($d->{'user'} ne $oldd->{'user'}) {
+		# XXX
 		}
 	}
 else {
