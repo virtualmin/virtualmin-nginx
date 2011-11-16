@@ -907,6 +907,13 @@ if ($d->{'nginx_php_port'}) {
 	}
 }
 
+# feature_restart_web_command()
+# Returns the Nginx restart command
+sub feature_restart_web_command
+{
+return $config{'apply_cmd'};
+}
+
 # feature_get_web_php_children(&domain)
 # Cannot be changed, so return -2
 sub feature_get_web_php_children
