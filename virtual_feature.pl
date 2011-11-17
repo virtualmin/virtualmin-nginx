@@ -980,22 +980,6 @@ sub feature_start_service
 return &start_nginx();
 }
 
-# feature_get_web_domain_star(&domain)
-# Checks if all sub-domains are matched for this domain
-sub feature_get_web_domain_star
-{
-my ($d) = @_;
-my $server = &find_domain_server($d);
-return undef if (!$server);
-my $obj = &find("server_name", $server);
-foreach my $w (@{$obj->{'words'}}) {
-	if ($w eq "*.".$d->{'dom'}) {
-		return 1;
-		}
-	}
-return 0;
-}
-
 # feature_bandwidth(&domain, start, &bw-hash)
 # Searches through log files for records after some date, and updates the
 # day counters in the given hash
@@ -1034,6 +1018,22 @@ foreach my $l (&unique(@logs)) {
 return $max_ltime;
 }
 
+# feature_get_web_domain_star(&domain)
+# Checks if all sub-domains are matched for this domain
+sub feature_get_web_domain_star
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return undef if (!$server);
+my $obj = &find("server_name", $server);
+foreach my $w (@{$obj->{'words'}}) {
+	if ($w eq "*.".$d->{'dom'}) {
+		return 1;
+		}
+	}
+return 0;
+}
+
 # feature_save_web_domain_star(&domain, star)
 # Add *.domain to server_name if missing
 sub feature_save_web_domain_star
@@ -1068,6 +1068,27 @@ my $server = &find_domain_server($d);
 return undef if (!$server);
 my $rv = &find_value($errorlog ? "error_log" : "access_log", $server);
 return $rv;
+}
+
+# feature_list_web_redirects(&domain)
+# Finds redirects from rewrite directives in the Nginx config
+sub feature_list_web_redirects
+{
+# XXX
+}
+
+# feature_create_web_redirect(&domain, &redirect)
+# Add a redirect using a rewrite directive
+sub feature_create_web_redirect
+{
+# XXX
+}
+
+# feature_delete_web_redirect(&domain, &redirect)
+# Remove a redirect using a rewrite directive
+sub feature_delete_web_redirect
+{
+# XXX
 }
 
 # domain_server_names(&domain)
