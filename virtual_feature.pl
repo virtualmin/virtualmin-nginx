@@ -819,6 +819,16 @@ sub feature_provides_web
 return 1;	# Nginx is a webserver
 }
 
+sub feature_web_supports_suexec
+{
+return -1;		# PHP is always run as domain owner
+}
+
+sub feature_web_supports_cgi
+{
+return 0;		# No CGI support
+}
+
 sub feature_web_supported_php_modes
 {
 return ('fcgid');	# Only mode we can run
@@ -992,13 +1002,11 @@ return 0;
 sub feature_bandwidth
 {
 my ($d, $start, $bwinfo) = @_;
-local @logs = ( &feature_get_web_log($d, 0) );
+my @logs = ( &feature_get_web_log($d, 0) );
 return if ($d->{'alias'} || $d->{'subdom'}); # never accounted separately
-local $l;
-local $max_ltime = $start;
-foreach $l (&unique(@logs)) {
-	local $f;
-	foreach $f (&virtual_server::all_log_files($l, $max_ltime)) {
+my $max_ltime = $start;
+foreach my $l (&unique(@logs)) {
+	foreach my $f (&virtual_server::all_log_files($l, $max_ltime)) {
 		local $_;
 		if ($f =~ /\.gz$/i) {
 			open(LOG, "gunzip -c ".quotemeta($f)." |");
@@ -1012,9 +1020,9 @@ foreach $l (&unique(@logs)) {
 		while(<LOG>) {
 			if (/^(\S+)\s+(\S+)\s+(\S+)\s+\[(\d+)\/(\S+)\/(\d+):(\d+):(\d+):(\d+)\s+(\S+)\]\s+"([^"]*)"\s+(\S+)\s+(\S+)/ && $12 ne "206") {
 				# Valid-looking log line .. work out the time
-				local $ltime = timelocal($9, $8, $7, $4, $apache_mmap{lc($5)}, $6-1900);
+				my $ltime = timelocal($9, $8, $7, $4, $virtual_server::apache_mmap{lc($5)}, $6-1900);
 				if ($ltime > $start) {
-					local $day = int($ltime / (24*60*60));
+					my $day = int($ltime / (24*60*60));
 					$bwinfo->{"web_".$day} += $13;
 					}
 				$max_ltime = $ltime if ($ltime > $max_ltime);
