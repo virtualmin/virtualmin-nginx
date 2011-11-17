@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use Time::Local;
 require 'virtualmin-nginx-lib.pl';
 our (%text, %config, $module_name);
 
@@ -983,6 +984,46 @@ foreach my $w (@{$obj->{'words'}}) {
 		}
 	}
 return 0;
+}
+
+# feature_bandwidth(&domain, start, &bw-hash)
+# Searches through log files for records after some date, and updates the
+# day counters in the given hash
+sub feature_bandwidth
+{
+my ($d, $start, $bwinfo) = @_;
+local @logs = ( &feature_get_web_log($d, 0) );
+return if ($d->{'alias'} || $d->{'subdom'}); # never accounted separately
+local $l;
+local $max_ltime = $start;
+foreach $l (&unique(@logs)) {
+	local $f;
+	foreach $f (&virtual_server::all_log_files($l, $max_ltime)) {
+		local $_;
+		if ($f =~ /\.gz$/i) {
+			open(LOG, "gunzip -c ".quotemeta($f)." |");
+			}
+		elsif ($f =~ /\.Z$/i) {
+			open(LOG, "uncompress -c ".quotemeta($f)." |");
+			}
+		else {
+			open(LOG, $f);
+			}
+		while(<LOG>) {
+			if (/^(\S+)\s+(\S+)\s+(\S+)\s+\[(\d+)\/(\S+)\/(\d+):(\d+):(\d+):(\d+)\s+(\S+)\]\s+"([^"]*)"\s+(\S+)\s+(\S+)/ && $12 ne "206") {
+				# Valid-looking log line .. work out the time
+				local $ltime = timelocal($9, $8, $7, $4, $apache_mmap{lc($5)}, $6-1900);
+				if ($ltime > $start) {
+					local $day = int($ltime / (24*60*60));
+					$bwinfo->{"web_".$day} += $13;
+					}
+				$max_ltime = $ltime if ($ltime > $max_ltime);
+				}
+			}
+		close(LOG);
+		}
+	}
+return $max_ltime;
 }
 
 # feature_save_web_domain_star(&domain, star)
