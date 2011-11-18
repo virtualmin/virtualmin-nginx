@@ -1072,23 +1072,83 @@ return $rv;
 
 # feature_list_web_redirects(&domain)
 # Finds redirects from rewrite directives in the Nginx config
+# XXX use \Q \E in regexp?
 sub feature_list_web_redirects
 {
-# XXX
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return () if (!$server);
+my @rv;
+foreach my $r (&find("rewrite", $server)) {
+	if ($r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?/ &&
+	    $r->{'words'}->[2] eq 'break') {
+		my $redirect = { 'path' => $1,
+				 'dest' => $r->{'words'}->[1],
+				 'object' => $r,
+			       };
+		if ($2) {
+			if ($redirect->{'dest'} =~ s/\$1$//) {
+				$redirect->{'regexp'} = 0;
+				}
+			else {
+				$redirect->{'regexp'} = 1;
+				}
+			}
+		if ($r->{'words'}->[1] =~ /^(http|https):/) {
+			$redirect->{'alias'} = 0;
+			}
+		else {
+			$redirect->{'alias'} = 1;
+			}
+		push(@rv, $redirect);
+		}
+	}
+return @rv;
 }
 
 # feature_create_web_redirect(&domain, &redirect)
 # Add a redirect using a rewrite directive
 sub feature_create_web_redirect
 {
-# XXX
+my ($d, $redirect) = @_;
+my $server = &find_domain_server($d);
+return &text('redirect_efind', $d->{'dom'}) if (!$server);
+my $r = { 'name' => 'rewrite',
+	  'words' => [ '^\\Q'.$redirect->{'path'}.'\\E',
+		       $redirect->{'dest'},
+		       'break' ],
+	};
+if ($redirect->{'regexp'}) {
+	# All sub-directories go to same dest path
+	$r->{'words'}->[0] .= "(.*)";
+	}
+else {
+	# Redirect sub-directory to same sub-dir on dest
+	$r->{'words'}->[0] .= "(.*)";
+	$r->{'words'}->[1] .= "\$1";
+	}
+&lock_all_config_files();
+&save_directive($server, [ ], [ $r ]);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
 }
 
 # feature_delete_web_redirect(&domain, &redirect)
 # Remove a redirect using a rewrite directive
 sub feature_delete_web_redirect
 {
-# XXX
+my ($d, $redirect) = @_;
+my $server = &find_domain_server($d);
+return &text('redirect_efind', $d->{'dom'}) if (!$server);
+return $text{'redirect_eobj'} if (!$redirect->{'object'});
+&lock_all_config_files();
+&save_directive($server, [ $redirect->{'object'} ], [ ]);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
 }
 
 # domain_server_names(&domain)
