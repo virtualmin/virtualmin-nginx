@@ -1070,9 +1070,13 @@ my $rv = &find_value($errorlog ? "error_log" : "access_log", $server);
 return $rv;
 }
 
+sub feature_supports_web_redirects
+{
+return 1;	# Always supported
+}
+
 # feature_list_web_redirects(&domain)
 # Finds redirects from rewrite directives in the Nginx config
-# XXX use \Q \E in regexp?
 sub feature_list_web_redirects
 {
 my ($d) = @_;
