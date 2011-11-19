@@ -26,7 +26,7 @@ if ($in{'id'}) {
 	print &ui_subheading($text{'server_settings'});
 	my @spages = ( $access{'logs'} ? ( "slogs" ) : ( ),
 		       "sdocs", "ssl", "fcgi", "sssi", "sgzip", "sproxy",
-		       "saccess", );
+		       "saccess", "srewrite", );
 	&icons_table(
 		[ map { "edit_".$_.".cgi?id=".&urlize($in{'id'}) } @spages ],
 		[ map { $text{$_."_title"} } @spages ],
@@ -47,6 +47,7 @@ if ($in{'id'}) {
 					  $text{'server_autoloc'} ]);
 		foreach my $l (@locations) {
 			my $rootdir = &find_value("root", $l);
+			my $pp = &find_value("proxy_pass", $l);
 			my @indexes = map { @{$_->{'words'}} }
 					  &find("index", $l);
 			my $auto = &find_value("autoindex", $l);
@@ -57,7 +58,9 @@ if ($in{'id'}) {
 				  &urlize($w[$#w])."'>".
 				  &html_escape($w[$#w])."</a>",
 				&match_desc(@w > 1 ? $w[0] : ""),
-				$rootdir || "<i>$text{'index_noroot'}</i>",
+				$rootdir ? $rootdir :
+				  $pp ? &text('server_pp', "<tt>$pp</tt>") :
+				  "<i>$text{'index_noroot'}</i>",
 				join(" ", @indexes) ||
 				  "<i>$text{'server_noindex'}</i>",
 				$auto =~ /on/i ? $text{'yes'} : $text{'no'},

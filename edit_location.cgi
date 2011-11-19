@@ -28,7 +28,7 @@ if ($in{'path'}) {
 	# Show icons for location types
 	print &ui_subheading($text{'location_settings'});
 	my @lpages = ( "ldocs", "lfcgi", "lssi", "lgzip", "lproxy",
-		       "laccess", );
+		       "laccess", "lrewrite", );
 	&icons_table(
 		[ map { "edit_".$_.".cgi?id=".&urlize($in{'id'}).
 			"&path=".&urlize($in{'path'}) } @lpages ],

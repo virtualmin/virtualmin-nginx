@@ -1065,6 +1065,52 @@ $in->{$name."_def"} || &can_directory($in->{$name}) ||
 			      -d $_[0] ? $text{'access_edir'} : undef });
 }
 
+# nginx_rewrite_input(name, &parent)
+# Returns HTML for setting rewrite directives
+sub nginx_rewrite_input
+{
+my ($name, $parent) = @_;
+return undef if (!&supported_directive($name, $parent));
+my @obj = &find($name, $parent);
+my $table = &ui_columns_start([ $text{'rewrite_from'},
+				$text{'rewrite_to'},
+				$text{'rewrite_flag'} ], 100, 0,
+			      [ "nowrap", "nowrap" ]);
+my $i =0;
+foreach my $o (@obj, { }, { }) {
+	$table .= &ui_columns_row([
+		&ui_textbox($name."_from_$i", $o->{'words'}->[0], 30),
+		&ui_textbox($name."_to_$i", $o->{'words'}->[1], 40),
+		&ui_select($name."_flag_$i", $o->{'words'}->[2],
+			   [ map { [ $_, $text{'rewrite_'.$_} ] }
+				 ('last', 'break', 'redirect', 'permanent') ]),
+		]);
+	$i++;
+	}
+$table .= &ui_columns_end();
+return &ui_table_row($text{'opt_'.$name}, $table, 3);
+}
+
+# nginx_rewrite_parse(name1, name2, &parent, &in)
+# Parse inputs from nginx_rewrite_input
+sub nginx_rewrite_parse
+{
+my ($name, $parent, $in) = @_;
+return undef if (!&supported_directive($name, $parent));
+$in ||= \%in;
+my @obj;
+for(my $i=0; defined(my $from = $in->{$name."_from_".$i}); $i++) {
+	next if (!$from);
+	$from =~ /^\S+$/ || &error(&text('rewrite_efrom', $i+1));
+	my $to = $in->{$name."_to_".$i};
+	$to =~ /^\S+$/ || &error(&text('rewrite_eto', $i+1));
+	my $flag = $in->{$name."_flag_".$i};
+	push(@obj, { 'name' => $name,
+		     'words' => [ $from, $to, $flag ] });
+	}
+&save_directive($parent, $name, \@obj);
+}
+
 # list_log_formats([&server])
 # Returns a list of all log format names
 sub list_log_formats
