@@ -428,5 +428,8 @@ fcgid_ecmd=No PHP command found!
 redirect_efind=No virtualhost for $1 was found
 redirect_eobj=Redirect is not associated with an Nginx configuration object
 redirect_eobj2=Proxy is not associated with an Nginx configuration object
+redirect_eupstream=A balancer named $1 already exists
+redirect_eurl=Not a URL : $1
+redirect_eurlhost=Hostname in URL cannot be resolved : $1
 
 __norefs=1

@@ -202,11 +202,11 @@ foreach my $c (@$conf) {
 return wantarray ? @rv : $rv[0];
 }
 
-# save_directive(&parent, name|&oldobjects, &newvalues|&newobjects, [at-top])
+# save_directive(&parent, name|&oldobjects, &newvalues|&newobjects, [&before])
 # Updates the values of some named directive
 sub save_directive
 {
-my ($parent, $name_or_oldstructs, $values, $at_top) = @_;
+my ($parent, $name_or_oldstructs, $values, $before) = @_;
 my $oldstructs = ref($name_or_oldstructs) ? $name_or_oldstructs :
 			[ &find($name_or_oldstructs, $parent) ];
 my $name = !ref($name_or_oldstructs) ? $name_or_oldstructs :
@@ -241,17 +241,25 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 			$n->{'eline'} = scalar(@lines) - 1;
 			$n->{'indent'} = 0 if ($n->{'type'});
 			&recursive_set_file($n, $n->{'file'}, $n->{'line'});
+			unshift(@{$parent->{'members'}}, $n);
 			}
-		elsif ($at_top) {
-			# Insert into parent at start
+		elsif ($before) {
+			# Insert into parent before some other directive
 			@lines = &make_directive_lines(
 					$n, $parent->{'indent'} + 1);
-			$n->{'line'} = $parent->{'line'} + 1;
+			$n->{'line'} = $before->{'line'};
 			$n->{'eline'} = $n->{'line'} + scalar(@lines) - 1;
 			&recursive_set_file($n, $file, $n->{'line'});
-			&renumber($file, $parent->{'line'}, scalar(@lines));
+			&renumber($file, $n->{'line'}-1, scalar(@lines));
 			$n->{'indent'} = $parent->{'indent'} + 1
 				if ($n->{'type'});
+			my $idx = &indexof($before, @{$parent->{'members'}});
+			if ($idx >= 0) {
+				splice(@{$parent->{'members'}}, $idx, 0, $n);
+				}
+			else {
+				push(@{$parent->{'members'}}, $n);
+				}
 			}
 		else {
 			# Insert into parent at end
@@ -263,8 +271,8 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 			&renumber($file, $parent->{'eline'}-1, scalar(@lines));
 			$n->{'indent'} = $parent->{'indent'} + 1
 				if ($n->{'type'});
+			push(@{$parent->{'members'}}, $n);
 			}
-		push(@{$parent->{'members'}}, $n);
 		splice(@$lref, $n->{'line'}, 0, @lines);
 		}
 	elsif ($i<@$oldstructs) {
@@ -1596,6 +1604,52 @@ return (
 	[ 'SERVER_PORT',       '$server_port' ],
 	[ 'SERVER_NAME',       '$server_name' ],
        );
+}
+
+# find_before_location(&parent, path)
+# Finds the first location with a path shorter than the one given
+sub find_before_location
+{
+my ($parent, $path) = @_;
+my @locs = &find("location", $parent);
+foreach my $l (@locs) {
+	if (length($l->{'words'}->[0]) <= length($path)) {
+		return $l;
+		}
+	}
+return undef;
+}
+
+# url_to_upstream(url)
+# Converts a URL like http://www.foo.com/ to an upstream host:port spec
+sub url_to_upstream
+{
+my ($url) = @_;
+my ($host, $port) = &parse_http_url($url);
+$port ||= 80;
+return $host.":".$port;
+}
+
+# upstream_to_url(host:port)
+# Converts a host:port spec to a URL
+sub upstream_to_url
+{
+my ($hp) = @_;
+my ($host, $port) = split(/:/, $hp);
+return "http://".$host.($port == 80 ? "" : ":".$port);
+}
+
+# validate_balancer_urls(url, ...)
+# Checks a bunch of URLs for syntax and resolvability
+sub validate_balancer_urls
+{
+foreach my $u (@_) {
+	my ($host, $port) = &parse_http_url($u);
+	return &text('redirect_eurl', $u) if (!$host);
+	&to_ipaddress($host) || &to_ip6address($host) ||
+		return &text('redirect_eurlhost', $host);
+	}
+return undef;
 }
 
 1;

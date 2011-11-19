@@ -621,7 +621,7 @@ else {
 				  'words' => [ '^/.*', $disfile, 'break' ] },
 			      ],
 			    };
-			&save_directive($server, [ ], [ $loc ], 1);
+			&save_directive($server, [ ], [ $loc ], $locs[0]);
 			}
 		}
 	else {
@@ -638,7 +638,7 @@ else {
 				  'words' => [ '^/.*', $url, 'break' ] },
 			      ],
 			    };
-			&save_directive($server, [ ], [ $loc ], 1);
+			&save_directive($server, [ ], [ $loc ], $locs[0]);
 			}
 		}
 
@@ -1169,27 +1169,30 @@ my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 my @rv;
 my @locations = &find("location", $server);
-my %upstreams = map { $_->{'words'}->[0], $_ } &find("upstream", $server);
+my $conf = &get_config();
+my $http = &find("http", $conf);
+my %upstreams = map { $_->{'words'}->[0], $_ } &find("upstream", $http);
 foreach my $l (@locations) {
 	next if (@{$l->{'words'}} > 1);
 	my $pp = &find_value("proxy_pass", $l);
 	next if (!$pp && @{$l->{'members'}});
 	my $b = { 'path' => $l->{'words'}->[0],
 		  'location' => $l };
-	if ($pp =~ /^http:\/\/([^\/]+)$/ && $upstreams{$1}) {
+	if (!$pp) {
+		# No URL, so proxying disabled
+		$b->{'none'} = 1;
+		}
+	elsif ($pp =~ /^http:\/\/([^\/]+)$/ && $upstreams{$1}) {
 		# Mapped to an upstream block, with multiple URLs
 		$b->{'balancer'} = $1;
 		my $u = $upstreams{$1};
-		$b->{'urls'} = [ &find_value("server", $u) ];
+		$b->{'urls'} = [ map { &upstream_to_url($_) }
+				     &find_value("server", $u) ];
 		$b->{'upstream'} = $u;
 		}
-	elsif ($pp) {
+	else {
 		# Just one URL
 		$b->{'urls'} = [ $pp ];
-		}
-	else {
-		# No URL, so proxying disabled
-		$b->{'none'} = 1;
 		}
 	push(@rv, $b);
 	}
@@ -1198,28 +1201,34 @@ return @rv;
 
 # feature_create_web_balancer(&domain, &balancer)
 # Create a location block for proxying to some URLs
-# XXX add location at top or in correct order
 sub feature_create_web_balancer
 {
 my ($d, $balancer) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 &lock_all_config_files();
-my @urls = @{$balancer->{'urls'}};
+my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
+my $err = &validate_balancer_urls(@urls);
+return $err if ($err);
 my $url;
 if (@urls > 1) {
 	$balancer->{'balancer'} ||= 'virtualmin_'.time().'_'.$$;
 	$url = 'http://'.$balancer->{'balancer'};
+	my $conf = &get_config();
+	my $http = &find("http", $conf);
+	my ($clash) = grep { $_->{'words'}->[0] eq $balancer->{'balancer'} }
+			   &find("upstream", $http);
+	$clash && return &text('redirect_eupstream', $balancer->{'balancer'});
 	my $u = { 'name' => 'upstream',
 		  'words' => [ $balancer->{'balancer'} ],
 		  'type' => 1,
 		  'members' => [
 			map { { 'name' => 'server',
-				'words' => [ $_ ] } } @urls,
+				'words' => [ &url_to_upstream($_) ] } } @urls,
 		  	]
 		};
 	$balancer->{'upstream'} = $u;
-	&save_directive($server, [ ], [ $u ], 1);
+	&save_directive($http, [ ], [ $u ]);
 	}
 elsif (!$balancer->{'none'}) {
 	$url = $urls[0];
@@ -1235,7 +1244,8 @@ if ($url) {
 				 });
 	}
 $balancer->{'location'} = $l;
-&save_directive($server, [ ], [ $l ], 1);
+my $before = &find_before_location($server, $balancer->{'path'});
+&save_directive($server, [ ], [ $l ], $before);
 &flush_config_file_lines();
 &unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
@@ -1255,11 +1265,13 @@ return $text{'redirect_eobj2'} if (!$balancer->{'location'});
 my $pp = &find_value("proxy_pass", $balancer->{'location'});
 if ($balancer->{'upstream'}) {
 	# Has associated upstream block .. check for other users
-	my @pps = &find_recursive("proxy_pass", $server);
+	my $conf = &get_config();
+	my $http = &find("http", $conf);
+	my @pps = &find_recursive("proxy_pass", $http);
 	my @users = grep { $_->{'words'}->[0] =~
 			   /^http:\/\/\Q$balancer->{'balancer'}\E/ } @pps;
 	if (@users <= 1) {
-		&save_directive($server, [ $balancer->{'upstream'} ], [ ]);
+		&save_directive($http, [ $balancer->{'upstream'} ], [ ]);
 		}
 	}
 &save_directive($server, [ $balancer->{'location'} ], [ ]);
@@ -1285,9 +1297,11 @@ if ($balancer->{'path'} ne $oldbalancer->{'path'}) {
 	}
 my $u = $oldbalancer->{'upstream'};
 my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
+my $err = &validate_balancer_urls(@urls);
+return $err if ($err);
 if ($u) {
 	# Change URLs in upstream block
-	&save_directive($u, "server", \@urls);
+	&save_directive($u, "server", [ map { &url_to_upstream($_) } @urls ]);
 	}
 elsif (@urls > 1) {
 	# Need to add an upstream block
