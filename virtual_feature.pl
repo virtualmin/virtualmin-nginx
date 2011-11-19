@@ -1155,6 +1155,154 @@ return $text{'redirect_eobj'} if (!$redirect->{'object'});
 return undef;
 }
 
+sub feature_supports_web_balancers
+{
+return 2;	# Supports multiple backends
+}
+
+# feature_list_web_balancers(&domain)
+# Finds location blocks that just have a proxy_pass in them
+sub feature_list_web_balancers
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return &text('redirect_efind', $d->{'dom'}) if (!$server);
+my @rv;
+my @locations = &find("location", $server);
+my %upstreams = map { $_->{'words'}->[0], $_ } &find("upstream", $server);
+foreach my $l (@locations) {
+	next if (@{$l->{'words'}} > 1);
+	my $pp = &find_value("proxy_pass", $l);
+	next if (!$pp && @{$l->{'members'}});
+	my $b = { 'path' => $l->{'words'}->[0],
+		  'location' => $l };
+	if ($pp =~ /^http:\/\/([^\/]+)$/ && $upstreams{$1}) {
+		# Mapped to an upstream block, with multiple URLs
+		$b->{'balancer'} = $1;
+		my $u = $upstreams{$1};
+		$b->{'urls'} = [ &find_value("server", $u) ];
+		$b->{'upstream'} = $u;
+		}
+	elsif ($pp) {
+		# Just one URL
+		$b->{'urls'} = [ $pp ];
+		}
+	else {
+		# No URL, so proxying disabled
+		$b->{'none'} = 1;
+		}
+	push(@rv, $b);
+	}
+return @rv;
+}
+
+# feature_create_web_balancer(&domain, &balancer)
+# Create a location block for proxying to some URLs
+# XXX add location at top or in correct order
+sub feature_create_web_balancer
+{
+my ($d, $balancer) = @_;
+my $server = &find_domain_server($d);
+return &text('redirect_efind', $d->{'dom'}) if (!$server);
+&lock_all_config_files();
+my @urls = @{$balancer->{'urls'}};
+my $url;
+if (@urls > 1) {
+	$balancer->{'balancer'} ||= 'virtualmin_'.time().'_'.$$;
+	$url = 'http://'.$balancer->{'balancer'};
+	my $u = { 'name' => 'upstream',
+		  'words' => [ $balancer->{'balancer'} ],
+		  'type' => 1,
+		  'members' => [
+			map { { 'name' => 'server',
+				'words' => [ $_ ] } } @urls,
+		  	]
+		};
+	$balancer->{'upstream'} = $u;
+	&save_directive($server, [ ], [ $u ], 1);
+	}
+elsif (!$balancer->{'none'}) {
+	$url = $urls[0];
+	}
+my $l = { 'name' => 'location',
+	  'words' => [ $balancer->{'path'} ],
+	  'type' => 1,
+	  'members' => [ ],
+        };
+if ($url) {
+	push(@{$l->{'members'}}, { 'name' => 'proxy_pass',
+				   'words' => [ $url ],
+				 });
+	}
+$balancer->{'location'} = $l;
+&save_directive($server, [ ], [ $l ], 1);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
+}
+
+# feature_delete_web_balancer(&domain, &balancer)
+# Deletes the location block for a proxy, and the balancer if created by
+# Virtualmin
+sub feature_delete_web_balancer
+{
+my ($d, $balancer) = @_;
+my $server = &find_domain_server($d);
+return &text('redirect_efind', $d->{'dom'}) if (!$server);
+return $text{'redirect_eobj2'} if (!$balancer->{'location'});
+&lock_all_config_files();
+my $pp = &find_value("proxy_pass", $balancer->{'location'});
+if ($balancer->{'upstream'}) {
+	# Has associated upstream block .. check for other users
+	my @pps = &find_recursive("proxy_pass", $server);
+	my @users = grep { $_->{'words'}->[0] =~
+			   /^http:\/\/\Q$balancer->{'balancer'}\E/ } @pps;
+	if (@users <= 1) {
+		&save_directive($server, [ $balancer->{'upstream'} ], [ ]);
+		}
+	}
+&save_directive($server, [ $balancer->{'location'} ], [ ]);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
+}
+
+# feature_modify_web_balancer(&domain, &balancer, &old-balancer)
+# Change the path or URLs of a proxy
+sub feature_modify_web_balancer
+{
+my ($d, $balancer, $oldbalancer) = @_;
+my $server = &find_domain_server($d);
+return &text('redirect_efind', $d->{'dom'}) if (!$server);
+return $text{'redirect_eobj2'} if (!$oldbalancer->{'location'});
+&lock_all_config_files();
+my $l = $oldbalancer->{'location'};
+if ($balancer->{'path'} ne $oldbalancer->{'path'}) {
+	$l->{'words'}->[0] = $balancer->{'path'};
+	&save_directive($server, [ $l ], [ $l ]);
+	}
+my $u = $oldbalancer->{'upstream'};
+my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
+if ($u) {
+	# Change URLs in upstream block
+	&save_directive($u, "server", \@urls);
+	}
+elsif (@urls > 1) {
+	# Need to add an upstream block
+	&error("Converting a proxy to a balancer can never happen!");
+	}
+else {
+	# Just change one URL
+	&save_directive($l, "proxy_pass", \@urls);
+	}
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
+}
+
 # domain_server_names(&domain)
 # Returns the list of server_name words for a domain
 sub domain_server_names

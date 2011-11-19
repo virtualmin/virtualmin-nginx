@@ -181,6 +181,27 @@ my @rv = map { $_->{'words'}->[0] || $_->{'value'} } &find($name, $conf);
 return wantarray ? @rv : $rv[0];
 }
 
+# find_recursive(name, [&config|&parent])
+# Returns all objects under some parent with the given name
+sub find_recursive
+{
+my ($name, $conf) = @_;
+$conf ||= &get_config();
+if (ref($conf) eq 'HASH') {
+        $conf = $conf->{'members'};
+        }
+my @rv;
+foreach my $c (@$conf) {
+        if (lc($c->{'name'}) eq $name) {
+                push(@rv, $c);
+                }
+	if ($c->{'type'}) {
+		push(@rv, &find_recursive($name, $c));
+		}
+        }
+return wantarray ? @rv : $rv[0];
+}
+
 # save_directive(&parent, name|&oldobjects, &newvalues|&newobjects, [at-top])
 # Updates the values of some named directive
 sub save_directive
