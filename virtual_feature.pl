@@ -1239,9 +1239,21 @@ my $l = { 'name' => 'location',
 	  'members' => [ ],
         };
 if ($url) {
-	push(@{$l->{'members'}}, { 'name' => 'proxy_pass',
-				   'words' => [ $url ],
-				 });
+	# Add rewrites to make URL sent to the proxy not include the original
+	# path, like Apache
+	my $p = $balancer->{'path'};
+	$p =~ s/\/$//;
+	push(@{$l->{'members'}},
+	     { 'name' => 'rewrite',
+	       'words' => [ '^'.$p.'$', $p.'/', 'redirect' ],
+	     },
+	     { 'name' => 'rewrite',
+	       'words' => [ '^'.$p.'(/.*)', '$1', 'break' ],
+	     },
+	     { 'name' => 'proxy_pass',
+	       'words' => [ $url ],
+	     },
+	    );
 	}
 $balancer->{'location'} = $l;
 my $before = &find_before_location($server, $balancer->{'path'});
@@ -1310,6 +1322,21 @@ elsif (@urls > 1) {
 else {
 	# Just change one URL
 	&save_directive($l, "proxy_pass", \@urls);
+	}
+if (@urls) {
+	my $p = $balancer->{'path'};
+	$p =~ s/\/$//;
+	&save_directive($l, 'rewrite',
+	     { 'name' => 'rewrite',
+	       'words' => [ '^'.$p.'$', $p.'/', 'redirect' ],
+	     },
+	     { 'name' => 'rewrite',
+	       'words' => [ '^'.$p.'(/.*)', '$1', 'break' ],
+	     },
+	     );
+	}
+esle {
+	&save_directive($l, 'rewrite', [ ]);
 	}
 &flush_config_file_lines();
 &unlock_all_config_files();
