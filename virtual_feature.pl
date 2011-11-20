@@ -171,6 +171,7 @@ if (!$d->{'alias'}) {
 	&virtual_server::link_apache_logs($d, $alog, $elog);
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
+	$d->{'web_port'} = 80;
 
 	# Set up fcgid server
 	&$virtual_server::first_print($text{'feat_phpfcgid'});
@@ -250,6 +251,7 @@ else {
 		}
 	&save_directive($server, "server_name", [ $obj ]);
 
+	$d->{'web_port'} = 80;
 	&flush_config_file_lines();
 	&unlock_all_config_files();
 	&virtual_server::register_post_action(\&print_apply_nginx);
