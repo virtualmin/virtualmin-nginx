@@ -143,14 +143,15 @@ if (!$d->{'alias'}) {
 		  'words' => [ 'index.html', 'index.htm', 'index.php' ] });
 
 	# Add a location for the root
-	push(@{$server->{'members'}},
-		{ 'name' => 'location',
-		  'words' => [ '/' ],
-		  'type' => 1,
-		  'members' => [
-			{ 'name' => 'root',
-			  'words' => [ &virtual_server::public_html_dir($d) ] },			],
-		});
+	#push(@{$server->{'members'}},
+	#	{ 'name' => 'location',
+	#	  'words' => [ '/' ],
+	#	  'type' => 1,
+	#	  'members' => [
+	#		{ 'name' => 'root',
+	#		  'words' => [ &virtual_server::public_html_dir($d) ] },
+	#		],
+	#	});
 
 	# Add log files
 	my $alog = &virtual_server::get_apache_template_log($d, 0);
@@ -1240,16 +1241,23 @@ my $l = { 'name' => 'location',
         };
 if ($url) {
 	# Add rewrites to make URL sent to the proxy not include the original
-	# path, like Apache
+	# path, like Apache does. Also fix up redirects
 	my $p = $balancer->{'path'};
-	$p =~ s/\/$//;
+	if ($p ne '/') {
+		$p =~ s/\/$//;
+		push(@{$l->{'members'}},
+		     { 'name' => 'rewrite',
+		       'words' => [ '^'.$p.'$', $p.'/', 'redirect' ],
+		     },
+		     { 'name' => 'rewrite',
+		       'words' => [ '^'.$p.'(/.*)', '$1', 'break' ],
+		     },
+		     { 'name' => 'proxy_redirect',
+		       'words' => [ $url, $p ],
+		     },
+		    );
+		}
 	push(@{$l->{'members'}},
-	     { 'name' => 'rewrite',
-	       'words' => [ '^'.$p.'$', $p.'/', 'redirect' ],
-	     },
-	     { 'name' => 'rewrite',
-	       'words' => [ '^'.$p.'(/.*)', '$1', 'break' ],
-	     },
 	     { 'name' => 'proxy_pass',
 	       'words' => [ $url ],
 	     },
@@ -1311,9 +1319,11 @@ my $u = $oldbalancer->{'upstream'};
 my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
 my $err = &validate_balancer_urls(@urls);
 return $err if ($err);
+my $url;
 if ($u) {
 	# Change URLs in upstream block
 	&save_directive($u, "server", [ map { &url_to_upstream($_) } @urls ]);
+	$url = "http://".$oldbalancer->{'balancer'};
 	}
 elsif (@urls > 1) {
 	# Need to add an upstream block
@@ -1322,8 +1332,10 @@ elsif (@urls > 1) {
 else {
 	# Just change one URL
 	&save_directive($l, "proxy_pass", \@urls);
+	$url = @urls ? $urls[0] : undef;
 	}
-if (@urls) {
+if (@urls && $balancer->{'path'} ne '/') {
+	# Add rewrites for the path
 	my $p = $balancer->{'path'};
 	$p =~ s/\/$//;
 	&save_directive($l, 'rewrite',
@@ -1332,6 +1344,9 @@ if (@urls) {
 	     },
 	     { 'name' => 'rewrite',
 	       'words' => [ '^'.$p.'(/.*)', '$1', 'break' ],
+	     },
+	     { 'name' => 'proxy_redirect',
+	       'words' => [ $url, $p ],
 	     },
 	     );
 	}
