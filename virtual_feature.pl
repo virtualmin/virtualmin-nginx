@@ -1361,6 +1361,130 @@ esle {
 return undef;
 }
 
+sub feature_supports_webmail_redirect
+{
+return 1;	# Can be setup using Nginx rewrites
+}
+
+# feature_add_web_webmail_redirect(&domain, &tmpl)
+# Add server names for webmail and admin, and rewrite rules to redirect to
+# Webmin and Usermin
+sub feature_add_web_webmail_redirect
+{
+my ($d, $tmpl) = @_;
+my $server = &find_domain_server($d);
+return &text('redirect_efind', $d->{'dom'}) if (!$server);
+&lock_all_config_files();
+foreach my $r ('webmail', 'admin') {
+	next if (!$tmpl->{'web_'.$r});
+
+	# Work out the URL to redirect to
+	my $url = $tmpl->{'web_'.$r.'dom'};
+	if ($url) {
+		# Sub in any template
+		$url = &virtual_server::substitute_domain_template($url, $d);
+		}
+	else {
+		# Work out URL
+		my ($port, $proto);
+		if ($r eq 'webmail') {
+			# From Usermin
+			if (&foreign_installed("usermin")) {
+				&foreign_require("usermin", "usermin-lib.pl");
+				my %miniserv;
+				&usermin::get_usermin_miniserv_config(
+					\%miniserv);
+				$proto = $miniserv{'ssl'} ? 'https' : 'http';
+				$port = $miniserv{'port'};
+				}
+			# Fall back to standard defaults
+			$proto ||= "http";
+			$port ||= 20000;
+			}
+		else {
+			# From Webmin
+			($port, $proto) = &virtual_server::get_miniserv_port_proto();
+			}
+		$url = "$proto://$d->{'dom'}:$port/";
+		}
+
+	# Update server_name
+	my $obj = &find("server_name", $server);
+	my $rhost = $r.".".$d->{'dom'};
+	if (&indexof($rhost, @{$obj->{'words'}}) < 0) {
+		push(@{$obj->{'words'}}, $rhost);
+		&save_directive($server, "server_name", [ $obj ]);
+		}
+
+	# Add rewrite directive, inside if block
+	&save_directive($server, [ ], [
+		{ 'name' => 'if',
+		  'type' => 2,
+		  'words' => [ '$host', '=', $rhost ],
+		  'members' => [
+			{ 'name' => 'rewrite',
+			  'words' => [ '^/(.*)$', $url.'$1', 'redirect' ],
+			},
+			]
+		},
+		]);
+	}
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
+}
+
+# feature_remove_web_webmail_redirect(&domain)
+# Delete the additional server names and rewrite rules
+sub feature_remove_web_webmail_redirect
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return &text('redirect_efind', $d->{'dom'}) if (!$server);
+&lock_all_config_files();
+foreach my $r ('webmail', 'admin') {
+	# Update server_name
+	my $obj = &find("server_name", $server);
+	my $rhost = $r.".".$d->{'dom'};
+	my $idx = &indexof($rhost, @{$obj->{'words'}});
+	if ($idx >= 0) {
+		splice(@{$obj->{'words'}}, $idx, 1);
+		&save_directive($server, "server_name", [ $obj ]);
+		}
+
+	# Remove if block for the rewrite
+	my @ifs = &find("if", $server);
+	foreach my $i (@ifs) {
+		if ($i->{'words'}->[0] eq '$host' &&
+		    $i->{'words'}->[1] eq '=' &&
+		    $i->{'words'}->[2] eq $rhost) {
+			&save_directive($server, [ $i ], [ ]);
+			}
+		}
+	}
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
+}
+
+# feature_get_web_webmail_redirect(&domain)
+# Check if the webmail and admin server_names are in place
+sub feature_get_web_webmail_redirect
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return 0 if (!$server);
+my $obj = &find("server_name", $server);
+my @rv;
+foreach my $r ("webmail", "admin") {
+	my $rhost = $r.".".$d->{'dom'};
+	push(@rv, $rhost) if (&indexof($rhost, @{$obj->{'words'}}) >= 0);
+	}
+return @rv;
+}
+
 # domain_server_names(&domain)
 # Returns the list of server_name words for a domain
 sub domain_server_names

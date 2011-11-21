@@ -69,7 +69,23 @@ my @lines = <$fh>;
 close($fh);
 foreach (@lines) {
 	s/#.*$//;
-	if (/^\s*(\S+)(\s+.*)\{/) {
+	if (/^\s*if\s*\((.*)\)\s*\{/) {
+		# Start of an if statement
+		my $ns = { 'name' => 'if',
+			   'type' => 2,
+			   'indent' => scalar(@stack),
+			   'file' => $file,
+			   'line' => $lnum,
+			   'eline' => $lnum,
+			   'members' => [ ] };
+		my $value = $1;
+		$ns->{'words'} = [ &split_words(" ".$value) ];
+		$ns->{'value'} = $ns->{'words'}->[0];
+		push(@stack, $addto);
+		push(@$addto, $ns);
+		$addto = $ns->{'members'};
+		}
+	elsif (/^\s*(\S+)(\s+.*)\{/) {
 		# Start of a section
 		my $ns = { 'name' => $1,
 			   'type' => 1,
@@ -378,7 +394,12 @@ my @rv;
 my @w = @{$dir->{'words'}};
 if ($dir->{'type'}) {
 	# Multi-line
-	push(@rv, $dir->{'name'}.(@w ? " ".&join_words(@w) : "")." {");
+	if ($dir->{'name'} eq 'if') {
+		push(@rv, $dir->{'name'}.' ('.&join_words(@w).') {');
+		}
+	else {
+		push(@rv, $dir->{'name'}.(@w ? " ".&join_words(@w) : "")." {");
+		}
 	foreach my $m (@{$dir->{'members'}}) {
 		push(@rv, &make_directive_lines($m, 1));
 		}
