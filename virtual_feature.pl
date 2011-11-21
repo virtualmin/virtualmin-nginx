@@ -273,6 +273,7 @@ if (!$d->{'alias'}) {
 	my $changed = 0;
 
 	# Update domain name in server_name
+	# XXX update in all directives?
 	if ($d->{'dom'} ne $oldd->{'dom'}) {
 		&$virtual_server::first_print($text{'feat_modifydom'});
 		my $server = &find_domain_server($oldd);
@@ -337,6 +338,15 @@ if (!$d->{'alias'}) {
 				}
 			}
 		&save_directive($server, "listen", \@listen);
+
+		# Remove IP in server_names
+		my $obj = &find("server_name", $server);
+		my $idx = &indexof($oldd->{'ip'}, @{$obj->{'words'}});
+		if ($idx >= 0) {
+			splice(@{$obj->{'words'}}, $idx, 0);
+			&save_directive($server, "server_name", [ $obj ]);
+			}
+
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
@@ -1483,6 +1493,58 @@ foreach my $r ("webmail", "admin") {
 	push(@rv, $rhost) if (&indexof($rhost, @{$obj->{'words'}}) >= 0);
 	}
 return @rv;
+}
+
+sub feature_supports_web_default
+{
+return 1;	# Websites can be made the default
+}
+
+# feature_set_web_default(&domain)
+# Make this domain's site the default by adding it's IP to server_name
+sub feature_set_web_default
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return &text('redirect_efind', $d->{'dom'}) if (!$server);
+&lock_all_config_files();
+
+# Add IP to server_name for this server
+my $obj = &find("server_name", $server);
+my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
+if ($idx < 0) {
+	push(@{$obj->{'words'}}, $d->{'ip'});
+	&save_directive($server, "server_name", [ $obj ]);
+	}
+
+# Remove IP from server_name for other servers
+my $conf = &get_config();
+my $http = &find("http", $conf);
+foreach my $os (&find("server", $http)) {
+	next if ($os eq $server);
+	my $obj = &find("server_name", $os);
+	my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
+	if ($idx >= 0) {
+		splice(@{$obj->{'words'}}, $idx, 1);
+		&save_directive($os, "server_name", [ $obj ]);
+		}
+	}
+
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
+}
+
+# feature_is_web_default(&domain)
+# Returns 1 if the server's IP is in server_names
+sub feature_is_web_default
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return 0 if (!$server);
+my $obj = &find("server_name", $server);
+return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
 }
 
 # domain_server_names(&domain)
