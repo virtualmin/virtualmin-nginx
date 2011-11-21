@@ -909,10 +909,14 @@ return &get_default("fastcgi_read_timeout");
 sub feature_set_fcgid_max_execution_time
 {
 my ($d, $max) = @_;
+&lock_all_config_files();
 my $server = &find_domain_server($d);
 if ($server) {
 	&save_directive($server, "fastcgi_read_timeout", [ $max || 9999 ]);
 	}
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
 }
 
 # feature_restart_web_php(&domain)
