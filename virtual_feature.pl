@@ -1638,10 +1638,15 @@ if ($oldd && $oldd->{'nginx_php_port'} != $d->{'nginx_php_port'}) {
 		}
 	}
 
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+&$virtual_server::second_print($virtual_server::text{'setup_done'});
+
 # Correct system-specific entries in PHP config files
 if ($oldd) {
-	local $sock = &virtual_server::get_php_mysql_socket($d);
-	local @fixes = (
+	my $sock = &virtual_server::get_php_mysql_socket($d);
+	my @fixes = (
 	  [ "session.save_path", $oldd->{'home'}, $d->{'home'}, 1 ],
 	  [ "upload_tmp_dir", $oldd->{'home'}, $d->{'home'}, 1 ],
 	  );
@@ -1654,14 +1659,8 @@ if ($oldd) {
 # Fix broken PHP extension_dir directives
 &virtual_server::fix_php_extension_dir($d);
 
-&flush_config_file_lines();
-&unlock_all_config_files();
-&virtual_server::register_post_action(\&print_apply_nginx);
-&$virtual_server::second_print($virtual_server::text{'setup_done'});
-
 # Restore log files
-my $server = &find_domain_server($d);
-if ($server && -r $file."_alog") {
+if (-r $file."_alog") {
 	&$virtual_server::first_print($text{'feat_restorelog'});
 	&copy_source_dest($file."_alog", $alog);
 	&set_nginx_log_permissions($d, $alog);
