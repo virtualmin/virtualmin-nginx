@@ -1476,15 +1476,19 @@ else {
 }
 
 # recursive_change_directives(&parent, old-value, new-value, [suffix-too],
-# 			      [prefix-too])
+# 			      [prefix-too], [infix-too])
 # Change all directives who have a value that is the old value to the new one
 sub recursive_change_directives
 {
-my ($parent, $oldv, $newv, $suffix, $prefix) = @_;
+my ($parent, $oldv, $newv, $suffix, $prefix, $infix) = @_;
 foreach my $dir (@{$parent->{'members'}}) {
 	my $changed = 0;
 	foreach my $w (@{$dir->{'words'}}) {
-		if ($suffix && $w =~ /\Q$oldv\E$/) {
+		if ($infix && $w =~ /\Q$oldv\E/) {
+			$w =~ s/\Q$oldv\E/$newv/g;
+			$changed++;
+			}
+		elsif ($suffix && $w =~ /\Q$oldv\E$/) {
 			$w =~ s/\Q$oldv\E$/$newv/g;
 			$changed++;
 			}

@@ -216,16 +216,11 @@ if (!$d->{'alias'}) {
 
 	# Create empty log files and make them writable by Nginx and
 	# the domain owner
-	if ($web_user) {
-		my @uinfo = getpwnam($web_user);
-		my $web_group = getgrgid($uinfo[3]) || $uinfo[3];
-		foreach my $l ($alog, $elog) {
-			my $fh = "LOG";
-			&open_tempfile($fh, ">>$l", 0, 1);
-			&close_tempfile($fh);
-			&set_ownership_permissions(
-				$d->{'uid'}, $web_group, 0660, $l);
-			}
+	foreach my $l ($alog, $elog) {
+		my $fh = "LOG";
+		&open_tempfile($fh, ">>$l", 0, 1);
+		&close_tempfile($fh);
+		&set_nginx_log_permissions($d, $l);
 		}
 
 	return 1;
@@ -273,7 +268,6 @@ if (!$d->{'alias'}) {
 	my $changed = 0;
 
 	# Update domain name in server_name
-	# XXX update in all directives?
 	if ($d->{'dom'} ne $oldd->{'dom'}) {
 		&$virtual_server::first_print($text{'feat_modifydom'});
 		my $server = &find_domain_server($oldd);
@@ -282,21 +276,8 @@ if (!$d->{'alias'}) {
 				&text('feat_efind', $oldd->{'dom'}));
 			return 0;
 			}
-		my $obj = &find("server_name", $server);
-		foreach my $n (&domain_server_names($oldd)) {
-			@{$obj->{'words'}} = grep { $_ ne $n }
-						  @{$obj->{'words'}};
-			}
-		foreach my $n (&domain_server_names($d)) {
-			if (&indexoflc($n, @{$obj->{'words'}}) < 0) {
-				push(@{$obj->{'words'}}, $n);
-				}
-			}
-		my $oldstar = &indexof("*.".$oldd->{'dom'}, @{$obj->{'words'}});
-		if ($oldstar >= 0) {
-			$obj->{'words'}->[$oldstar] = "*.".$d->{'dom'};
-			}
-		&save_directive($server, "server_name", [ $obj ]);
+		&recursive_change_directives($server, $oldd->{'dom'},
+					     $d->{'dom'}, 0, 0, 1);
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
@@ -458,7 +439,11 @@ if (!$d->{'alias'}) {
 
 	# Update owner of log files
 	if ($d->{'user'} ne $oldd->{'user'}) {
-		# XXX
+		my $alog = &get_nginx_log($d, 0);
+		my $elog = &get_nginx_log($d, 1);
+		foreach my $l ($alog, $elog) {
+			&set_nginx_log_permissions($d, $l);
+			}
 		}
 	}
 else {
@@ -1003,7 +988,7 @@ return &start_nginx();
 sub feature_bandwidth
 {
 my ($d, $start, $bwinfo) = @_;
-my @logs = ( &feature_get_web_log($d, 0) );
+my @logs = ( &get_nginx_log($d, 0) );
 return if ($d->{'alias'} || $d->{'subdom'}); # never accounted separately
 my $max_ltime = $start;
 foreach my $l (&unique(@logs)) {
@@ -1081,10 +1066,7 @@ elsif (!$star && $idx >= 0) {
 sub feature_get_web_log
 {
 my ($d, $errorlog) = @_;
-my $server = &find_domain_server($d);
-return undef if (!$server);
-my $rv = &find_value($errorlog ? "error_log" : "access_log", $server);
-return $rv;
+return &get_nginx_log($d, $errorlog);
 }
 
 sub feature_supports_web_redirects
@@ -1549,6 +1531,159 @@ my $server = &find_domain_server($d);
 return 0 if (!$server);
 my $obj = &find("server_name", $server);
 return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
+}
+
+# feature_backup(&domain, file, &opts, &all-opts)
+# Backup this domain's Nginx directives to a file
+sub feature_backup
+{
+my ($d, $file) = @_;
+return 1 if ($d->{'alias'});
+
+# Write config directives from the server block to a file
+&$virtual_server::first_print($text{'feat_backup'});
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+if (!$server) {
+	&unlock_all_config_files();
+	&$virtual_server::second_print(
+		&text('feat_efind', $d->{'dom'}));
+	return 0;
+	}
+my $lref = &read_file_lines($server->{'file'}, 1);
+my $fh = "BACKUP";
+&open_tempfile($fh, ">$file");
+foreach my $l (@$lref[($server->{'line'}+1) .. ($server->{'eline'}-1)]) {
+	&print_tempfile($fh, $l."\n");
+	}
+&close_tempfile($fh);
+&unlock_all_config_files();
+&$virtual_server::second_print($virtual_server::text{'setup_done'});
+
+# Save log files, if outside home
+my $alog = &get_nginx_log($d, 0);
+if ($alog && !&is_under_directory($d->{'home'}, $alog)) {
+	&$virtual_server::first_print($text{'feat_backuplog'});
+	&copy_source_dest($alog, $file."_alog");
+	my $elog = &get_nginx_log($d, 1);
+	if ($elog && !&is_under_directory($d->{'home'}, $elog)) {
+		&copy_source_dest($elog, $file."_elog");
+		}
+	&$virtual_server::second_print($virtual_server::text{'setup_done'});
+	}
+
+return 1;
+}
+
+# feature_restore(&domain, file, &opts, &all-opts, home-format, &old-domain)
+# Re-created this domain's Nginx directives from a file
+sub feature_restore
+{
+my ($d, $file, undef, undef, undef, $oldd) = @_;
+return 1 if ($d->{'alias'});
+
+# Replace lines in the server block with those from the backup file
+&$virtual_server::first_print($text{'feat_restore'});
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+if (!$server) {
+	&unlock_all_config_files();
+	&$virtual_server::second_print(
+		&text('feat_efind', $d->{'dom'}));
+	return 0;
+	}
+my $alog = &get_nginx_log($d, 0);
+my $elog = &get_nginx_log($d, 1);
+my $lref = &read_file_lines($server->{'file'});
+my $srclref = &read_file_lines($file, 1);
+splice(@$lref, $server->{'line'}+1, $server->{'eline'}-$server->{'line'}-1,
+       @$srclref);
+&flush_file_lines($server->{'file'});
+&flush_config_cache();
+$server = &find_domain_server($d);
+if (!$server) {
+	&$virtual_server::second_print(
+		&text('feat_erestorefind', $d->{'dom'}));
+	return 0;
+	}
+
+# Put back old log file paths
+&save_directive($server, "access_log", [ $alog ]) if ($alog);
+&save_directive($server, "error_log", [ $elog ]) if ($elog);
+
+# Remove IP from server_name if changed
+if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
+	my $obj = &find("server_name", $server);
+	my $idx = &indexof($oldd->{'ip'}, @{$obj->{'words'}});
+	if ($idx >= 0) {
+		splice(@{$obj->{'words'}}, $idx, 1);
+		&save_directive($server, "server_name", [ $obj ]);
+		}
+	}
+
+# Fix up home directory if changed
+if ($oldd && $d->{'home'} ne $oldd->{'home'}) {
+	&recursive_change_directives(
+		$server, $oldd->{'home'}, $d->{'home'}, 0, 1);
+	}
+
+# Put back old port for PHP server
+if ($oldd && $oldd->{'nginx_php_port'} != $d->{'nginx_php_port'}) {
+	my ($l) = grep { $_->{'words'}->[1] eq '\.php$' }
+		       &find("location", $server);
+	if ($l) {
+		&save_directive($l, "fastcgi_pass",
+				"localhost:".$oldd->{'nginx_php_port'});
+		$d->{'nginx_php_port'} = $oldd->{'nginx_php_port'};
+		}
+	}
+
+# Correct system-specific entries in PHP config files
+if ($oldd) {
+	local $sock = &virtual_server::get_php_mysql_socket($d);
+	local @fixes = (
+	  [ "session.save_path", $oldd->{'home'}, $d->{'home'}, 1 ],
+	  [ "upload_tmp_dir", $oldd->{'home'}, $d->{'home'}, 1 ],
+	  );
+	if ($sock ne 'none') {
+		push(@fixes, [ "mysql.default_socket", undef, $sock ]);
+		}
+	&virtual_server::fix_php_ini_files($d, \@fixes);
+	}
+
+# Fix broken PHP extension_dir directives
+&virtual_server::fix_php_extension_dir($d);
+
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+&$virtual_server::second_print($virtual_server::text{'setup_done'});
+
+# Restore log files
+my $server = &find_domain_server($d);
+if ($server && -r $file."_alog") {
+	&$virtual_server::first_print($text{'feat_restorelog'});
+	&copy_source_dest($file."_alog", $alog);
+	&set_nginx_log_permissions($d, $alog);
+	if (-r $file."_elog") {
+		&copy_source_dest($file."_elog", $elog);
+		&set_nginx_log_permissions($d, $elog);
+		}
+	&$virtual_server::second_print($virtual_server::text{'setup_done'});
+	}
+
+return 1;
+}
+
+# set_nginx_log_permissions(&domain, file)
+# Sets the correct user and group perms on a log file
+sub set_nginx_log_permissions
+{
+my ($d, $log) = @_;
+my $web_user = &get_nginx_user();
+my @uinfo = getpwnam($web_user);
+my $web_group = getgrgid($uinfo[3]) || $uinfo[3];
+&set_ownership_permissions($d->{'uid'}, $web_group, 0660, $log);
 }
 
 # domain_server_names(&domain)

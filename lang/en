@@ -441,6 +441,11 @@ feat_srestart=Restart Nginx Webserver
 feat_sstart=Start Nginx Webserver
 feat_sstopdesc=The Nginx webserver is currently active, and serving virtual server web pages. Click this button to shut it down.
 feat_sstartdesc=The Nginx webserver is currently down, meaning that all virtual server web pages are inaccessible. Click this button to start it.
+feat_backup=Backing up Nginx webserver configuration ..
+feat_backuplog=Backing up Nginx webserver log files ..
+feat_restore=Restoring Nginx webserver configuration ..
+feat_restorelog=Restoring Nginx webserver log files ..
+feat_erestorefind=.. Nginx virtualhost was not found after restore!?
 
 fcgid_ecmd=No PHP command found!
 
