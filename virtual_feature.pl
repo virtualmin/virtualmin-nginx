@@ -110,6 +110,11 @@ if (!$d->{'alias'}) {
 	my $conf = &get_config();
 	my $http = &find("http", $conf);
 
+	# Pick ports
+	my $tmpl = &virtual_server::get_template($d->{'template'});
+	$d->{'web_port'} ||= $tmpl->{'web_port'} || 80;
+	$d->{'web_sslport'} ||= $tmpl->{'web_sslport'} || 443;
+
 	# Create the server object
 	my $server = { 'name' => 'server',
                        'type' => 1,
@@ -122,14 +127,15 @@ if (!$d->{'alias'}) {
 		{ 'name' => 'server_name',
 		  'words' => [ &domain_server_names($d) ] });
 
-	# Add listen on the correct IP
+	# Add listen on the correct IP and port
+	my $portstr = $d->{'web_port'} == 80 ? '' : ':'.$d->{'web_port'};
 	push(@{$server->{'members'}},
 		{ 'name' => 'listen',
-		  'words' => [ $d->{'ip'} ] });
+		  'words' => [ $d->{'ip'}.$portstr ] });
 	if ($d->{'virt6'}) {
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
-			  'words' => [ "[".$d->{'ip6'}."]" ] });
+			  'words' => [ '['.$d->{'ip6'}.']'.$portstr ] });
 		}
 
 	# Set the root correctly
@@ -171,7 +177,6 @@ if (!$d->{'alias'}) {
 	&virtual_server::link_apache_logs($d, $alog, $elog);
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
-	$d->{'web_port'} = 80;
 
 	# Set up fcgid server
 	&$virtual_server::first_print($text{'feat_phpfcgid'});
@@ -372,6 +377,34 @@ if (!$d->{'alias'}) {
 			}
 		if ($d->{'virt6'} && !$oldd->{'virt6'}) {
 			push(@newlisten, { 'words' => [ $nb ] });
+			}
+		&save_directive($server, "listen", \@newlisten);
+		&$virtual_server::second_print(
+			$virtual_server::text{'setup_done'});
+		$changed++;
+		}
+
+	# Update port, if changed
+	if ($d->{'web_port'} != $oldd->{'web_port'}) {
+		&$virtual_server::first_print($text{'feat_modifyport'});
+		my $server = &find_domain_server($d);
+		if (!$server) {
+			&$virtual_server::second_print(
+				&text('feat_efind', $d->{'dom'}));
+			return 0;
+			}
+		my @listen = &find("listen", $server);
+		my @newlisten;
+		foreach my $l (@listen) {
+			my @w = @{$l->{'words'}};
+			my $defp = &indexof("ssl", @w) >= 0 ? 443 : 80;
+			my $p = $w[0] =~ /:(\d+)$/ ? $1 : $defp;
+			if ($p == $oldd->{'web_port'}) {
+				$w[0] =~ s/:\d+$//;
+				$w[0] .= ":".$d->{'web_port'}
+					if ($d->{'web_port'} != $defp);
+				}
+			push(@newlisten, { 'words' => \@w });
 			}
 		&save_directive($server, "listen", \@newlisten);
 		&$virtual_server::second_print(
