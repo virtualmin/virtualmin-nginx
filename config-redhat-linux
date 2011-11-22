@@ -1,0 +1,5 @@
+nginx_config=/etc/nginx/nginx.conf
+ngxin_cmd=/usr/sbin/nginx
+start_cmd=/etc/init.d/nginx start
+stop_cmd=/etc/init.d/nginx stop
+apply_cmd=/etc/init.d/nginx restart
