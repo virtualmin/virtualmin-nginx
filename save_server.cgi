@@ -81,6 +81,17 @@ else {
 	&nginx_text_parse("server_name", $server, undef, '^\S+$', undef, 1);
 	$name = $in{'server_name'};
 
+	# Get param for default server
+	my $ver = &get_nginx_version();
+	my $defserv;
+	if ($ver > 0.8 ||
+	    $ver =~ /^0\.8\.(\d+)/ && $1 >= 21) {
+		$defserv = "default_server";
+		}
+	else {
+		$defserv = "default";
+		}
+
 	# Addresses to accept connections on
 	# XXX preserve existing args
 	my $i = 0;
@@ -118,7 +129,7 @@ else {
 		# Other random options
 		my @words = ( $ip );
 		if ($in{"default_$i"}) {
-			push(@words, "default_server");
+			push(@words, $defserv);
 			}
 		if ($in{"ssl_$i"}) {
 			push(@words, "ssl");

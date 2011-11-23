@@ -421,6 +421,7 @@ feat_evalidatediff=The Nginx virtual host for the target virtual server $1 is no
 feat_evalidateip=The Nginx virtual host is not accepting connections on IP address $1
 feat_evalidateip6=The Nginx virtual host is not accepting connections on IPv6 address $1
 feat_edit=Configure Nginx Website
+feat_ssl=Setup SSL Website
 feat_modifydom=Changing domain name in Nginx configuration ..
 feat_modifyhome=Changing home directory in Nginx configuration ..
 feat_modifyip=Changing IP address in Nginx configuration ..

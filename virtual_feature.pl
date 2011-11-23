@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Time::Local;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %config, $module_name);
+our (%text, %config, $module_name, %access);
 
 # feature_name()
 # Returns a short name for this feature
@@ -809,10 +809,11 @@ sub feature_links
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return ( ) if (!$server);
-return ( { 'mod' => $module_name,
-	   'desc' => $text{'feat_edit'},
-	   'page' => 'edit_server.cgi?id='.&server_id($server),
-	   'cat' => 'services' } );
+my @rv = ( { 'mod' => $module_name,
+	     'desc' => $text{'feat_edit'},
+	     'page' => 'edit_server.cgi?id='.&server_id($server),
+	     'cat' => 'services' } );
+return @rv;
 }
 
 # print_apply_nginx()
