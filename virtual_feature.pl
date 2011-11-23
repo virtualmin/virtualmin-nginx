@@ -113,7 +113,6 @@ if (!$d->{'alias'}) {
 	# Pick ports
 	my $tmpl = &virtual_server::get_template($d->{'template'});
 	$d->{'web_port'} ||= $tmpl->{'web_port'} || 80;
-	$d->{'web_sslport'} ||= $tmpl->{'web_sslport'} || 443;
 
 	# Create the server object
 	my $server = { 'name' => 'server',
@@ -397,12 +396,11 @@ if (!$d->{'alias'}) {
 		my @newlisten;
 		foreach my $l (@listen) {
 			my @w = @{$l->{'words'}};
-			my $defp = &indexof("ssl", @w) >= 0 ? 443 : 80;
-			my $p = $w[0] =~ /:(\d+)$/ ? $1 : $defp;
+			my $p = $w[0] =~ /:(\d+)$/ ? $1 : 80;
 			if ($p == $oldd->{'web_port'}) {
 				$w[0] =~ s/:\d+$//;
 				$w[0] .= ":".$d->{'web_port'}
-					if ($d->{'web_port'} != $defp);
+					if ($d->{'web_port'} != 80);
 				}
 			push(@newlisten, { 'words' => \@w });
 			}
@@ -756,22 +754,28 @@ if ($d->{'alias'}) {
 		if ($targetserver ne $server);
 	}
 
-# Check for IPs
+# Check for IPs and port
 if (!$d->{'alias'}) {
 	my @listen = &find_value("listen", $server);
 	my $found = 0;
 	foreach my $l (@listen) {
-		$found++ if ($l eq $d->{'ip'} ||
-			     $l =~ /^\Q$d->{'ip'}\E:/);
+		$found++ if ($l eq $d->{'ip'} &&
+			      $d->{'web_port'} == 80 ||
+			     $l =~ /^\Q$d->{'ip'}\E:(\d+)$/ &&
+			      $d->{'web_port'} == $1);
 		}
-	$found || return &text('feat_evalidateip', $d->{'ip'});
+	$found || return &text('feat_evalidateip',
+			       $d->{'ip'}, $d->{'web_port'});
 	if ($d->{'virt6'}) {
 		my $found6 = 0;
 		foreach my $l (@listen) {
-			$found6++ if ($l eq "[".$d->{'ip6'}."]" ||
-				      $l =~ /^\[\Q$d->{'ip'}\E\]:/);
+			$found6++ if ($l eq "[".$d->{'ip6'}."]" &&
+				       $d->{'web_port'} == 80 ||
+				      $l =~ /^\[\Q$d->{'ip6'}\E\]:(\d+)$/ &&
+				       $d->{'web_port'} == $1);
 			}
-		$found6 || return &text('feat_evalidateip6', $d->{'ip6'});
+		$found6 || return &text('feat_evalidateip6',
+					$d->{'ip6'}, $d->{'web_port'});
 		}
 	}
 
