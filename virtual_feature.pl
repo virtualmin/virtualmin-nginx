@@ -1567,11 +1567,12 @@ my $obj = &find("server_name", $server);
 return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
 }
 
-# feature_backup(&domain, file, &opts, &all-opts)
+# feature_backup(&domain, file, &opts, homeformat?, incremental?, as-owner,
+# 		 &all-opts)
 # Backup this domain's Nginx directives to a file
 sub feature_backup
 {
-my ($d, $file) = @_;
+my ($d, $file, $opts, $homefmt, $increment, $asd, $allopts) = @_;
 return 1 if ($d->{'alias'});
 
 # Write config directives from the server block to a file
@@ -1596,7 +1597,8 @@ foreach my $l (@$lref[($server->{'line'}+1) .. ($server->{'eline'}-1)]) {
 
 # Save log files, if outside home
 my $alog = &get_nginx_log($d, 0);
-if ($alog && !&is_under_directory($d->{'home'}, $alog)) {
+if ($alog && !&is_under_directory($d->{'home'}, $alog) &&
+    !$allopts->{'dir'}->{'dirnologs'}) {
 	&$virtual_server::first_print($text{'feat_backuplog'});
 	&copy_source_dest($alog, $file."_alog");
 	my $elog = &get_nginx_log($d, 1);
