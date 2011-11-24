@@ -961,6 +961,13 @@ if ($d->{'nginx_php_port'}) {
 	}
 }
 
+# feature_restart_web()
+# Applies the webserver configuration
+sub feature_restart_web
+{
+&print_apply_nginx();
+}
+
 # feature_restart_web_command()
 # Returns the Nginx restart command
 sub feature_restart_web_command
@@ -1572,6 +1579,16 @@ my $server = &find_domain_server($d);
 return 0 if (!$server);
 my $obj = &find("server_name", $server);
 return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
+}
+
+# feature_save_web_passphrase(&domain)
+# Not possible with Nginx
+sub feature_save_web_passphrase
+{
+my ($d) = @_;
+if ($d->{'ssl_pass'}) {
+	&error($text{'feat_epassphrase'});
+	}
 }
 
 # feature_backup(&domain, file, &opts, homeformat?, incremental?, as-owner,
