@@ -1591,6 +1591,30 @@ if ($d->{'ssl_pass'}) {
 	}
 }
 
+# feature_save_web_ssl_file(&domain, mode, file)
+# Set the SSL cert or key file in the Nginx config
+sub feature_save_web_ssl_file
+{
+my ($d, $mode, $file) = @_;
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+return &text('feat_efind', $d->{'dom'}) if (!$server);
+if ($mode eq 'cert') {
+	&save_directive($server, "ssl_certificate", [ $file ]);
+	}
+elsif ($mode eq 'key') {
+	&save_directive($server, "ssl_certificate_key", [ $file ]);
+	}
+elsif ($mode eq 'ca') {
+	# XXX not supported yet
+	return $text{'feat_esslca'};
+	}
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
+}
+
 # feature_backup(&domain, file, &opts, homeformat?, incremental?, as-owner,
 # 		 &all-opts)
 # Backup this domain's Nginx directives to a file
