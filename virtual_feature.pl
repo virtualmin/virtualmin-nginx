@@ -339,7 +339,7 @@ if (!$d->{'alias'}) {
 
 	# Update IPv6 address (or add or remove)
 	if ($d->{'ip6'} ne $oldd->{'ip6'} ||
-	    int($d->{'virt6'}) != int($oldd->{'virt6'})) {
+	    $d->{'virt6'} ne $oldd->{'virt6'}) {
 		&$virtual_server::first_print($text{'feat_modifyip6'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
@@ -461,11 +461,14 @@ if (!$d->{'alias'}) {
 	# Update fcgid user, by tearing down and re-running. Killing needs to
 	# be done in the new home, as it may have been moved already
 	if ($d->{'user'} ne $oldd->{'user'}) {
+		&$virtual_server::first_print($text{'feat_modifyphp'});
 		my $oldd_copy = { %$oldd };
 		$oldd_copy->{'home'} = $d->{'home'};
 		&delete_php_fcgi_server($oldd_copy);
 		&delete_php_fcgi_server($oldd);
 		&setup_php_fcgi_server($d);
+		&$virtual_server::second_print(
+			$virtual_server::text{'setup_done'});
 		}
 
 	# Update owner of log files

@@ -330,12 +330,12 @@ $parent->{'file'} ||= $file;
 $parent->{'line'} ||= $line;
 $parent->{'eline'} ||= $parent->{'line'};
 if ($parent->{'type'}) {
-	my $n = 0;
+	my $n = 1;
 	foreach my $dir (@{$parent->{'members'}}) {
 		&recursive_set_file($dir, $file, $parent->{'line'} + $n);
 		$n += ($dir->{'eline'} - $dir->{'line'} + 1);
 		}
-	$parent->{'eline'} = $parent->{'line'} + $n + 1;
+	$parent->{'eline'} = $parent->{'line'} + $n;
 	}
 }
 
