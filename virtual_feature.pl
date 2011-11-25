@@ -266,6 +266,14 @@ sub feature_modify
 {
 my ($d, $oldd) = @_;
 
+# Special case - converting an alias domain into a non-alias. Just delete and
+# re-create
+if ($oldd->{'alias'} && !$d->{'alias'}) {
+	&feature_delete($oldd);
+	&feature_setup($d);
+	return 1;
+	}
+
 if (!$d->{'alias'}) {
 	# Changing a real virtual host
 	&lock_all_config_files();
@@ -297,7 +305,9 @@ if (!$d->{'alias'}) {
 			return 0;
 			}
 		&recursive_change_directives(
-			$server, $oldd->{'home'}, $d->{'home'}, 0, 1);
+			$server, $oldd->{'home'}, $d->{'home'}, 0, 0, 0);
+		&recursive_change_directives(
+			$server, $oldd->{'home'}.'/', $d->{'home'}.'/', 0, 1,0);
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
@@ -1674,7 +1684,17 @@ if (!$server) {
 my $lref = &read_file_lines($server->{'file'}, 1);
 my $fh = "BACKUP";
 &open_tempfile($fh, ">$file");
+my %adoms = map { $_->{'dom'}, 1 }
+		&virtual_server::get_domain_by("alias", $d->{'id'});
 foreach my $l (@$lref[($server->{'line'}+1) .. ($server->{'eline'}-1)]) {
+	if ($l =~ /^\s+server_name(\s+.*);/) {
+		# Exclude server_name entries for alias domains
+		my @sa = &split_words($1);
+		@sa = grep { !($adoms{$_} ||
+			     /^([^\.]+)\.(\S+)/ && $adoms{$2}) } @sa;
+		next if (!@sa);
+		$l = "server_name ".&join_words(@sa).";";
+		}
 	&print_tempfile($fh, $l."\n");
 	}
 &close_tempfile($fh);
@@ -1856,7 +1876,9 @@ if (!$server) {
 
 # Fix home dir, which is incorrect in copied directives
 &recursive_change_directives(
-	$server, $oldd->{'home'}, $d->{'home'}, 0, 1);
+	$server, $oldd->{'home'}, $d->{'home'}, 0, 0, 0);
+&recursive_change_directives(
+	$server, $oldd->{'home'}.'/', $d->{'home'}.'/', 0, 1, 0);
 
 # Fix domain name, which is incorrect in copied directives
 &recursive_change_directives($server, $oldd->{'dom'},
