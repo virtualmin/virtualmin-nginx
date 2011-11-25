@@ -1591,6 +1591,26 @@ if ($d->{'ssl_pass'}) {
 	}
 }
 
+# feature_get_web_ssl_file(&domain, mode)
+# Return the SSL cert or key file in the Nginx config
+sub feature_get_web_ssl_file
+{
+my ($d, $mode) = @_;
+my $server = &find_domain_server($d);
+return undef if (!$server);
+if ($mode eq 'cert') {
+	return &find_value($server, "ssl_certificate");
+	}
+elsif ($mode eq 'key') {
+	return &find_value($server, "ssl_certificate_key");
+	}
+elsif ($mode eq 'ca') {
+	# Always appeneded to the cert file
+	return $d->{'ssl_chain'};
+	}
+return undef;
+}
+
 # feature_save_web_ssl_file(&domain, mode, file)
 # Set the SSL cert or key file in the Nginx config
 sub feature_save_web_ssl_file
@@ -1600,14 +1620,32 @@ my ($d, $mode, $file) = @_;
 my $server = &find_domain_server($d);
 return &text('feat_efind', $d->{'dom'}) if (!$server);
 if ($mode eq 'cert') {
-	&save_directive($server, "ssl_certificate", [ $file ]);
+	&save_directive($server, "ssl_certificate",
+			$file ? [ $file ] : [ ]);
 	}
 elsif ($mode eq 'key') {
-	&save_directive($server, "ssl_certificate_key", [ $file ]);
+	&save_directive($server, "ssl_certificate_key",
+			$file ? [ $file ] : [ ]);
 	}
 elsif ($mode eq 'ca') {
-	# XXX not supported yet
-	return $text{'feat_esslca'};
+	# Append to cert file as well
+	my $certfile = &find_value("ssl_certificate", $server);
+	$certfile || return $text{'feat_echainfile'};
+	my @certs = &split_ssl_certs(&read_file_contents($certfile));
+	my $fh = "CERT";
+	if ($file) {
+		# Append chained cert to main cert
+		my $chain = &read_file_contents($file);
+		&open_tempfile($fh, ">$certfile");
+		&print_tempfile($fh, join("", $certs[0], $chain));
+		&close_tempfile($fh);
+		}
+	else {
+		# Use only main cert
+		&open_tempfile($fh, ">$certfile");
+		&print_tempfile($fh, $certs[0]);
+		&close_tempfile($fh);
+		}
 	}
 &flush_config_file_lines();
 &unlock_all_config_files();

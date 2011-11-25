@@ -1723,5 +1723,24 @@ foreach my $u (@_) {
 return undef;
 }
 
+# split_ssl_certs(data)
+# Returns an array of all SSL certs in some file
+sub split_ssl_certs
+{
+my ($data) = @_;
+my @rv;
+my $idx = -1;
+foreach my $l (split(/\r?\n/, $data)) {
+	if ($l =~ /^\-+BEGIN/) {
+		$idx++;
+		push(@rv, $l."\n");
+		}
+	elsif ($idx >= 0 && $l =~ /\S/) {
+		$rv[$idx] .= $l."\n";
+		}
+	}
+return @rv;
+}
+
 1;
 

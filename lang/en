@@ -451,6 +451,7 @@ feat_restorelog=Restoring Nginx webserver log files ..
 feat_erestorefind=.. Nginx virtualhost was not found after restore!?
 feat_epassphrase=SSL certificates that use a passphrase are not supported by Nginx
 feat_esslca=Additional SSL certificate authorities cannot be set for Nginx
+feat_echainfile=A CA certificate cannot be set unless an SSL certificate has been defined
 
 fcgid_ecmd=No PHP command found!
 
