@@ -452,6 +452,9 @@ feat_erestorefind=.. Nginx virtualhost was not found after restore!?
 feat_epassphrase=SSL certificates that use a passphrase are not supported by Nginx
 feat_esslca=Additional SSL certificate authorities cannot be set for Nginx
 feat_echainfile=A CA certificate cannot be set unless an SSL certificate has been defined
+feat_clone=Cloning Nginx virtual host ..
+feat_clonealias=.. not necessary for alias domains
+feat_eclonefind=.. could not find new virtual host named $1 after cloning!
 
 fcgid_ecmd=No PHP command found!
 

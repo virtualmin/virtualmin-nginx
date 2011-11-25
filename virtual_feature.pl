@@ -1755,7 +1755,7 @@ if ($oldd && $oldd->{'nginx_php_port'} != $d->{'nginx_php_port'}) {
 		       &find("location", $server);
 	if ($l) {
 		&save_directive($l, "fastcgi_pass",
-				"localhost:".$oldd->{'nginx_php_port'});
+				[ "localhost:".$oldd->{'nginx_php_port'} ]);
 		$d->{'nginx_php_port'} = $oldd->{'nginx_php_port'};
 		}
 	}
@@ -1793,6 +1793,88 @@ if (-r $file."_alog") {
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 	}
 
+return 1;
+}
+
+# feature_clone(&domain, &old-domain)
+# Create a new Nginx virtualhost that copies from this one one
+sub feature_clone
+{
+my ($d, $oldd) = @_;
+&$virtual_server::first_print($text{'feat_clone'});
+if ($d->{'alias'}) {
+	# Nothing needs to be done, as the re-create as part of the cloning
+	# will already have done everything
+	&$virtual_server::second_print($text{'feat_clonealias'});
+	return 1;
+	}
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+if (!$server) {
+	&unlock_all_config_files();
+	&$virtual_server::second_print(&text('feat_efind', $d->{'dom'}));
+	return 0;
+	}
+my $oldserver = &find_domain_server($d);
+if (!$oldserver) {
+	&unlock_all_config_files();
+	&$virtual_server::second_print(&text('feat_efind', $oldd->{'dom'}));
+	return 0;
+	}
+
+# Preserve some settings from the clone target
+my $alog = &get_nginx_log($d, 0);
+my $elog = &get_nginx_log($d, 1);
+my $obj = &find("server_name", $server);
+
+# Copy across all directives to the new server block, fixing the server_name
+# so that it can be found
+my $oldlref = &read_file_lines($oldserver->{'file'}, 1);
+my $lref = &read_file_lines($server->{'file'});
+my @lines = @$oldlref[$oldserver->{'line'}+1 .. $oldserver->{'eline'}-1];
+foreach my $l (@lines) {
+	if ($l =~ /^(\s*server_name\s+)/) {
+		$l = $1.&join_words(@{$obj->{'words'}}).';';
+		}
+	}
+splice(@$lref, $server->{'line'}+1, $server->{'eline'}-$server->{'line'}-1,
+       @lines);
+&flush_file_lines($server->{'file'});
+&flush_config_cache();
+
+# Re-get the new server block
+$server = &find_domain_server($d);
+if (!$server) {
+	&unlock_all_config_files();
+	&$virtual_server::second_print(&text('feat_eclonefind', $d->{'dom'}));
+	return 0;
+	}
+
+# Put back old log file paths
+&save_directive($server, "access_log", [ $alog ]) if ($alog);
+&save_directive($server, "error_log", [ $elog ]) if ($elog);
+
+# Fix home dir, which is incorrect in copied directives
+&recursive_change_directives(
+	$server, $oldd->{'home'}, $d->{'home'}, 0, 1);
+
+# Fix domain name, which is incorrect in copied directives
+&recursive_change_directives($server, $oldd->{'dom'},
+			     $d->{'dom'}, 0, 0, 1);
+
+# Fix PHP server port, which is incorrect in copied directives
+my ($l) = grep { $_->{'words'}->[1] eq '\.php$' }
+	       &find("location", $server);
+if ($l) {
+	&save_directive($l, "fastcgi_pass",
+			[ "localhost:".$d->{'nginx_php_port'} ]);
+	}
+
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+
+&$virtual_server::second_print($virtual_server::text{'setup_done'});
 return 1;
 }
 
