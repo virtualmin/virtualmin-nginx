@@ -1802,6 +1802,10 @@ if ($oldd) {
 # Fix broken PHP extension_dir directives
 &virtual_server::fix_php_extension_dir($d);
 
+# Restart PHP server, in case php.ini got changed by the restore
+# XXX
+&feature_restart_web_php($d);
+
 # Restore log files
 if (-r $file."_alog") {
 	&$virtual_server::first_print($text{'feat_restorelog'});

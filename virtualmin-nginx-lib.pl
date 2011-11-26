@@ -1531,7 +1531,11 @@ my ($d, $port) = @_;
 my ($ver, $cmd) = &get_default_php_version();
 $cmd || return ( );
 my $log = "$d->{'home'}/logs/php.log";
-my $pidfile = "$d->{'home'}/logs/php.pid";
+my $piddir = "/var/php-nginx";
+if (!-d $piddir) {
+	&make_dir($piddir, 0777);
+	}
+my $pidfile = "$piddir/$d->{'id'}.php.pid";
 $cmd .= " -b localhost:$port";
 my %envs_to_set = ( 'PHPRC', $d->{'home'}."/etc/php".$ver );
 return ($cmd, \%envs_to_set, $log, $pidfile);
@@ -1567,7 +1571,8 @@ my $fh = "PIDFILE";
 sub stop_php_fcgi_server_command
 {
 my ($d) = @_;
-my $pidfile = "$d->{'home'}/logs/php.pid";
+my (undef, undef, undef, $pidfile) =
+	&get_php_fcgi_server_command($d, $d->{'nginx_php_port'});
 my $pid = &check_pid_file($pidfile);
 if ($pid) {
 	&virtual_server::run_as_domain_user($d, "kill -9 ".quotemeta($pid));
