@@ -176,6 +176,9 @@ if (!$d->{'alias'}) {
 	&virtual_server::setup_apache_logs($d, $alog, $elog);
 	&virtual_server::link_apache_logs($d, $alog, $elog);
 	&virtual_server::register_post_action(\&print_apply_nginx);
+	if ($d->{'proxy_pass_mode'}) {
+		&setup_nginx_proxy_pass($d);
+		}
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
 	# Set up fcgid server
@@ -419,6 +422,16 @@ if (!$d->{'alias'}) {
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
+		}
+
+	# Update proxy settings if needed
+	if ($d->{'proxy_pass_mode'} ne $oldd->{'proxy_pass_mode'} ||
+	    $d->{'proxy_pass'} ne $oldd->{'proxy_pass'}) {
+		&$virtual_server::first_print($text{'feat_modifyproxy'});
+		&remove_nginx_proxy_pass($oldd);
+		&setup_nginx_proxy_pass($d);
+		&$virtual_server::second_print(
+			$virtual_server::text{'setup_done'});
 		}
 
 	# Rename log files if needed
@@ -1269,6 +1282,9 @@ sub feature_create_web_balancer
 my ($d, $balancer) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
+my ($clash) = grep { $_->{'words'}->[0] eq $balancer->{'path'} }
+		   &find("location", $server);
+$clash && return &text('redirect_eclash', $balancer->{'path'});
 &lock_all_config_files();
 my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
 my $err = &validate_balancer_urls(@urls);
@@ -1949,6 +1965,79 @@ my $conf = &get_config();
 my $user = &find_value("user", $conf);
 $user ||= &get_default("user");
 return $user;
+}
+
+# setup_nginx_proxy_pass(&domain)
+# Add proxying or frame forward directives for a domain, if enabled
+sub setup_nginx_proxy_pass
+{
+my ($d) = @_;
+if (!$d->{'proxy_pass_mode'}) {
+	return undef;
+	}
+elsif ($d->{'proxy_pass_mode'} == 1) {
+	# Add proxy
+	return &feature_create_web_balancer($d,
+		{ 'path' => '/', 'urls' => [ $d->{'proxy_pass'} ] });
+	}
+elsif ($d->{'proxy_pass_mode'} == 2) {
+	# Add frame forward
+	my $server = &find_domain_server($d);
+	$server || return &text('redirect_efind', $d->{'dom'});
+	&lock_all_config_files();
+	&virtual_server::create_framefwd_file($d);
+	my $ff = &virtual_server::framefwd_file($d);
+	my $phd = &virtual_server::public_html_dir($d);
+	$ff =~ s/^\Q$phd\E//;
+	&save_directive($server, [ ],
+		[ { 'name' => 'rewrite',
+		    'words' => [ '^/.*$', $ff, 'break' ] } ]);
+	&flush_config_file_lines();
+	&unlock_all_config_files();
+	&virtual_server::register_post_action(\&print_apply_nginx);
+	}
+else {
+	return "Unknown proxy mode $d->{'proxy_pass_mode'}";
+	}
+}
+
+# remove_nginx_proxy_pass(&domain)
+# Remove enabled proxying or frame forward directives for a domain
+sub remove_nginx_proxy_pass
+{
+my ($d) = @_;
+if (!$d->{'proxy_pass_mode'}) {
+	return undef;
+	}
+elsif ($d->{'proxy_pass_mode'} == 1) {
+	# Remove proxy for /
+	my @bals = &feature_list_web_balancers($d);
+	my ($balancer) = grep { $_->{'path'} eq '/' } @bals;
+	return &feature_delete_web_balancer($d, $balancer) if ($balancer);
+	return undef;
+	}
+elsif ($d->{'proxy_pass_mode'} == 2) {
+	# Remove frame forward
+	my $server = &find_domain_server($d);
+	$server || return &text('redirect_efind', $d->{'dom'});
+	&lock_all_config_files();
+	my $ff = &virtual_server::framefwd_file($d);
+	my $phd = &virtual_server::public_html_dir($d);
+	$ff =~ s/^\Q$phd\E//;
+	my ($rewrite) = grep { $_->{'words'}->[0] eq '^/.*$' &&
+			       $_->{'words'}->[1] eq $ff }
+			     &find("rewrite", $server);
+	if ($rewrite) {
+		&save_directive($server, [ $rewrite ], [ ]);
+		}
+	&flush_config_file_lines();
+	&unlock_all_config_files();
+	&virtual_server::register_post_action(\&print_apply_nginx);
+	return undef;
+	}
+else {
+	return "Unknown proxy mode $d->{'proxy_pass_mode'}";
+	}
 }
 
 1;

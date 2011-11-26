@@ -455,6 +455,7 @@ feat_echainfile=A CA certificate cannot be set unless an SSL certificate has bee
 feat_clone=Cloning Nginx virtual host ..
 feat_clonealias=.. not necessary for alias domains
 feat_eclonefind=.. could not find new virtual host named $1 after cloning!
+feat_modifyproxy=Modifying proxy destination ..
 
 fcgid_ecmd=No PHP command found!
 
@@ -464,5 +465,6 @@ redirect_eobj2=Proxy is not associated with an Nginx configuration object
 redirect_eupstream=A balancer named $1 already exists
 redirect_eurl=Not a URL : $1
 redirect_eurlhost=Hostname in URL cannot be resolved : $1
+redirect_eclash=A location for $1 already exists
 
 __norefs=1
