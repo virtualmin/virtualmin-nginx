@@ -1159,6 +1159,7 @@ my ($d) = @_;
 my $server = &find_domain_server($d);
 return () if (!$server);
 my @rv;
+my $phd = &virtual_server::public_html_dir($d);
 foreach my $r (&find("rewrite", $server)) {
 	if ($r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?/ &&
 	    $r->{'words'}->[2] eq 'break') {
@@ -1178,6 +1179,7 @@ foreach my $r (&find("rewrite", $server)) {
 			$redirect->{'alias'} = 0;
 			}
 		else {
+			$redirect->{'dest'} = $phd.$redirect->{'dest'};
 			$redirect->{'alias'} = 1;
 			}
 		push(@rv, $redirect);
@@ -1193,9 +1195,14 @@ sub feature_create_web_redirect
 my ($d, $redirect) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
+my $phd = &virtual_server::public_html_dir($d);
+my $dest = $redirect->{'dest'};
+if ($dest !~ /^(http|https):/) {
+	$dest =~ s/^\Q$phd\E// || return &text('redirect_ephd', $phd);
+	}
 my $r = { 'name' => 'rewrite',
 	  'words' => [ '^\\Q'.$redirect->{'path'}.'\\E',
-		       $redirect->{'dest'},
+		       $dest,
 		       'break' ],
 	};
 if ($redirect->{'regexp'}) {

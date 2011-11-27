@@ -466,5 +466,6 @@ redirect_eupstream=A balancer named $1 already exists
 redirect_eurl=Not a URL : $1
 redirect_eurlhost=Hostname in URL cannot be resolved : $1
 redirect_eclash=A location for $1 already exists
+redirect_ephd=Nginx only allows aliases destination directories to be under $1
 
 __norefs=1
