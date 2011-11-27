@@ -1926,6 +1926,42 @@ if ($l) {
 return 1;
 }
 
+# feature_set_web_public_html_dir(&domain, subdir)
+# Change the root path in the domain's server object
+sub feature_set_web_public_html_dir
+{
+my ($d, $subdir) = @_;
+my $server = &find_domain_server($d);
+$server || return &text('redirect_efind', $d->{'dom'});
+&lock_all_config_files();
+&save_directive($server, "root", [ $d->{'home'}."/".$subdir ]);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
+}
+
+# feature_find_web_html_cgi_dirs(&domain)
+# Use the root path in the domain's server to set public_html_dir and
+# public_html_path
+sub feature_find_web_html_cgi_dirs
+{
+my ($d) = @_;
+my $server = &find_domain_server($d);
+return undef if (!$server);
+$d->{'public_html_path'} = &find_value("root", $server);
+if ($d->{'public_html_path'} =~ /^\Q$d->{'home'}\E\/(.*)$/) {
+	$d->{'public_html_dir'} = $1;
+	}
+elsif ($d->{'public_html_path'} eq $d->{'home'}) {
+	# Same as home directory!
+	$d->{'public_html_dir'} = ".";
+	}
+else {
+	delete($d->{'public_html_dir'});
+	}
+}
+
 # set_nginx_log_permissions(&domain, file)
 # Sets the correct user and group perms on a log file
 sub set_nginx_log_permissions
