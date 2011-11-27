@@ -217,7 +217,7 @@ if (!$d->{'alias'}) {
 
 	# Add the user nginx runs as to the domain's group
 	my $web_user = &get_nginx_user();
-	if ($web_user) {
+	if ($web_user && $web_user ne 'none') {
 		&virtual_server::add_user_to_domain_group(
 			$d, $web_user, 'setup_webuser');
 		}
@@ -501,6 +501,15 @@ if (!$d->{'alias'}) {
 		my $elog = &get_nginx_log($d, 1);
 		foreach my $l ($alog, $elog) {
 			&set_nginx_log_permissions($d, $l);
+			}
+		}
+
+	# Add Nginx user to the group for the new domain
+	if ($d->{'user'} ne $oldd->{'user'}) {
+		my $web_user = &get_nginx_user();
+		if ($web_user && $web_user ne 'none') {
+			&virtual_server::add_user_to_domain_group(
+				$d, $web_user, 'setup_webuser');
 			}
 		}
 	}
