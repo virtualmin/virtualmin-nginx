@@ -104,8 +104,6 @@ sub feature_setup
 my ($d) = @_;
 
 if (!$d->{'alias'}) {
-	# Create a whole new server
-	&$virtual_server::first_print($text{'feat_setup'});
 	&lock_all_config_files();
 	my $conf = &get_config();
 	my $http = &find("http", $conf);
@@ -113,6 +111,28 @@ if (!$d->{'alias'}) {
 	# Pick ports
 	my $tmpl = &virtual_server::get_template($d->{'template'});
 	$d->{'web_port'} ||= $tmpl->{'web_port'} || 80;
+
+	if ($d->{'virt6'}) {
+		# Disable IPv6 default listen in default server
+		foreach my $dserver (&find("server", $http)) {
+			foreach my $l (&find("listen", $dserver)) {
+				if ($l->{'words'}->[0] eq
+				    "[::]:".$d->{'web_port'}) {
+					my $name = &find_value("server_name",
+							       $dserver);
+					&$virtual_server::first_print(
+					  &text('feat_setupdefault', $name));
+					&save_directive($dserver, [ $l ], [ ]);
+					&$virtual_server::second_print(
+					  $virtual_server::text{'setup_done'});
+					last;
+					}
+				}
+			}
+		}
+
+	# Create a whole new server
+	&$virtual_server::first_print($text{'feat_setup'});
 
 	# Create the server object
 	my $server = { 'name' => 'server',

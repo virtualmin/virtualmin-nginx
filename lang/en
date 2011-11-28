@@ -403,6 +403,7 @@ feat_edepdir=Nginx cannot be enabled for a domain without a home directory
 feat_eapache=Nginx cannot be enabled for a domain that alias has an Apache website
 feat_clash=An Nginx virtual host with the same name already exists
 feat_setup=Creating Nginx virtual host ..
+feat_setupdefault=Removing default IPv6 listen from virtual host $1 ..
 feat_apply=Applying Nginx configuration ..
 feat_econfig=.. configuration is invalid : $1
 feat_eapply=.. restart failed : $1
