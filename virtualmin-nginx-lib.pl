@@ -1554,6 +1554,7 @@ if (!$pid) {
 	&switch_to_unix_user(\@u);
 	open(STDOUT, ">>$log");
 	open(STDERR, ">&STDOUT");
+	&clean_environment();
 	foreach my $e (keys %$envs_to_set) {
 		$ENV{$e} = $envs_to_set->{$e};
 		}
