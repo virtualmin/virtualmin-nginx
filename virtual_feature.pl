@@ -204,6 +204,8 @@ if (!$d->{'alias'}) {
 	&virtual_server::setup_apache_logs($d, $alog, $elog);
 	&virtual_server::link_apache_logs($d, $alog, $elog);
 	&virtual_server::register_post_action(\&print_apply_nginx);
+	$d->{'proxy_pass_mode'} ||= 0;
+	$d->{'proxy_pass'} ||= "";
 	if ($d->{'proxy_pass_mode'}) {
 		&setup_nginx_proxy_pass($d);
 		}
@@ -1107,7 +1109,6 @@ return if ($d->{'alias'} || $d->{'subdom'}); # never accounted separately
 my $max_ltime = $start;
 foreach my $l (&unique(@logs)) {
 	foreach my $f (&virtual_server::all_log_files($l, $max_ltime)) {
-		print STDERR "reading $f\n";
 		local $_;
 		if ($f =~ /\.gz$/i) {
 			open(LOG, "gunzip -c ".quotemeta($f)." |");

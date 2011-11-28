@@ -1575,7 +1575,13 @@ my (undef, undef, undef, $pidfile) =
 	&get_php_fcgi_server_command($d, $d->{'nginx_php_port'});
 my $pid = &check_pid_file($pidfile);
 if ($pid) {
-	&virtual_server::run_as_domain_user($d, "kill -9 ".quotemeta($pid));
+	if (&virtual_server::has_domain_user($d)) {
+		&virtual_server::run_as_domain_user(
+			$d, "kill -9 ".quotemeta($pid));
+		}
+	else {
+		&kill_logged('KILL', $pid);
+		}
 	}
 &virtual_server::unlink_file_as_domain_user($d, $pidfile);
 }
