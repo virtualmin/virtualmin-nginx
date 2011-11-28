@@ -131,6 +131,14 @@ if (!$d->{'alias'}) {
 			}
 		}
 
+	# Bump up server_names_hash if too low
+	my $snh = &find_value("server_names_hash_bucket_size", $http);
+	$snh ||= int(&get_default("server_names_hash_bucket_size"));
+	if ($snh <= 32) {
+		&save_directive($http, "server_names_hash_bucket_size",
+				[ 128 ]);
+		}
+
 	# Create a whole new server
 	&$virtual_server::first_print($text{'feat_setup'});
 
@@ -1099,6 +1107,7 @@ return if ($d->{'alias'} || $d->{'subdom'}); # never accounted separately
 my $max_ltime = $start;
 foreach my $l (&unique(@logs)) {
 	foreach my $f (&virtual_server::all_log_files($l, $max_ltime)) {
+		print STDERR "reading $f\n";
 		local $_;
 		if ($f =~ /\.gz$/i) {
 			open(LOG, "gunzip -c ".quotemeta($f)." |");
