@@ -477,10 +477,10 @@ if (!$d->{'alias'}) {
 				&text('feat_efind', $oldd->{'dom'}));
 			return 0;
 			}
-		&save_directive($server, "access_log", [ $new_alog ]);
+		&feature_change_web_access_log($d, $new_alog);
 		&rename_logged($old_alog, $new_alog);
 		if ($old_elog ne $new_elog) {
-			&save_directive($server, "error_log", [ $new_elog ]);
+			&feature_change_web_error_log($d, $new_elog);
 			&rename_logged($old_elog, $new_elog);
 			}
 		&virtual_server::link_apache_logs($d, $new_alog, $new_elog);
@@ -2006,6 +2006,70 @@ elsif ($d->{'public_html_path'} eq $d->{'home'}) {
 else {
 	delete($d->{'public_html_dir'});
 	}
+}
+
+# feature_change_web_access_log(&domain, logfile)
+# Update the access log location
+sub feature_change_web_access_log
+{
+my ($d, $logfile) = @_;
+return &change_nginx_log_file($d, $logfile, "access_log");
+}
+
+# feature_change_web_error_log(&domain, logfile)
+# Update the error log location
+sub feature_change_web_error_log
+{
+my ($d, $logfile) = @_;
+return &change_nginx_log_file($d, $logfile, "error_log");
+}
+
+# change_nginx_log_file(&domain, file, name)
+# Changes the log file for an access or error log
+sub change_nginx_log_file
+{
+my ($d, $logfile, $name) = @_;
+
+# Update Nginx config
+my $server = &find_domain_server($d);
+$server || return &text('redirect_efind', $d->{'dom'});
+&lock_all_config_files();
+my $obj = &find($name, $server);
+my @w = $obj ? @{$obj->{'words'}} : ( );
+my $old_logfile = shift(@w);
+&save_directive($server, $name,
+		[ { 'name' => $name,
+		    'words' => [ $logfile, @w ] } ]);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+
+# Actually move the file
+if ($old_logfile && (!&same_file($logfile, $old_logfile) || -l $logfile)) {
+        if (-e $logfile) {
+                &unlink_file($logfile);
+                }
+        if (-r $old_logfile) {
+                &rename_logged($old_logfile, $logfile);
+                }
+        }
+
+# Fix logrotate config
+if ($d->{'logrotate'}) {
+        my $lconf = &virtual_server::get_logrotate_section($old_logfile);
+        if ($lconf) {
+                my $parent = &logrotate::get_config_parent();
+                foreach my $n (@{$lconf->{'name'}}) {
+                        if ($n eq $old_logfile) {
+                                $n = $logfile;
+                                }
+                        }
+                &logrotate::save_directive($parent, $lconf, $lconf);
+                &flush_file_lines($lconf->{'file'});
+                }
+        }
+
+return undef;
 }
 
 # set_nginx_log_permissions(&domain, file)
