@@ -1536,7 +1536,7 @@ if (!-d $piddir) {
 	&make_dir($piddir, 0777);
 	}
 my $pidfile = "$piddir/$d->{'id'}.php.pid";
-$cmd .= " -b localhost:$port";
+$cmd .= " -b 127.0.0.1:$port";
 my %envs_to_set = ( 'PHPRC', $d->{'home'}."/etc/php".$ver );
 return ($cmd, \%envs_to_set, $log, $pidfile);
 }
