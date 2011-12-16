@@ -1523,6 +1523,18 @@ $cmd || return ( );
 return @{$vers[0]};
 }
 
+# create_loop_script()
+# Returns the path to a script that runs PHP in a loop
+sub create_loop_script
+{
+foreach my $looper ("/usr/bin/php-loop.pl", "/etc/php-loop.pl") {
+	if (&copy_source_dest("$module_root_directory/php-loop.pl", $looper)) {
+		return $looper;
+		}
+	}
+&error("Could not copy php-loop.pl to anywhere!");
+}
+
 # get_php_fcgi_server_command(&domain, port)
 # Returns the PHP CGI command and a hash ref of environment variables
 sub get_php_fcgi_server_command
@@ -1538,6 +1550,7 @@ if (!-d $piddir) {
 my $pidfile = "$piddir/$d->{'id'}.php.pid";
 $cmd .= " -b 127.0.0.1:$port";
 my %envs_to_set = ( 'PHPRC', $d->{'home'}."/etc/php".$ver );
+$cmd = &create_loop_script()." ".$cmd;
 return ($cmd, \%envs_to_set, $log, $pidfile);
 }
 
@@ -1578,10 +1591,10 @@ my $pid = &check_pid_file($pidfile);
 if ($pid) {
 	if (&virtual_server::has_domain_user($d)) {
 		&virtual_server::run_as_domain_user(
-			$d, "kill -9 ".quotemeta($pid));
+			$d, "kill ".quotemeta($pid));
 		}
 	else {
-		&kill_logged('KILL', $pid);
+		&kill_logged('TERM', $pid);
 		}
 	}
 &virtual_server::unlink_file_as_domain_user($d, $pidfile);
@@ -1627,7 +1640,7 @@ my $envs = join(" ", map { $_."=".$envs_to_set->{$_} } keys %$envs_to_set);
 	      &command_as_user($d->{'user'}, 0,
 		"$envs $cmd >>$log 2>&1 </dev/null & echo \$! >$pidfile"),
 	      &command_as_user($d->{'user'}, 0,
-		"kill -9 `cat $pidfile`"),
+		"kill `cat $pidfile`"),
 	      );
 $init::init_mode = $old_init_mode;
 
