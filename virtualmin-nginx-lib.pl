@@ -1630,7 +1630,8 @@ $cmd || return (0, $text{'fcgid_ecmd'});
 # Create init script
 &foreign_require("init");
 my $old_init_mode = $init::init_mode;
-if ($init::init_mode eq "upstart") {
+if ($init::init_mode eq "upstart" ||
+    $init::init_mode eq "systemd") {
 	$init::init_mode = "init";
 	}
 my $name = "php-fcgi-$d->{'dom'}";
@@ -1659,7 +1660,8 @@ my ($d) = @_;
 # Delete init script
 &foreign_require("init");
 my $old_init_mode = $init::init_mode;
-if ($init::init_mode eq "upstart") {
+if ($init::init_mode eq "upstart" ||
+    $init::init_mode eq "systemd") {
         $init::init_mode = "init";
         }
 my $name = "php-fcgi-$d->{'dom'}";
