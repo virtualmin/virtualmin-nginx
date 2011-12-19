@@ -1044,19 +1044,26 @@ return $config{'apply_cmd'};
 }
 
 # feature_get_web_php_children(&domain)
-# Cannot be changed, so return -2
+# Defaults to 1, but can be changed by environment variable
 sub feature_get_web_php_children
 {
 my ($d) = @_;
-return -2;
+return $d->{'nginx_php_children'} || 1;
 }
 
 # feature_save_web_php_children(&domain, children)
-# Cannot be changed currently
+# Update the PHP init script and running process with the new child count
 sub feature_save_web_php_children
 {
 my ($d, $children) = @_;
-&error("The number of PHP child processes cannot be set when using Nginx");
+$d->{'nginx_php_children'} ||= 1;
+if ($children != $d->{'nginx_php_children'}) {
+	$d->{'nginx_php_children'} = $children;
+	&delete_php_fcgi_server($d);
+	&setup_php_fcgi_server($d);
+	&virtual_server::save_domain($d);
+	}
+return undef;
 }
 
 # feature_startstop()

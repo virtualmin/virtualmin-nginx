@@ -1550,6 +1550,9 @@ if (!-d $piddir) {
 my $pidfile = "$piddir/$d->{'id'}.php.pid";
 $cmd .= " -b 127.0.0.1:$port";
 my %envs_to_set = ( 'PHPRC', $d->{'home'}."/etc/php".$ver );
+if ($d->{'nginx_php_children'} > 1) {
+	$envs_to_set{'PHP_FCGI_CHILDREN'} = $d->{'nginx_php_children'};
+	}
 $cmd = &create_loop_script()." ".$cmd;
 return ($cmd, \%envs_to_set, $log, $pidfile);
 }
@@ -1596,6 +1599,7 @@ if ($pid) {
 	else {
 		&kill_logged('TERM', $pid);
 		}
+	sleep(1);	# Give it time to exit cleanly
 	}
 &virtual_server::unlink_file_as_domain_user($d, $pidfile);
 }
@@ -1641,7 +1645,7 @@ my $envs = join(" ", map { $_."=".$envs_to_set->{$_} } keys %$envs_to_set);
 	      &command_as_user($d->{'user'}, 0,
 		"$envs $cmd >>$log 2>&1 </dev/null & echo \$! >$pidfile"),
 	      &command_as_user($d->{'user'}, 0,
-		"kill `cat $pidfile`"),
+		"kill `cat $pidfile`")." ; sleep 1",
 	      );
 $init::init_mode = $old_init_mode;
 
