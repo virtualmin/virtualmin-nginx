@@ -1550,7 +1550,7 @@ if (!-d $piddir) {
 my $pidfile = "$piddir/$d->{'id'}.php.pid";
 $cmd .= " -b 127.0.0.1:$port";
 my %envs_to_set = ( 'PHPRC', $d->{'home'}."/etc/php".$ver );
-if ($d->{'nginx_php_children'} > 1) {
+if ($d->{'nginx_php_children'} && $d->{'nginx_php_children'} > 1) {
 	$envs_to_set{'PHP_FCGI_CHILDREN'} = $d->{'nginx_php_children'};
 	}
 $cmd = &create_loop_script()." ".$cmd;

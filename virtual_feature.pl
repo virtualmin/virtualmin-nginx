@@ -2031,6 +2031,14 @@ my ($d, $logfile) = @_;
 return &change_nginx_log_file($d, $logfile, "error_log");
 }
 
+# feature_supports_sni([&domain])
+# Returns 1 if Nginx supports SNI
+sub feature_supports_sni
+{
+my $out = &backquote_command("$config{'nginx_cmd'} -V 2>&1 </dev/null");
+return $out =~ /TLS\s+SNI\s+support\s+enabled/i ? 1 : 0;
+}
+
 # change_nginx_log_file(&domain, file, name)
 # Changes the log file for an access or error log
 sub change_nginx_log_file
