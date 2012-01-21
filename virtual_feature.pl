@@ -900,7 +900,7 @@ if (&is_nginx_running()) {
 		}
 	if ($test) {
 		&$virtual_server::second_print(
-		    &text('feat_econfig', "<tt>".&html_escape($test)."</tt>"));
+		    &text('feat_econfig2', "<tt>".&html_escape($test)."</tt>"));
 		}
 	else {
 		my $err = apply_nginx();
