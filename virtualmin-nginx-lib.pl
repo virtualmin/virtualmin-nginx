@@ -1611,6 +1611,14 @@ sub setup_php_fcgi_server
 {
 my ($d) = @_;
 
+# Find ports used by domains
+my %used;
+foreach my $od (&virtual_server::list_domains()) {
+	if ($od->{'id'} ne $d->{'id'} && $d->{'nginx_php_port'}) {
+		$used{$d->{'nginx_php_port'}}++;
+		}
+	}
+
 # Find a free port
 my $port = 9000;
 my $s;
@@ -1618,7 +1626,7 @@ socket($s, PF_INET, SOCK_STREAM, getprotobyname('tcp')) ||
 	return (0, "Socket failed : $!");
 setsockopt($s, SOL_SOCKET, SO_REUSEADDR, pack("l", 1));
 while(1) {
-	last if (bind($s, sockaddr_in($port, INADDR_ANY)));
+	last if (!$used{$port} && bind($s, sockaddr_in($port, INADDR_ANY)));
 	$port++;
 	}
 close($s);
@@ -1639,6 +1647,8 @@ if ($init::init_mode eq "upstart" ||
 	$init::init_mode = "init";
 	}
 my $name = "php-fcgi-$d->{'dom'}";
+my $oldname = $name;
+$name =~ s/\./-/g;
 my $envs = join(" ", map { $_."=".$envs_to_set->{$_} } keys %$envs_to_set);
 &init::enable_at_boot($name,
 	      "Start Nginx PHP fcgi server for $d->{'dom'}",
@@ -1647,6 +1657,7 @@ my $envs = join(" ", map { $_."=".$envs_to_set->{$_} } keys %$envs_to_set);
 	      &command_as_user($d->{'user'}, 0,
 		"kill `cat $pidfile`")." ; sleep 1",
 	      );
+&init::disable_at_boot($oldname);
 $init::init_mode = $old_init_mode;
 
 return (1, $port);
@@ -1669,13 +1680,17 @@ if ($init::init_mode eq "upstart" ||
         $init::init_mode = "init";
         }
 my $name = "php-fcgi-$d->{'dom'}";
-&init::disable_at_boot($name);
-if ($init::init_mode eq "init") {
-	my $fn = &init::action_filename($name);
-	&unlink_logged($fn);
-	}
-elsif ($init::init_mode eq "rc") {
-	&init::delete_rc_script($name);
+my $oldname = $name;
+$name =~ s/\./-/g;
+foreach my $n ($name, $oldname) {
+	&init::disable_at_boot($n);
+	if ($init::init_mode eq "init") {
+		my $fn = &init::action_filename($n);
+		&unlink_logged($fn);
+		}
+	elsif ($init::init_mode eq "rc") {
+		&init::delete_rc_script($n);
+		}
 	}
 $init::init_mode = $old_init_mode;
 }
