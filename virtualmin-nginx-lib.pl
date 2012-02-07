@@ -1614,8 +1614,8 @@ my ($d) = @_;
 # Find ports used by domains
 my %used;
 foreach my $od (&virtual_server::list_domains()) {
-	if ($od->{'id'} ne $d->{'id'} && $d->{'nginx_php_port'}) {
-		$used{$d->{'nginx_php_port'}}++;
+	if ($od->{'id'} ne $d->{'id'} && $od->{'nginx_php_port'}) {
+		$used{$od->{'nginx_php_port'}}++;
 		}
 	}
 
