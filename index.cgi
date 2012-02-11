@@ -62,8 +62,8 @@ if (@servers) {
 		my (@ips, @ports);
 		foreach my $l (&find_value("listen", $s)) {
 			my ($ip, $port) = &split_ip_port($l);
-			$ip = $text{'index_any6'} if ($ip eq "::");
 			$ip ||= $text{'index_any'};
+			$ip = $text{'index_any6'} if ($ip eq "::");
 			push(@ips, $ip);
 			push(@ports, $port);
 			}
