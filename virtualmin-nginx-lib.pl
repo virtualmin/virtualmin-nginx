@@ -67,15 +67,29 @@ my $fh = "CFILE";
 &open_readfile($fh, $file);
 my @lines = <$fh>;
 close($fh);
-foreach (@lines) {
-	s/#.*$//;
-	if (/^\s*if\s*\((.*)\)\s*\{/) {
+while(@lines) {
+	my $l = shift(@lines);
+	$l =~ s/#.*$//;
+	my $slnum = $lnum;
+
+	# If line doesn't end with { } or ; , it must be continued on the
+	# next line
+	while($l !~ /[\{\}\;]\s*$/ && @lines) {
+		my $nl = shift(@lines);
+		if ($nl =~ /\S/) {
+			$nl =~ s/#.*$//;
+			$l .= " ".$nl;
+			}
+		$lnum++;
+		}
+
+	if ($l =~ /^\s*if\s*\((.*)\)\s*\{/) {
 		# Start of an if statement
 		my $ns = { 'name' => 'if',
 			   'type' => 2,
 			   'indent' => scalar(@stack),
 			   'file' => $file,
-			   'line' => $lnum,
+			   'line' => $slnum,
 			   'eline' => $lnum,
 			   'members' => [ ] };
 		my $value = $1;
@@ -85,13 +99,13 @@ foreach (@lines) {
 		push(@$addto, $ns);
 		$addto = $ns->{'members'};
 		}
-	elsif (/^\s*(\S+)(\s+.*)\{/) {
+	elsif ($l =~ /^\s*(\S+)(\s+.*)\{/) {
 		# Start of a section
 		my $ns = { 'name' => $1,
 			   'type' => 1,
 			   'indent' => scalar(@stack),
 			   'file' => $file,
-			   'line' => $lnum,
+			   'line' => $slnum,
 			   'eline' => $lnum,
 			   'members' => [ ] };
 		my $value = $2;
@@ -101,12 +115,12 @@ foreach (@lines) {
 		push(@$addto, $ns);
 		$addto = $ns->{'members'};
 		}
-	elsif (/^\s*}/) {
+	elsif ($l =~ /^\s*}/ && @stack) {
 		# End of a section
 		$addto = pop(@stack);
 		$addto->[@$addto-1]->{'eline'} = $lnum;
 		}
-	elsif (/^\s*(\S+)((\s+("([^"]*)"|'([^']*)'|\S+))*);/) {
+	elsif ($l =~ /^\s*(\S+)((\s+("([^"]*)"|'([^']*)'|\S+))*);/) {
 		# Found a directive
 		my ($name, $value) = ($1, $2);
 		my @words = &split_words($value);
@@ -129,10 +143,13 @@ foreach (@lines) {
 				    'words' => \@words,
 				    'type' => 0,
 				    'file' => $file,
-				    'line' => $lnum,
+				    'line' => $slnum,
 				    'eline' => $lnum };
 			push(@$addto, $dir);
 			}
+		}
+	elsif ($l =~ /\S/) {
+		print STDERR "Invalid Nginx config line $l at $lnum\n";
 		}
 	$lnum++;
 	}
@@ -237,14 +254,17 @@ for(my $i=0; $i<@$newstructs || $i<@$oldstructs; $i++) {
 	push(@open_config_files, $file);
 	if ($i<@$newstructs && $i<@$oldstructs) {
 		# Updating some directive
-		# XXX deal with length change
 		my $olen = $o->{'eline'} - $o->{'line'} + 1;
 		my @lines = &make_directive_lines($n, $parent->{'indent'}+1);
 		$o->{'name'} = $n->{'name'};
 		$o->{'value'} = $n->{'words'}->[0];
 		$o->{'words'} = $n->{'words'};
-		splice(@$lref, $o->{'line'}, $o->{'eline'}-$o->{'line'}+1,
-		       @lines);
+		splice(@$lref, $o->{'line'}, $olen, @lines);
+		if ($olen != scalar(@lines)) {
+			# Renumber directives
+			&renumber($file, $o->{'line'}, $olen - scalar(@lines));
+			$o->{'eline'} = $o->{'line'} + scalar(@lines) - 1;
+			}
 		}
 	elsif ($i<@$newstructs) {
 		# Adding a directive
