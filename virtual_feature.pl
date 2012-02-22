@@ -224,6 +224,9 @@ if (!$d->{'alias'}) {
 			     'words' => [ '~', '\.php$' ],
 			     'type' => 1,
 			     'members' => [
+				{ 'name' => 'try_files',
+				  'words' => [ '$uri', '=404' ],
+				},
 				{ 'name' => 'fastcgi_pass',
 				  'words' => [ 'localhost:'.$port ],
 				},
