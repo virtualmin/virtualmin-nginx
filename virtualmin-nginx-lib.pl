@@ -1097,6 +1097,7 @@ return &nginx_opt_input($name, $parent, 50, $text{'access_pfile'},
 sub nginx_passfile_parse
 {
 my ($name, $parent, $in) = @_;
+$in ||= \%in;
 $in->{$name."_def"} || &can_directory($in->{$name}) ||
 	&error(&text('access_ecannot',
 		     "<tt>".&html_escape($in->{$name})."</tt>",
