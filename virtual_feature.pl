@@ -213,6 +213,8 @@ if (!$d->{'alias'}) {
 
 	# Set up fcgid server
 	&$virtual_server::first_print($text{'feat_phpfcgid'});
+	$d->{'nginx_php_children'} = $config{'child_procs'} ||
+				     $tmpl->{'web_phpchildren'} || 1;
 	my ($ok, $port) = &setup_php_fcgi_server($d);
 	if ($ok) {
 		# Configure domain to use it for .php files

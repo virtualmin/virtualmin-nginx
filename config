@@ -3,3 +3,4 @@ nginx_cmd=/usr/local/nginx/sbin/nginx
 start_cmd=/usr/local/nginx/sbin/nginx >/dev/null 2>&1 </dev/null &
 stop_cmd=killall nginx
 apply_cmd=killall nginx ; sleep 1 ; /usr/local/nginx/sbin/nginx >/dev/null 2>&1 </dev/null &
+child_procs=4
