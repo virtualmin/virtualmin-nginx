@@ -5,3 +5,4 @@ stop_cmd=service nginx stop
 apply_cmd=service nginx restart
 add_to=/etc/nginx/sites-available
 add_link=/etc/nginx/sites-enabled
+child_procs=4
