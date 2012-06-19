@@ -1809,5 +1809,19 @@ foreach my $l (split(/\r?\n/, $data)) {
 return @rv;
 }
 
+# recursive_clear_lines(&directive, ...)
+# Remove any file and line fields from directives
+sub recursive_clear_lines
+{
+foreach my $e (@_) {
+	delete($e->{'file'});
+	delete($e->{'eline'});
+	delete($e->{'line'});
+	if ($e->{'type'}) {
+		&recursive_clear_lines(@{$e->{'members'}});
+		}
+	}
+}
+
 1;
 
