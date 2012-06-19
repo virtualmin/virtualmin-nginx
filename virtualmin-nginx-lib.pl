@@ -1815,8 +1815,8 @@ sub recursive_clear_lines
 {
 foreach my $e (@_) {
 	delete($e->{'file'});
-	delete($e->{'eline'});
 	delete($e->{'line'});
+	delete($e->{'eline'});
 	if ($e->{'type'}) {
 		&recursive_clear_lines(@{$e->{'members'}});
 		}

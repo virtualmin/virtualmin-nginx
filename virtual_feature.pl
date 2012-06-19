@@ -233,9 +233,11 @@ if (!$d->{'alias'}) {
 	if ($ok) {
 		# Configure domain to use it for .php files
 		&lock_all_config_files();
+		my @params = &list_fastcgi_params($server);
+		push(@params, map { $_->{'words'} }
+				  &find("fastcgi_param", $server));
 		&save_directive($server, "fastcgi_param",
-			[ map { { 'words' => $_ } }
-				&list_fastcgi_params($server) ]);
+			[ map { { 'words' => $_ } } @params ]);
 		my $ploc = { 'name' => 'location',
 			     'words' => [ '~', '\.php$' ],
 			     'type' => 1,
