@@ -197,6 +197,19 @@ if (!$d->{'alias'}) {
                 { 'name' => 'error_log',
 		  'words' => [ $elog ] });
 
+	# Add custom directives
+	if ($config{'extra_dirs'}) {
+		my $temp = &transname();
+		my $fh = "EXTRA";
+		&open_tempfile($fh, ">$temp", 0, 1);
+		&print_tempfile($fh, 
+			join("\n", split(/\t+/, $config{'extra_dirs'}))."\n");
+		&close_tempfile($fh);
+		my $econf = &read_config_file($temp);
+		push(@{$server->{'members'}}, @$econf);
+		&unlink_file($temp);
+		}
+
 	&save_directive($http, [ ], [ $server ]);
 	&flush_config_file_lines();
 	&unlock_all_config_files();
