@@ -206,6 +206,11 @@ if (!$d->{'alias'}) {
 			join("\n", split(/\t+/, $config{'extra_dirs'}))."\n");
 		&close_tempfile($fh);
 		my $econf = &read_config_file($temp);
+		foreach my $e (@$econf) {
+			delete($e->{'file'});
+			delete($e->{'eline'});
+			delete($e->{'line'});
+			}
 		push(@{$server->{'members'}}, @$econf);
 		&unlink_file($temp);
 		}
