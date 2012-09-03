@@ -394,6 +394,7 @@ feat_name=Nginx website
 feat_losing=The Nginx virtual host and all of its configuration directives will be deleted
 feat_disname=Nginx website
 feat_label=Enable Nginx website?
+feat_label2=Nginx website
 feat_econfig=The Nginx configuration file $1 was not found on your system
 feat_ecmd=The Nginx webserver $1 was not found on your system
 feat_edepunix=Nginx cannot be enabled for a domain without a Unix user
