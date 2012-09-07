@@ -32,7 +32,7 @@ return $text{'feat_disname'};
 # editing form
 sub feature_label
 {
-local ($edit) = @_;
+my ($edit) = @_;
 return $edit ? $text{'feat_label2'} : $text{'feat_label'};
 }
 
