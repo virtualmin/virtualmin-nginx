@@ -64,7 +64,7 @@ my $addto = \@rv;
 my @stack = ( );
 my $lnum = 0;
 my $fh = "CFILE".int(rand(1000000));
-&open_readfile($fh, $file);
+&open_readfile($fh, $file) || return [];
 my @lines = <$fh>;
 close($fh);
 while(@lines) {
