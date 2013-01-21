@@ -99,7 +99,7 @@ while(@lines) {
 		push(@$addto, $ns);
 		$addto = $ns->{'members'};
 		}
-	elsif ($l =~ /^\s*(\S+)(\s+.*)\{/) {
+	elsif ($l =~ /^\s*(\S+)(\s*.*)\{/) {
 		# Start of a section
 		my $ns = { 'name' => $1,
 			   'type' => 1,
