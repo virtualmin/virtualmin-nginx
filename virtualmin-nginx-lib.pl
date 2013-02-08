@@ -586,13 +586,14 @@ $in ||= \%in;
 &save_directive($parent, $name, [ $in->{$name} ? "on" : "off" ]);
 }
 
-# nginx_opt_input(name, &parent, size, prefix, suffix)
+# nginx_opt_input(name, &parent, size, prefix, suffix, [multi-value])
 # Returns HTML for an optional text field
 sub nginx_opt_input
 {
-my ($name, $parent, $size, $prefix, $suffix) = @_;
+my ($name, $parent, $size, $prefix, $suffix, $multi) = @_;
 return undef if (!&supported_directive($name, $parent));
-my $value = &find_value($name, $parent);
+my $obj = &find($name, $parent);
+my $value = $multi ? &join_words(@{$obj->{'words'}}) : $obj->{'value'};
 my $def = &get_default($name);
 return &ui_table_row($text{'opt_'.$name},
 	&ui_opt_textbox($name, $value, $size,
@@ -600,11 +601,11 @@ return &ui_table_row($text{'opt_'.$name},
 	$suffix, $size > 40 ? 3 : 1);
 }
 
-# nginx_opt_parse(name, &parent, &in, [regex], [&validator])
+# nginx_opt_parse(name, &parent, &in, [regex], [&validator], [multi-value])
 # Updates the config with input from nginx_opt_input
 sub nginx_opt_parse
 {
-my ($name, $parent, $in, $regexp, $vfunc) = @_;
+my ($name, $parent, $in, $regexp, $vfunc, $multi) = @_;
 return undef if (!&supported_directive($name, $parent));
 $in ||= \%in;
 if ($in->{$name."_def"}) {
@@ -612,11 +613,13 @@ if ($in->{$name."_def"}) {
 	}
 else {
 	my $v = $in->{$name};
+	my @w = $multi ? &split_quoted_string($v) : ( $v );
 	$v eq '' && &error(&text('opt_missing', $text{'opt_'.$name}));
 	!$regexp || $v =~ /$regexp/ || &error($text{'opt_e'.$name} || $name);
 	my $err = $vfunc && &$vfunc($v, $name);
 	$err && &error($err);
-	&save_directive($parent, $name, [ $v ]);
+	&save_directive($parent, $name, [ { 'name' => $name,
+					    'words' => \@w } ]);
 	}
 }
 

@@ -14,7 +14,7 @@ $access{'global'} || &error($text{'index_eglobal'});
 
 &nginx_opt_parse("root", $http, undef, '^\/.*$');
 
-&nginx_opt_parse("index", $http, undef);
+&nginx_opt_parse("index", $http, undef, undef, undef, 1);
 
 &nginx_opt_parse("default_type", $http, undef,
 		 '^[a-zA-Z0-9\.\_\-]+\/[a-zA-Z0-9\.\_\-]+$');

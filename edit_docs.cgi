@@ -17,7 +17,7 @@ print &ui_table_start($text{'docs_header'}, undef, 2);
 print &nginx_opt_input("root", $http, 60, undef,
 		       &file_chooser_button("root", 1));
 
-print &nginx_opt_input("index", $http, 60);
+print &nginx_opt_input("index", $http, 60, undef, undef, 1);
 
 print &nginx_opt_input("default_type", $http, 20);
 
