@@ -1744,6 +1744,7 @@ return (
 	[ 'SERVER_ADDR',       '$server_addr' ],
 	[ 'SERVER_PORT',       '$server_port' ],
 	[ 'SERVER_NAME',       '$server_name' ],
+	[ 'HTTPS',	       '$https' ],
        );
 }
 
