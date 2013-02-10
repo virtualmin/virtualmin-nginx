@@ -1726,7 +1726,7 @@ sub list_fastcgi_params
 my ($server) = @_;
 my $root = &find_value("root", $server);
 $root ||= '$document_root';
-return (
+my @rv = (
 	[ 'GATEWAY_INTERFACE', 'CGI/1.1' ],
 	[ 'SERVER_SOFTWARE',   'nginx' ],
 	[ 'QUERY_STRING',      '$query_string' ],
@@ -1744,8 +1744,12 @@ return (
 	[ 'SERVER_ADDR',       '$server_addr' ],
 	[ 'SERVER_PORT',       '$server_port' ],
 	[ 'SERVER_NAME',       '$server_name' ],
-	[ 'HTTPS',	       '$https' ],
        );
+if (&get_nginx_version() >= 1.2 ||
+    &get_nginx_version() =~ /^1\.1\.(\d+)/ && $1 >= 11) {
+	push(@rv, [ 'HTTPS',             '$https' ]);
+	}
+return @rv;
 }
 
 # find_before_location(&parent, path)
