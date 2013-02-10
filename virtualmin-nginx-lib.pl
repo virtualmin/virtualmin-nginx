@@ -1745,9 +1745,12 @@ my @rv = (
 	[ 'SERVER_PORT',       '$server_port' ],
 	[ 'SERVER_NAME',       '$server_name' ],
        );
-if (&get_nginx_version() >= 1.2 ||
-    &get_nginx_version() =~ /^1\.1\.(\d+)/ && $1 >= 11) {
-	push(@rv, [ 'HTTPS',             '$https' ]);
+my $ver = &get_nginx_version();
+if ($ver =~ /^(\d+)\./ && $1 >= 2 ||
+    $ver =~ /^1\.(\d+)\./ && $1 >= 2 ||
+    $ver =~ /^1\.1\.(\d+)/ && $1 >= 11) {
+	# Only in Nginx 1.1.11+
+	push(@rv, [ 'HTTPS', '$https' ]);
 	}
 return @rv;
 }
