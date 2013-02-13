@@ -894,6 +894,14 @@ else {
 	}
 }
 
+# feature_modules()
+# Returns a list of the modules that domain owners with this feature may be
+# granted access to. Used in server templates.
+sub feature_modules
+{
+return ( [ $module_name, $text{'feat_module'} ] );
+}
+
 # feature_links(&domain)
 # Returns an array of link objects for webmin modules for this feature
 sub feature_links

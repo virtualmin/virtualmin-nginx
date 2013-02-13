@@ -456,6 +456,7 @@ feat_clone=Cloning Nginx virtual host ..
 feat_clonealias=.. not necessary for alias domains
 feat_eclonefind=.. could not find new virtual host named $1 after cloning!
 feat_modifyproxy=Modifying proxy destination ..
+feat_module=Nginx Webserver (for virtual host)
 
 fcgid_ecmd=No PHP command found!
 
