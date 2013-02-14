@@ -74,7 +74,7 @@ while(@lines) {
 
 	# If line doesn't end with { } or ; , it must be continued on the
 	# next line
-	while($l !~ /[\{\}\;]\s*$/ && @lines) {
+	while($l =~ /\S/ && $l !~ /[\{\}\;]\s*$/ && @lines) {
 		my $nl = shift(@lines);
 		if ($nl =~ /\S/) {
 			$nl =~ s/#.*$//;
@@ -120,7 +120,7 @@ while(@lines) {
 		$addto = pop(@stack);
 		$addto->[@$addto-1]->{'eline'} = $lnum;
 		}
-	elsif ($l =~ /^\s*(\S+)((\s+("([^"]*)"|'([^']*)'|\S+))*);/) {
+	elsif ($l =~ /^\s*(\S+)((\s+("([^"]*)"|'([^']*)'|[^ ;]+))*);/) {
 		# Found a directive
 		my ($name, $value) = ($1, $2);
 		my @words = &split_words($value);
