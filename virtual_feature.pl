@@ -230,6 +230,11 @@ if (!$d->{'alias'}) {
 	&$virtual_server::first_print($text{'feat_phpfcgid'});
 	$d->{'nginx_php_children'} = $config{'child_procs'} ||
 				     $tmpl->{'web_phpchildren'} || 1;
+
+	# This function sets up php.ini for the domain. This has to be done
+	# first to create the .ini files used by the PHP server process
+	&virtual_server::save_domain_php_mode($d, "fcgid");
+
 	my ($ok, $port) = &setup_php_fcgi_server($d);
 	if ($ok) {
 		# Configure domain to use it for .php files
@@ -254,9 +259,6 @@ if (!$d->{'alias'}) {
 		&save_directive($server, [ ], [ $ploc ]);
 		&flush_config_file_lines();
 		&unlock_all_config_files();
-
-		# This function sets up php.ini for the domain
-		&virtual_server::save_domain_php_mode($d, "fcgid");
 
 		$d->{'nginx_php_port'} = $port;
 		&$virtual_server::second_print(
