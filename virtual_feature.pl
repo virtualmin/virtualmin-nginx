@@ -336,6 +336,8 @@ if (!$d->{'alias'}) {
 	# Changing a real virtual host
 	&lock_all_config_files();
 	my $changed = 0;
+	my $old_alog = &get_nginx_log($d, 0);
+	my $old_elog = &get_nginx_log($d, 1);
 
 	# Update domain name in server_name
 	if ($d->{'dom'} ne $oldd->{'dom'}) {
@@ -489,8 +491,6 @@ if (!$d->{'alias'}) {
 		}
 
 	# Rename log files if needed
-	my $old_alog = &get_nginx_log($d, 0);
-	my $old_elog = &get_nginx_log($d, 1);
 	my $new_alog = &virtual_server::get_apache_template_log($d, 0);
 	my $new_elog = &virtual_server::get_apache_template_log($d, 1);
 	if ($old_alog ne $new_alog) {
