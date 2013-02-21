@@ -1710,6 +1710,16 @@ foreach my $n ($name, $oldname) {
 	&init::disable_at_boot($n);
 	if ($init::init_mode eq "init") {
 		my $fn = &init::action_filename($n);
+		foreach my $l (&init::action_levels('S', $n)) {
+			if ($l =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
+				&init::delete_rl_action($n, $1, 'S');
+				}
+			}
+		foreach my $l (&init::action_levels('K', $n)) {
+			if ($l =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
+				&init::delete_rl_action($n, $1, 'K');
+				}
+			}
 		&unlink_logged($fn);
 		}
 	elsif ($init::init_mode eq "rc") {
