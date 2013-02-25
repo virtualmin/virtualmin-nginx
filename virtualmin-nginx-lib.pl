@@ -1559,7 +1559,7 @@ foreach my $looper ("/usr/bin/php-loop.pl", "/etc/php-loop.pl") {
 &error("Could not copy php-loop.pl to anywhere!");
 }
 
-# get_php_fcgi_server_command(&domain, port)
+# get_php_fcgi_server_command(&domain, port|file)
 # Returns the PHP CGI command and a hash ref of environment variables
 sub get_php_fcgi_server_command
 {
@@ -1572,7 +1572,12 @@ if (!-d $piddir) {
 	&make_dir($piddir, 0777);
 	}
 my $pidfile = "$piddir/$d->{'id'}.php.pid";
-$cmd .= " -b 127.0.0.1:$port";
+if ($port =~ /^\d+$/) {
+	$cmd .= " -b 127.0.0.1:$port";
+	}
+else {
+	$cmd .= " -s $port";
+	}
 my %envs_to_set = ( 'PHPRC', $d->{'home'}."/etc/php".$ver );
 if ($d->{'nginx_php_children'} && $d->{'nginx_php_children'} > 1) {
 	$envs_to_set{'PHP_FCGI_CHILDREN'} = $d->{'nginx_php_children'};
@@ -1625,7 +1630,16 @@ if ($pid) {
 		}
 	sleep(1);	# Give it time to exit cleanly
 	}
+
+# Delete PID file
 &virtual_server::unlink_file_as_domain_user($d, $pidfile);
+
+# Delete socket file, if any
+if ($d->{'nginx_php_port'} =~ /^(\/\S+)\/socket$/) {
+	my $domdir = $1;
+	&unlink_file($d->{'nginx_php_port'});
+	&unlink_file($domdir);
+	}
 }
 
 # setup_php_fcgi_server(&domain)
@@ -1633,27 +1647,44 @@ if ($pid) {
 # Returns an OK flag and the port number selected to listen on.
 sub setup_php_fcgi_server
 {
-my ($d) = @_;
+my ($d) =  @_;
+my $port;
 
-# Find ports used by domains
-my %used;
-foreach my $od (&virtual_server::list_domains()) {
-	if ($od->{'id'} ne $d->{'id'} && $od->{'nginx_php_port'}) {
-		$used{$od->{'nginx_php_port'}}++;
+if (!$config{'php_socket'}) {
+	# Find ports used by domains
+	my %used;
+	foreach my $od (&virtual_server::list_domains()) {
+		if ($od->{'id'} ne $d->{'id'} && $od->{'nginx_php_port'}) {
+			$used{$od->{'nginx_php_port'}}++;
+			}
 		}
-	}
 
-# Find a free port
-my $port = 9000;
-my $s;
-socket($s, PF_INET, SOCK_STREAM, getprotobyname('tcp')) ||
-	return (0, "Socket failed : $!");
-setsockopt($s, SOL_SOCKET, SO_REUSEADDR, pack("l", 1));
-while(1) {
-	last if (!$used{$port} && bind($s, sockaddr_in($port, INADDR_ANY)));
-	$port++;
+	# Find a free port
+	$port = 9000;
+	my $s;
+	socket($s, PF_INET, SOCK_STREAM, getprotobyname('tcp')) ||
+		return (0, "Socket failed : $!");
+	setsockopt($s, SOL_SOCKET, SO_REUSEADDR, pack("l", 1));
+	while(1) {
+		last if (!$used{$port} &&
+			 bind($s, sockaddr_in($port, INADDR_ANY)));
+		$port++;
+		}
+	close($s);
 	}
-close($s);
+else {
+	# Use socket file. First work out directory for it
+	my $socketdir = "/var/php-nginx";
+	if (!-d $socketdir) {
+		&make_dir($socketdir, 0777);
+		}
+	my $domdir = "$socketdir/$d->{'id'}.sock";
+	if (!-d $domdir) {
+		&make_dir($domdir, 0770);
+		}
+	&set_ownership_permissions($domdir, $d->{'gid'}, undef, $socketdir);
+	$port = "$socketdir/socket";
+	}
 
 # Get the command
 my ($cmd, $envs_to_set, $log, $pidfile) =

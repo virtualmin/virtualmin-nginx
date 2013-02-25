@@ -252,7 +252,9 @@ if (!$d->{'alias'}) {
 				  'words' => [ '$uri', '=404' ],
 				},
 				{ 'name' => 'fastcgi_pass',
-				  'words' => [ 'localhost:'.$port ],
+				  'words' => [ $port =~ /^\d+$/ ?
+						'localhost:'.$port :
+						'unix:'.$port ],
 				},
 			     ],
 			   };
@@ -1882,7 +1884,9 @@ if ($oldd && $oldd->{'nginx_php_port'} != $d->{'nginx_php_port'}) {
 		       &find("location", $server);
 	if ($l) {
 		&save_directive($l, "fastcgi_pass",
-				[ "localhost:".$oldd->{'nginx_php_port'} ]);
+			$oldd->{'nginx_php_port'} =~ /^\d+$/ ?
+			    [ "localhost:".$oldd->{'nginx_php_port'} ] :
+			    [ "unix:".$oldd->{'nginx_php_port'} ]);
 		$d->{'nginx_php_port'} = $oldd->{'nginx_php_port'};
 		}
 	}
@@ -1909,7 +1913,6 @@ if ($oldd) {
 &virtual_server::fix_php_extension_dir($d);
 
 # Restart PHP server, in case php.ini got changed by the restore
-# XXX
 &feature_restart_web_php($d);
 
 # Restore log files
@@ -2000,7 +2003,9 @@ my ($l) = grep { $_->{'words'}->[1] eq '\.php$' }
 	       &find("location", $server);
 if ($l) {
 	&save_directive($l, "fastcgi_pass",
-			[ "localhost:".$d->{'nginx_php_port'} ]);
+		$d->{'nginx_php_port'} =~ /^\d+$/ ?
+		    [ "localhost:".$d->{'nginx_php_port'} ] :
+		    [ "unix:".$d->{'nginx_php_port'} ]);
 	}
 
 &flush_config_file_lines();
