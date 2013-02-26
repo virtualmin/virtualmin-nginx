@@ -1576,7 +1576,7 @@ if ($port =~ /^\d+$/) {
 	$cmd .= " -b 127.0.0.1:$port";
 	}
 else {
-	$cmd .= " -s $port";
+	$cmd .= " -b $port";
 	}
 my %envs_to_set = ( 'PHPRC', $d->{'home'}."/etc/php".$ver );
 if ($d->{'nginx_php_children'} && $d->{'nginx_php_children'} > 1) {
@@ -1682,8 +1682,9 @@ else {
 	if (!-d $domdir) {
 		&make_dir($domdir, 0770);
 		}
-	&set_ownership_permissions($domdir, $d->{'gid'}, undef, $socketdir);
-	$port = "$socketdir/socket";
+	my $user = &get_nginx_user();
+	&set_ownership_permissions($user, $d->{'gid'}, undef, $domdir);
+	$port = "$domdir/socket";
 	}
 
 # Get the command

@@ -6,5 +6,5 @@ start_cmd=Command to start Nginx,0
 stop_cmd=Command to stop Nginx,0
 apply_cmd=Command to apply Nginx configuration,0
 child_procs=Default number of PHP child processes,3,Virtualmin default
-extra_dirs=Additional Nginx directives for new virtual hosts,9,80,5,\t
 php_socket=Connect Nginx to PHP processes with,1,1-Socket files,0-TCP connections
+extra_dirs=Additional Nginx directives for new virtual hosts,9,80,5,\t

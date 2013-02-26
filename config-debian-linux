@@ -6,3 +6,4 @@ apply_cmd=service nginx restart
 add_to=/etc/nginx/sites-available
 add_link=/etc/nginx/sites-enabled
 child_procs=4
+php_socket=1

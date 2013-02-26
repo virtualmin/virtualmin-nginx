@@ -4,3 +4,4 @@ start_cmd=/etc/init.d/nginx start
 stop_cmd=/etc/init.d/nginx stop
 apply_cmd=/etc/init.d/nginx restart
 child_procs=4
+php_socket=1
