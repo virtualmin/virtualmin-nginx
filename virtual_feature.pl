@@ -1807,6 +1807,12 @@ foreach my $l (@$lref[($server->{'line'}+1) .. ($server->{'eline'}-1)]) {
 	&print_tempfile($fh, $l."\n");
 	}
 &close_tempfile($fh);
+if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
+    -d $config{'add_to'}) {
+	# Domain has it's own file, so save it completely for use 
+	# when restoring
+	&copy_source_dest($server->{'file'}, $file."_complete");
+	}
 &unlock_all_config_files();
 &$virtual_server::second_print($virtual_server::text{'setup_done'});
 
@@ -1845,11 +1851,22 @@ if (!$server) {
 	}
 my $alog = &get_nginx_log($d, 0);
 my $elog = &get_nginx_log($d, 1);
-my $lref = &read_file_lines($server->{'file'});
-my $srclref = &read_file_lines($file, 1);
-splice(@$lref, $server->{'line'}+1, $server->{'eline'}-$server->{'line'}-1,
-       @$srclref);
-&flush_file_lines($server->{'file'});
+if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
+    -d $config{'add_to'} &&
+    -r $file."_complete") {
+	# Domain is in its own file, and backup includes the whole file .. so
+	# just copy it into place
+	&copy_source_dest($file."_complete", $server->{'file'});
+	}
+else {
+	# Just replace server block for this domain
+	my $lref = &read_file_lines($server->{'file'});
+	my $srclref = &read_file_lines($file, 1);
+	splice(@$lref, $server->{'line'}+1,
+	       $server->{'eline'}-$server->{'line'}-1,
+	       @$srclref);
+	&flush_file_lines($server->{'file'});
+	}
 &flush_config_cache();
 $server = &find_domain_server($d);
 if (!$server) {
