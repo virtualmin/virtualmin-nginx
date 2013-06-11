@@ -1796,15 +1796,8 @@ my $fh = "BACKUP";
 my %adoms = map { $_->{'dom'}, 1 }
 		&virtual_server::get_domain_by("alias", $d->{'id'});
 foreach my $l (@$lref[($server->{'line'}+1) .. ($server->{'eline'}-1)]) {
-	if ($l =~ /^\s+server_name(\s+.*);/) {
-		# Exclude server_name entries for alias domains
-		my @sa = &split_words($1);
-		@sa = grep { !($adoms{$_} ||
-			     /^([^\.]+)\.(\S+)/ && $adoms{$2}) } @sa;
-		next if (!@sa);
-		$l = "server_name ".&join_words(@sa).";";
-		}
-	&print_tempfile($fh, $l."\n");
+	$l = &fix_server_name_line($l, \%adoms);
+	&print_tempfile($fh, $l."\n") if ($l);
 	}
 &close_tempfile($fh);
 if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
@@ -1812,6 +1805,11 @@ if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
 	# Domain has it's own file, so save it completely for use 
 	# when restoring
 	&copy_source_dest($server->{'file'}, $file."_complete");
+	my $clref = &read_file_lines($file."_complete");
+	foreach my $l (@$clref) {
+		$l = &fix_server_name_line($l, \%adoms);
+		}
+	&flush_file_lines($file."_complete");
 	}
 &unlock_all_config_files();
 &$virtual_server::second_print($virtual_server::text{'setup_done'});
@@ -1896,7 +1894,7 @@ if ($oldd && $d->{'home'} ne $oldd->{'home'}) {
 	}
 
 # Put back old port for PHP server
-if ($oldd && $oldd->{'nginx_php_port'} != $d->{'nginx_php_port'}) {
+if ($oldd && $oldd->{'nginx_php_port'} ne $d->{'nginx_php_port'}) {
 	my ($l) = grep { $_->{'words'}->[1] eq '\.php$' }
 		       &find("location", $server);
 	if ($l) {
@@ -2253,6 +2251,21 @@ elsif ($d->{'proxy_pass_mode'} == 2) {
 else {
 	return "Unknown proxy mode $d->{'proxy_pass_mode'}";
 	}
+}
+
+sub fix_server_name_line
+{
+my ($l, $adoms) = @_;
+if ($l =~ /^(\s*)server_name(\s+.*);/) {
+	# Exclude server_name entries for alias domains
+	my $indent = $1;
+	my @sa = &split_words($2);
+	@sa = grep { !($adoms->{$_} ||
+		       /^([^\.]+)\.(\S+)/ && $adoms->{$2}) } @sa;
+	return undef if (!@sa);
+	$l = $indent."server_name ".&join_words(@sa).";";
+	}
+return $l;
 }
 
 1;
