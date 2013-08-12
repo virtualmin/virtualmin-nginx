@@ -913,10 +913,25 @@ sub feature_links
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return ( ) if (!$server);
+
+# Link to edit Nginx config for domain
 my @rv = ( { 'mod' => $module_name,
 	     'desc' => $text{'feat_edit'},
 	     'page' => 'edit_server.cgi?id='.&server_id($server),
 	     'cat' => 'services' } );
+
+# Links to edit PHP configs
+foreach my $ini (&virtual_server::find_domain_php_ini_files($d)) {
+        push(@rv, { 'mod' => 'phpini',
+                    'desc' => $ini->[0] ?
+                        &text('links_phpini2', $ini->[0]) :
+                        &text('links_phpini'),
+                    'page' => 'list_ini.cgi?file='.
+                                &urlize($ini->[1]),
+                    'cat' => 'services',
+                  });
+        }
+
 return @rv;
 }
 

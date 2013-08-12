@@ -469,4 +469,9 @@ redirect_eurlhost=Hostname in URL cannot be resolved : $1
 redirect_eclash=A location for $1 already exists
 redirect_ephd=Nginx only allows aliases destination directories to be under $1
 
+links_alog=Apache Access Log
+links_elog=Apache Error Log
+links_phpini=PHP Configuration
+links_phpini2=PHP $1 Configuration
+
 __norefs=1
