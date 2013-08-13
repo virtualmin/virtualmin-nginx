@@ -920,6 +920,21 @@ my @rv = ( { 'mod' => $module_name,
 	     'page' => 'edit_server.cgi?id='.&server_id($server),
 	     'cat' => 'services' } );
 
+# Links to logs
+foreach my $log ([ 0, $text{'links_anlog'} ],
+		 [ 1, $text{'links_enlog'} ]) {
+	my $lf = &get_nginx_log($d, $log->[0]);
+	if ($lf) {
+		my $param = &virtual_server::master_admin() ? "file" : "extra";
+		push(@rv, { 'mod' => 'syslog',
+			    'desc' => $log->[1],
+			    'page' => "save_log.cgi?view=1&".
+				      "$param=".&urlize($lf),
+			    'cat' => 'logs',
+			  });
+		}
+	}
+
 # Links to edit PHP configs
 foreach my $ini (&virtual_server::find_domain_php_ini_files($d)) {
         push(@rv, { 'mod' => 'phpini',
