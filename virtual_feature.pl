@@ -160,7 +160,7 @@ if (!$d->{'alias'}) {
 	push(@{$server->{'members'}},
 		{ 'name' => 'listen',
 		  'words' => [ $d->{'ip'}.$portstr ] });
-	if ($d->{'virt6'}) {
+	if ($d->{'ip6'}) {
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
 			  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
@@ -410,8 +410,8 @@ if (!$d->{'alias'}) {
 		}
 
 	# Update IPv6 address (or add or remove)
-	if ($d->{'ip6'} ne $oldd->{'ip6'} ||
-	    $d->{'virt6'} ne $oldd->{'virt6'}) {
+	if (($d->{'ip6'} || "") ne ($oldd->{'ip6'} || "") ||
+	    ($d->{'virt6'} || 0) ne ($oldd->{'virt6'} || 0)) {
 		&$virtual_server::first_print($text{'feat_modifyip6'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
@@ -421,8 +421,8 @@ if (!$d->{'alias'}) {
 			}
 		my @listen = &find("listen", $server);
 		my @newlisten;
-		my $ob = $oldd->{'virt6'} ? "[".$oldd->{'ip6'}."]" : "";
-		my $nb = $d->{'virt6'} ? "[".$d->{'ip6'}."]" : "";
+		my $ob = $oldd->{'ip6'} ? "[".$oldd->{'ip6'}."]" : "";
+		my $nb = $d->{'ip6'} ? "[".$d->{'ip6'}."]" : "";
 		foreach my $l (@listen) {
 			my @w = @{$l->{'words'}};
 			if ($ob && $w[0] eq $ob) {
@@ -446,7 +446,7 @@ if (!$d->{'alias'}) {
 				push(@newlisten, { 'words' => \@w });
 				}
 			}
-		if ($d->{'virt6'} && !$oldd->{'virt6'}) {
+		if ($d->{'ip6'} && !$oldd->{'ip6'}) {
 			push(@newlisten, { 'words' => [ $nb ] });
 			}
 		&save_directive($server, "listen", \@newlisten);
