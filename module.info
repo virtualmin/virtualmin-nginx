@@ -1,5 +1,5 @@
 desc=Nginx Webserver
 category=servers
-version=1.5
+version=1.6
 readonly=1
 desc_nl=Nginx Webserver

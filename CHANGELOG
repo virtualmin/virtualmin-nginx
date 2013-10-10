@@ -3,3 +3,5 @@ Fixed parsing of Nginx config files with directives split over multiple lines.
 Changed the default method of communicating with PHP processes to use a more secure Unix domain socket instead of a TCP connection.
 Fixed the renaming of log files when a domain is renamed.
 Fixed a bug that caused PHP processes in newly created domains to be using the wrong php.ini file.
+---- Changes since 1.5 ----
+Added support for shared hosting on IPv6 addresses.
