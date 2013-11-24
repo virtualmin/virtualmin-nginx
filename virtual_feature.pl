@@ -1083,7 +1083,7 @@ sub feature_restart_web_php
 {
 my ($d) = @_;
 if ($d->{'nginx_php_port'}) {
-	&stop_php_fcgi_server_command($d);
+	&stop_php_fcgi_server_command($d, 0);
 	my ($cmd, $envs_to_set, $log, $pidfile) = &get_php_fcgi_server_command(
 			$d, $d->{'nginx_php_port'});
 	if ($cmd) {

@@ -1612,11 +1612,11 @@ my $fh = "PIDFILE";
 &virtual_server::close_tempfile_as_domain_user($d, $fh);
 }
 
-# stop_php_fcgi_server_command(&domain)
+# stop_php_fcgi_server_command(&domain, [delete-dir])
 # Kills the running PHP server process for a domain
 sub stop_php_fcgi_server_command
 {
-my ($d) = @_;
+my ($d, $deletedir) = @_;
 my (undef, undef, undef, $pidfile) =
 	&get_php_fcgi_server_command($d, $d->{'nginx_php_port'});
 my $pid = &check_pid_file($pidfile);
@@ -1638,7 +1638,7 @@ if ($pid) {
 if ($d->{'nginx_php_port'} =~ /^(\/\S+)\/socket$/) {
 	my $domdir = $1;
 	&unlink_file($d->{'nginx_php_port'});
-	&unlink_file($domdir);
+	&unlink_file($domdir) if ($deletedir);
 	}
 }
 
@@ -1726,7 +1726,7 @@ sub delete_php_fcgi_server
 my ($d) = @_;
 
 # Stop the server
-&stop_php_fcgi_server_command($d);
+&stop_php_fcgi_server_command($d, 1);
 
 # Delete init script
 &foreign_require("init");
