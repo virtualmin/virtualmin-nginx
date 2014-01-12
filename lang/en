@@ -474,4 +474,7 @@ links_enlog=Nginx Error Log
 links_phpini=PHP Configuration
 links_phpini2=PHP $1 Configuration
 
+monitor_missing=Nginx is not installed
+monitor_type=Nginx Webserver
+
 __norefs=1
