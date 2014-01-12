@@ -146,6 +146,10 @@ while(@lines) {
 				    'line' => $slnum,
 				    'eline' => $lnum };
 			push(@$addto, $dir);
+                        if (@stack) {
+                                my $lastaddto = $stack[$#stack];
+                                $lastaddto->[@$lastaddto - 1]->{'eline'} = $lnum;
+                                }
 			}
 		}
 	elsif ($l =~ /\S/) {
