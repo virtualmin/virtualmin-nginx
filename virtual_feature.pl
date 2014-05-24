@@ -1056,10 +1056,20 @@ sub feature_get_fcgid_max_execution_time
 my ($d) = @_;
 my $server = &find_domain_server($d);
 if ($server) {
-	my $t = &find_value("fastcgi_read_timeout", $server);
-	return $t == 9999 ? undef : $t if ($t);
+	if (&get_nginx_version() >= 1.6) {
+		# New format directive
+		my ($t) = grep { /^read_timeout\s+(\d+)/ }
+			     &find_value("fastcgi_param", $server);
+		my $v = $t && $t =~ /^read_timeout\s+(\d+)/ ? $1 : undef;
+		return $v == 9999 ? undef : $v;
+		}
+	else {
+		# Old format directive
+		my $t = &find_value("fastcgi_read_timeout", $server);
+		return $t == 9999 ? undef : $t if ($t);
+		}
+	return &get_default("fastcgi_read_timeout");
 	}
-return &get_default("fastcgi_read_timeout");
 }
 
 # feature_set_fcgid_max_execution_time(&domain, timeout)
@@ -1070,7 +1080,18 @@ my ($d, $max) = @_;
 &lock_all_config_files();
 my $server = &find_domain_server($d);
 if ($server) {
-	&save_directive($server, "fastcgi_read_timeout", [ $max || 9999 ]);
+	if (&get_nginx_version() >= 1.6) {
+		# New format directive
+		my @p = &find_value("fastcgi_param", $server);
+		@p = grep { !/^read_timeout\s/ } @p;
+		push(@p, "read_timeout ".($max || 9999));
+		&save_directive($server, "fastcgi_param", \@p);
+		}
+	else {
+		# Old format directive
+		&save_directive($server, "fastcgi_read_timeout",
+			        [ $max || 9999 ]);
+		}
 	}
 &flush_config_file_lines();
 &unlock_all_config_files();
