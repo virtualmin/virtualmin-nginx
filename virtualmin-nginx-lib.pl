@@ -1392,12 +1392,18 @@ sub delete_server_link
 {
 my ($server) = @_;
 if ($config{'add_link'}) {
-        my $link = $server->{'file'};
-        $link =~ s/^.*\///;
-        $link = $config{'add_link'}."/".$link;
-	if (-l $link) {
-		&unlink_logged($link);
-		}
+	my $file = $server->{'file'};
+        my $short = $file;
+        $short =~ s/^.*\///;
+        opendir(LINKDIR, $config{'add_link'});
+        foreach my $f (readdir(LINKDIR)) {
+                if ($f ne "." && $f ne ".." &&
+                    (&resolve_links($config{'add_link'}."/".$f) eq $file ||
+                     $short eq $f)) {
+                        &unlink_logged($config{'add_link'}."/".$f);
+                        }
+                }
+        closedir(LINKDIR);
         }
 }
 
