@@ -5,3 +5,6 @@ Fixed the renaming of log files when a domain is renamed.
 Fixed a bug that caused PHP processes in newly created domains to be using the wrong php.ini file.
 ---- Changes since 1.5 ----
 Added support for shared hosting on IPv6 addresses.
+---- Changes since 1.6 ----
+Fixed a bug that caused leftover times in sites-available.
+Use the fastcgi_param time_timeout directive on Ngix 1.6+, instead of fastcgi_read_timeout.
