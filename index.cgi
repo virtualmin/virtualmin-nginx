@@ -57,6 +57,7 @@ if (@servers) {
 				  $text{'index_root'} ], 100, 0, \@tds);
 	foreach my $s (@servers) {
 		my $name = &find_value("server_name", $s);
+		$name ||= "";
 
 		# Extract all IPs and ports from listen directives
 		my (@ips, @ports);
@@ -86,7 +87,7 @@ if (@servers) {
 		my $id = $name.";".$rootdir;
 		print &ui_columns_row([
 			"<a href='edit_server.cgi?id=".&urlize($id)."'>".
-			  &html_escape($name)."</a>",
+			  ($name ? &html_escape($name) : $text{'default'})."</a>",
 			join("<br>", @ips),
 			join("<br>", @ports),
 			$root ],
