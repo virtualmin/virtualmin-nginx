@@ -568,6 +568,15 @@ if (!$d->{'alias'}) {
 				$d, $web_user, 'setup_webuser');
 			}
 		}
+
+	if ($d->{'home'} ne $oldd->{'home'}) {
+		# Update session dir and upload path in php.ini files
+		my @fixes = (
+                  [ "session.save_path", $oldd->{'home'}, $d->{'home'}, 1 ],
+                  [ "upload_tmp_dir", $oldd->{'home'}, $d->{'home'}, 1 ],
+                  );
+                &virtual_server::fix_php_ini_files($d, \@fixes);
+		}
 	}
 else {
 	# Changing inside an alias
