@@ -540,7 +540,8 @@ if (!$d->{'alias'}) {
 
 	# Update fcgid user, by tearing down and re-running. Killing needs to
 	# be done in the new home, as it may have been moved already
-	if ($d->{'user'} ne $oldd->{'user'}) {
+	if ($d->{'user'} ne $oldd->{'user'} ||
+	    $d->{'home'} ne $oldd->{'home'}) {
 		&$virtual_server::first_print($text{'feat_modifyphp'});
 		my $oldd_copy = { %$oldd };
 		$oldd_copy->{'home'} = $d->{'home'};
