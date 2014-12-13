@@ -1858,24 +1858,26 @@ if (!$server) {
 	}
 my $lref = &read_file_lines($server->{'file'}, 1);
 my $fh = "BACKUP";
-&open_tempfile($fh, ">$file");
+&virtual_server::open_tempfile_as_domain_user($d, $fh, ">$file");
 my %adoms = map { $_->{'dom'}, 1 }
 		&virtual_server::get_domain_by("alias", $d->{'id'});
 foreach my $l (@$lref[($server->{'line'}+1) .. ($server->{'eline'}-1)]) {
 	$l = &fix_server_name_line($l, \%adoms);
 	&print_tempfile($fh, $l."\n") if ($l);
 	}
-&close_tempfile($fh);
+&virtual_server::close_tempfile_as_domain_user($d, $fh);
 if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
     -d $config{'add_to'}) {
 	# Domain has it's own file, so save it completely for use 
 	# when restoring
-	&copy_source_dest($server->{'file'}, $file."_complete");
-	my $clref = &read_file_lines($file."_complete");
+	&virtual_server::copy_write_as_domain_user(
+		$server->{'file'}, $file."_complete");
+	my $clref = &virtual_server::read_file_lines_as_domain_user(
+			$d, $file."_complete");
 	foreach my $l (@$clref) {
 		$l = &fix_server_name_line($l, \%adoms);
 		}
-	&flush_file_lines($file."_complete");
+	&virtual_server::flush_file_lines_as_domain_user($d, $file."_complete");
 	}
 &unlock_all_config_files();
 &$virtual_server::second_print($virtual_server::text{'setup_done'});
@@ -1885,10 +1887,11 @@ my $alog = &get_nginx_log($d, 0);
 if ($alog && !&is_under_directory($d->{'home'}, $alog) &&
     !$allopts->{'dir'}->{'dirnologs'}) {
 	&$virtual_server::first_print($text{'feat_backuplog'});
-	&copy_source_dest($alog, $file."_alog");
+	&virtual_server::copy_write_as_domain_user($d, $alog, $file."_alog");
 	my $elog = &get_nginx_log($d, 1);
 	if ($elog && !&is_under_directory($d->{'home'}, $elog)) {
-		&copy_source_dest($elog, $file."_elog");
+		&virtual_server::copy_write_as_domain_user(
+			$d, $elog, $file."_elog");
 		}
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 	}
