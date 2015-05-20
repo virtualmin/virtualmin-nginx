@@ -33,8 +33,8 @@ push(@links, "<a href='edit_mime.cgi?new=1&search=".&urlize($in{'search'}).
 	     "#new'>".$text{'mime_add'}."</a>") if (!$in{'new'});
 if (@types) {
 	# Show in table
-	unshift(@links, &select_all_link("d"),
-			&select_invert_link("d"));
+	unshift(@links, &select_all_link("d", 1),
+			&select_invert_link("d", 1));
 	print &ui_form_start("save_mime.cgi", "post");
 	print &ui_hidden("new", $in{'new'});
 	print &ui_hidden("type", $in{'type'});
