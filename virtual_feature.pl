@@ -1921,7 +1921,7 @@ my $alog = &get_nginx_log($d, 0);
 my $elog = &get_nginx_log($d, 1);
 if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
     -d $config{'add_to'} &&
-    -r $file."_complete") {
+    -s $file."_complete") {
 	# Domain is in its own file, and backup includes the whole file .. so
 	# just copy it into place
 	&copy_source_dest($file."_complete", $server->{'file'});

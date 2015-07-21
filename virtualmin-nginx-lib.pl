@@ -182,7 +182,7 @@ my ($name) = @_;
 if (-d $config{'add_to'}) {
 	$name =~ s/[^a-zA-Z0-9\.\_\-]//g;
 	if ($name) {
-		return $config{'add_to'}."/".$name;
+		return $config{'add_to'}."/".$name.".conf";
 		}
 	}
 elsif ($config{'add_to'}) {
