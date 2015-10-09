@@ -1997,6 +1997,9 @@ if ($oldd) {
 # Fix broken PHP extension_dir directives
 &virtual_server::fix_php_extension_dir($d);
 
+# Re-check HTML dirs
+&virtual_server::find_html_cgi_dirs($d);
+
 # Restart PHP server, in case php.ini got changed by the restore
 &feature_restart_web_php($d);
 
