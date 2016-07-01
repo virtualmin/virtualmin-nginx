@@ -4,17 +4,18 @@ use strict;
 use warnings;
 use POSIX;
 
-my $dead = 0;
-my $childpid;
+our $dead = 0;
+our $childpid = 0;
 
-$SIG{'TERM'} = sub { $dead = 1;
-if ($childpid) {
-	kill('TERM', $childpid);
-	sleep(1);	# Give it time to clean up
-	kill('KILL', $childpid);
-	}
-	exit(1);
-};
+$SIG{'TERM'} = sub {
+		$dead = 1;
+		if ($childpid) {
+			kill('TERM', $childpid);
+			sleep(1);	# Give it time to clean up
+			kill('KILL', $childpid);
+		}
+		exit(1);
+	};
 
 while(!$dead) {
 	my $start = time();
