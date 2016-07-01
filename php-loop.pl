@@ -12,7 +12,7 @@ if ($childpid) {
 	kill('TERM', $childpid);
 	sleep(1);	# Give it time to clean up
 	kill('KILL', $childpid);
-  }
+	}
 	exit(1);
 };
 
