@@ -13,7 +13,7 @@ if ($childpid) {
 	sleep(1);	# Give it time to clean up
 	kill('KILL', $childpid);
   }
- exit(1);
+	exit(1);
 };
 
 while(!$dead) {
