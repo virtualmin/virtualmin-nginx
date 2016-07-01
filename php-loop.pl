@@ -14,7 +14,7 @@ if ($childpid) {
 	kill('KILL', $childpid);
   }
  exit(1);
-		   };
+};
 
 while(!$dead) {
 	my $start = time();
