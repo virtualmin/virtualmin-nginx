@@ -502,7 +502,7 @@ if (!%list_directives_cache) {
 			"$module_root_directory/nginx-directives", 1);
 	foreach my $l (@$lref) {
 		my ($module, $name, $default, $context) = split(/\t/, $l);
-		$list_directives_cache{$name} = 
+		$list_directives_cache{$name} =
 			{ 'module' => $module,
 			  'name' => $name,
 			  'default' => $default eq '-' ? undef : $default,
@@ -1607,8 +1607,8 @@ if (!$pid) {
 	close(STDIN); close(STDOUT); close(STDERR);
 	my @u = getpwnam($d->{'user'});
 	&switch_to_unix_user(\@u);
-	open(STDOUT, ">>$log");
-	open(STDERR, ">&STDOUT");
+	open(STDOUT, ">>", "$log");
+	open(STDERR, ">", "&STDOUT");
 	&clean_environment();
 	foreach my $e (keys %$envs_to_set) {
 		$ENV{$e} = $envs_to_set->{$e};
@@ -1887,4 +1887,3 @@ foreach my $e (@_) {
 }
 
 1;
-

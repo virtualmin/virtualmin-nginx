@@ -204,7 +204,7 @@ if (!$d->{'alias'}) {
 		my $temp = &transname();
 		my $fh = "EXTRA";
 		&open_tempfile($fh, ">$temp", 0, 1);
-		&print_tempfile($fh, 
+		&print_tempfile($fh,
 			join("\n", split(/\t+/, $config{'extra_dirs'}))."\n");
 		&close_tempfile($fh);
 		my $econf = &read_config_file($temp);
@@ -735,8 +735,10 @@ else {
 		&open_lock_tempfile($fh, ">$dis");
 		&print_tempfile($fh, $msg);
 		&close_tempfile($fh);
+		no warnings "once";
 		&set_ownership_permissions(
 			undef, undef, 0644, $virtual_server::disabled_website);
+		use warnings "once";
 
 		# Add location to force use of it
 		if (!$clash) {
@@ -1218,19 +1220,22 @@ my $max_ltime = $start;
 foreach my $l (&unique(@logs)) {
 	foreach my $f (&virtual_server::all_log_files($l, $max_ltime)) {
 		local $_;
+		my $LOG;
 		if ($f =~ /\.gz$/i) {
-			open(LOG, "gunzip -c ".quotemeta($f)." |");
+			open($LOG, "<", "gunzip -c ".quotemeta($f)." |");
 			}
 		elsif ($f =~ /\.Z$/i) {
-			open(LOG, "uncompress -c ".quotemeta($f)." |");
+			open($LOG, "<", "uncompress -c ".quotemeta($f)." |");
 			}
 		else {
-			open(LOG, $f);
+			open($LOG, "<", $f);
 			}
-		while(<LOG>) {
+		while(<$LOG>) {
 			if (/^(\S+)\s+(\S+)\s+(\S+)\s+\[(\d+)\/(\S+)\/(\d+):(\d+):(\d+):(\d+)\s+(\S+)\]\s+"([^"]*)"\s+(\S+)\s+(\S+)/ && $12 ne "206") {
 				# Valid-looking log line .. work out the time
+				no warnings "once";
 				my $ltime = timelocal($9, $8, $7, $4, $virtual_server::apache_mmap{lc($5)}, $6-1900);
+				use warnings "once";
 				if ($ltime > $start) {
 					my $day = int($ltime / (24*60*60));
 					$bwinfo->{"web_".$day} += $13;
@@ -1238,7 +1243,7 @@ foreach my $l (&unique(@logs)) {
 				$max_ltime = $ltime if ($ltime > $max_ltime);
 				}
 			}
-		close(LOG);
+		close($LOG);
 		}
 	}
 return $max_ltime;
@@ -1869,7 +1874,7 @@ foreach my $l (@$lref[($server->{'line'}+1) .. ($server->{'eline'}-1)]) {
 &virtual_server::close_tempfile_as_domain_user($d, $fh);
 if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
     -d $config{'add_to'}) {
-	# Domain has it's own file, so save it completely for use 
+	# Domain has it's own file, so save it completely for use
 	# when restoring
 	&virtual_server::copy_write_as_domain_user(
 		$server->{'file'}, $file."_complete");
@@ -2342,4 +2347,3 @@ return $l;
 }
 
 1;
-

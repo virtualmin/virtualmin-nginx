@@ -1,6 +1,8 @@
+use strict;
+use warnings;
+our (%text, %in);
 
 do 'virtualmin-nginx-lib.pl';
-our (%in);
 
 # acl_security_form(&options)
 # Output HTML for editing security options for the acl module
@@ -56,4 +58,3 @@ $o->{'logs'} = $in{'logs'};
 $o->{'user'} = $in{'user'};
 $o->{'stop'} = $in{'stop'};
 }
-

@@ -1,4 +1,6 @@
 #!/usr/bin/perl
+use strict;
+use warnings;
 
 my @mods;
 my %donemod;
@@ -14,6 +16,7 @@ foreach my $l (&download("http://wiki.nginx.org/DirectiveIndex")) {
 	}
 push(@mods, [ "CoreModule", "core" ]);
 
+my @dirs;
 foreach my $m (@mods) {
 	my ($page, $mod) = @$m;
 	my $dir;
