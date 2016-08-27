@@ -1877,7 +1877,7 @@ if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
 	# Domain has it's own file, so save it completely for use
 	# when restoring
 	&virtual_server::copy_write_as_domain_user(
-		$server->{'file'}, $file."_complete");
+		$d, $server->{'file'}, $file."_complete");
 	my $clref = &virtual_server::read_file_lines_as_domain_user(
 			$d, $file."_complete");
 	foreach my $l (@$clref) {
