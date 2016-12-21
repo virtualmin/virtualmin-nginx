@@ -164,8 +164,7 @@ if (!$d->{'alias'}) {
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
 			  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
-				       $d->{'virt6'} ? ( 'default' ) : ( ),
-				       'ipv6only=on' ] });
+				       $d->{'virt6'} ? ( 'default' ) : ( ) ] });
 		}
 
 	# Set the root correctly
