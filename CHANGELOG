@@ -8,3 +8,5 @@ Added support for shared hosting on IPv6 addresses.
 ---- Changes since 1.6 ----
 Fixed a bug that caused leftover times in sites-available.
 Use the fastcgi_param time_timeout directive on Ngix 1.6+, instead of fastcgi_read_timeout.
+---- Changes since 2.0 ----
+Added a Virtualmin template-level option for default Nginx directives for new severs.

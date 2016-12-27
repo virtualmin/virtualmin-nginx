@@ -199,12 +199,15 @@ if (!$d->{'alias'}) {
 		  'words' => [ $elog ] });
 
 	# Add custom directives
-	if ($config{'extra_dirs'}) {
+	my $extra_dirs = $tmpl->{$module_name};
+	$extra_dirs ||= $config{'extra_dirs'};
+	$extra_dirs = "" if ($extra_dirs eq "none");
+	if ($extra_dirs) {
 		my $temp = &transname();
 		my $fh = "EXTRA";
 		&open_tempfile($fh, ">$temp", 0, 1);
 		&print_tempfile($fh,
-			join("\n", split(/\t+/, $config{'extra_dirs'}))."\n");
+			join("\n", split(/\t+/, $extra_dirs))."\n");
 		&close_tempfile($fh);
 		my $econf = &read_config_file($temp);
 		&recursive_clear_lines(@$econf);
