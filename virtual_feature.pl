@@ -1025,7 +1025,7 @@ my $fpmsock = &virtual_server::get_php_fpm_socket_file($d);
 if ($loc) {
 	my ($pass) = &find("fastcgi_pass", $loc);
 	if ($pass && $pass->{'words'}->[0] =~ /^(localhost|unix):(.*)$/) {
-		if ($1 eq "unix" && $2 eq "fpmsock") {
+		if ($1 eq "unix" && $2 eq $fpmsock) {
 			return 'fpm';
 			}
 		else {
@@ -1062,7 +1062,7 @@ if ($mode eq "fcgid" && $oldmode ne "fcgid") {
 	}
 elsif ($mode eq "fpm" && $oldmode ne "fpm") {
 	# Setup FPM pool
-	&virtual_server::setup_php_fpm_pool($d);
+	&virtual_server::create_php_fpm_pool($d);
 	$port = &virtual_server::get_php_fpm_socket_file($d);
 	}
 
@@ -1076,8 +1076,8 @@ if ($port) {
 		&save_directive($loc, "fastcgi_pass",
 			$port =~ /^\d+$/ ? [ "localhost:".$port ]
 					 : [ "unix:".$port ]);
-		&unlock_file($loc->{'file'});
 		&flush_file_lines($loc->{'file'});
+		&unlock_file($loc->{'file'});
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
 	}
@@ -1101,7 +1101,7 @@ elsif ($mode eq 'fpm') {
 	# XXX is this function safe to call?
 	my @avail = &virtual_server::list_available_php_versions($d, $mode);
         if (@avail) {
-                return ( { 'dir' => &public_html_dir($d),
+                return ( { 'dir' => &virtual_server::public_html_dir($d),
                            'version' => $avail[0]->[0],
                            'mode' => $mode } );
                 }

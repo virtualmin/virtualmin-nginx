@@ -1670,7 +1670,7 @@ if (!$config{'php_socket'}) {
 		}
 
 	# Find a free port
-	$port = 9000;
+	$port = 9100;
 	my $s;
 	socket($s, PF_INET, SOCK_STREAM, getprotobyname('tcp')) ||
 		return (0, "Socket failed : $!");
