@@ -409,6 +409,7 @@ feat_eapply=.. restart failed : $1
 feat_notrunning=.. Nginx webserver is not running
 feat_setupalias=Updating target Nginx virtual host ..
 feat_phpfcgid=Starting PHP FastCGI server ..
+feat_phpfpm=Setting up PHP pool ..
 feat_failed=.. failed : $1
 feat_delete=Removing Nginx virtual host ..
 feat_deletelogs=Deleting Nginx webserver log files ..

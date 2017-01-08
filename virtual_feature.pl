@@ -229,8 +229,9 @@ if (!$d->{'alias'}) {
 		}
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
-	# Set up fcgid server
-	&$virtual_server::first_print($text{'feat_phpfcgid'});
+	# Set up fcgid or FPM server
+	my $mode = $tmpl->{'web_php_suexec'} == 3 ? "fpm" : "fcgid";
+	&$virtual_server::first_print($text{'feat_php'.$mode});
 	$d->{'nginx_php_children'} = $config{'child_procs'} ||
 				     $tmpl->{'web_phpchildren'} || 1;
 
@@ -257,7 +258,6 @@ if (!$d->{'alias'}) {
 	&unlock_all_config_files();
 
 	# Setup the selected PHP mode
-	my $mode = $tmpl->{'web_php_suexec'} == 3 ? "fpm" : "fcgid";
 	&virtual_server::save_domain_php_mode($d, $mode);
 	&$virtual_server::second_print(
 		$virtual_server::text{'setup_done'});
@@ -531,6 +531,7 @@ if (!$d->{'alias'}) {
 
 	# Update fcgid user, by tearing down and re-running. Killing needs to
 	# be done in the new home, as it may have been moved already
+	# XXX fpm mode
 	if ($d->{'user'} ne $oldd->{'user'} ||
 	    $d->{'home'} ne $oldd->{'home'}) {
 		&$virtual_server::first_print($text{'feat_modifyphp'});
@@ -624,6 +625,7 @@ if (!$d->{'alias'}) {
 	# Remove the whole server
 	&$virtual_server::first_print($text{'feat_delete'});
 	&lock_all_config_files();
+	my $mode = &feature_get_web_php_mode($d);
 	my $conf = &get_config();
 	my $http = &find("http", $conf);
 	my $server = &find_domain_server($d);
@@ -640,7 +642,12 @@ if (!$d->{'alias'}) {
 	&unlock_all_config_files();
 	&delete_server_link($server);
 	&delete_server_file_if_empty($server);
-	&delete_php_fcgi_server($d);
+	if ($mode eq "fcgid") {
+		&delete_php_fcgi_server($d);
+		}
+	elsif ($mode eq "fpm") {
+		&virtual_server::delete_php_fpm_pool($d);
+		}
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
@@ -1041,7 +1048,7 @@ sub feature_save_web_php_mode
 {
 my ($d, $mode) = @_;
 my $server = &find_domain_server($d);
-my $oldmode = &feature_get_web_php_mode($d);
+my $oldmode = &feature_get_web_php_mode($d) || "";
 if ($oldmode eq "fpm" && $mode ne "fpm") {
 	# Shut down FPM pool
 	&virtual_server::delete_php_fpm_pool($d);

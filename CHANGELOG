@@ -10,3 +10,4 @@ Fixed a bug that caused leftover times in sites-available.
 Use the fastcgi_param time_timeout directive on Ngix 1.6+, instead of fastcgi_read_timeout.
 ---- Changes since 2.0 ----
 Added a Virtualmin template-level option for default Nginx directives for new severs.
+Added support for FPM as an execution mode, if Virtualmin 5.06 and FPM packages are installed.
