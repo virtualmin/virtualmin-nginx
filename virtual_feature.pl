@@ -1098,7 +1098,6 @@ if ($mode eq 'fcgid') {
 	}
 elsif ($mode eq 'fpm') {
 	# Can only run the PHP version for the FPM server
-	# XXX is this function safe to call?
 	my @avail = &virtual_server::list_available_php_versions($d, $mode);
         if (@avail) {
                 return ( { 'dir' => &virtual_server::public_html_dir($d),
@@ -1135,7 +1134,6 @@ my ($d, $dir) = @_;
 # Returns the timeout set by fastcgi_read_timeout
 sub feature_get_fcgid_max_execution_time
 {
-# XXX FPM support
 my ($d) = @_;
 my $server = &find_domain_server($d);
 if ($server) {
@@ -1161,7 +1159,6 @@ if ($server) {
 # Sets the fcgi timeout with fastcgi_read_timeout
 sub feature_set_fcgid_max_execution_time
 {
-# XXX FPM support
 my ($d, $max) = @_;
 &lock_all_config_files();
 my $server = &find_domain_server($d);
@@ -1222,20 +1219,64 @@ return $config{'apply_cmd'};
 sub feature_get_web_php_children
 {
 my ($d) = @_;
-return $d->{'nginx_php_children'} || 1;
+my $mode = &feature_get_web_php_mode($d);
+if ($mode eq "fcgid") {
+	# Stored in the domain's config
+	return $d->{'nginx_php_children'} || 1;
+	}
+elsif ($mode eq "fpm") {
+	# Read from FPM config file
+        my $conf = &virtual_server::get_php_fpm_config();
+        return -1 if (!$conf);
+        my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+        my $lref = &read_file_lines($file, 1);
+        my $childs = 0;
+        foreach my $l (@$lref) {
+                if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
+                        $childs = $1;
+                        }
+                }
+        &unflush_file_lines($file);
+        return $childs == 9999 ? 0 : $childs;
+	}
+else {
+	return undef;
+	}
 }
 
 # feature_save_web_php_children(&domain, children)
 # Update the PHP init script and running process with the new child count
 sub feature_save_web_php_children
 {
-# XXX FPM support
 my ($d, $children) = @_;
 $d->{'nginx_php_children'} ||= 1;
 if ($children != $d->{'nginx_php_children'}) {
 	$d->{'nginx_php_children'} = $children;
-	&delete_php_fcgi_server($d);
-	&setup_php_fcgi_server($d);
+	my $mode = &feature_get_web_php_mode($d);
+	if ($mode eq "fcgid") {
+		# Set in the fcgid init script / command line
+		&delete_php_fcgi_server($d);
+		&setup_php_fcgi_server($d);
+		}
+	elsif ($mode eq "fpm") {
+		# Set in the FPM config
+		my $conf = &virtual_server::get_php_fpm_config();
+		return 0 if (!$conf);
+		my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+		return 0 if (!-r $file);
+		&lock_file($file);
+		my $lref = &read_file_lines($file);
+		$children = 9999 if ($children == 0);   # Unlimited
+		foreach my $l (@$lref) {
+			if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
+				$l = "pm.max_children = $children";
+				}
+			}
+		&flush_file_lines($file);
+		&unlock_file($file);
+		&virtual_server::register_post_action(
+			\&virtual_server::restart_php_fpm_server);
+		}
 	&virtual_server::save_domain($d);
 	}
 return undef;
