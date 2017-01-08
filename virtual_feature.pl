@@ -234,45 +234,33 @@ if (!$d->{'alias'}) {
 	$d->{'nginx_php_children'} = $config{'child_procs'} ||
 				     $tmpl->{'web_phpchildren'} || 1;
 
-	# This function sets up php.ini for the domain. This has to be done
-	# first to create the .ini files used by the PHP server process
-	&virtual_server::save_domain_php_mode($d, "fcgid");
 
-	my ($ok, $port) = &setup_php_fcgi_server($d);
-	if ($ok) {
-		# Configure domain to use it for .php files
-		&lock_all_config_files();
-		my @params = &list_fastcgi_params($server);
-		push(@params, map { $_->{'words'} }
-				  &find("fastcgi_param", $server));
-		&save_directive($server, "fastcgi_param",
-			[ map { { 'words' => $_ } } @params ]);
-		my $ploc = { 'name' => 'location',
-			     'words' => [ '~', '\.php$' ],
-			     'type' => 1,
-			     'members' => [
-				{ 'name' => 'try_files',
-				  'words' => [ '$uri', '=404' ],
-				},
-				{ 'name' => 'fastcgi_pass',
-				  'words' => [ $port =~ /^\d+$/ ?
-						'localhost:'.$port :
-						'unix:'.$port ],
-				},
-			     ],
-			   };
-		&save_directive($server, [ ], [ $ploc ]);
-		&flush_config_file_lines();
-		&unlock_all_config_files();
+	# Create initial config block for running PHP scripts. The port gets
+	# filled in later by save_domain_php_mode
+	&lock_all_config_files();
+	my @params = &list_fastcgi_params($server);
+	push(@params, map { $_->{'words'} }
+			  &find("fastcgi_param", $server));
+	&save_directive($server, "fastcgi_param",
+		[ map { { 'words' => $_ } } @params ]);
+	my $ploc = { 'name' => 'location',
+		     'words' => [ '~', '\.php$' ],
+		     'type' => 1,
+		     'members' => [
+			{ 'name' => 'try_files',
+			  'words' => [ '$uri', '=404' ],
+			},
+		     ],
+		   };
+	&save_directive($server, [ ], [ $ploc ]);
+	&flush_config_file_lines();
+	&unlock_all_config_files();
 
-		$d->{'nginx_php_port'} = $port;
-		&$virtual_server::second_print(
-			$virtual_server::text{'setup_done'});
-		}
-	else {
-		delete($d->{'nginx_php_port'});
-		&$virtual_server::second_print(&text('feat_failed', $port));
-		}
+	# Setup the selected PHP mode
+	my $mode = $tmpl->{'web_php_suexec'} == 3 ? "fpm" : "fcgid";
+	&virtual_server::save_domain_php_mode($d, $mode);
+	&$virtual_server::second_print(
+		$virtual_server::text{'setup_done'});
 
 	# Add the user nginx runs as to the domain's group
 	my $web_user = &get_nginx_user();
@@ -1017,21 +1005,82 @@ return 0;		# No CGI support
 
 sub feature_web_supported_php_modes
 {
-return ('fcgid');	# Only mode we can run
+my @rv = ('fcgid');
+if (&virtual_server::get_php_fpm_config()) {
+	push(@rv, 'fpm');
+	}
+return @rv;
 }
 
 # feature_get_web_php_mode(&domain)
 sub feature_get_web_php_mode
 {
 my ($d) = @_;
-return 'fcgid';		# Only mode we can run
+my $server = &find_domain_server($d);
+$server || return undef;
+my @locs = &find("location", $server);
+my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
+		   $_->{'words'}->[1] eq '\.php$' } @locs;
+my $fpmsock = &virtual_server::get_php_fpm_socket_file($d);
+if ($loc) {
+	my ($pass) = &find("fastcgi_pass", $loc);
+	if ($pass && $pass->{'words'}->[0] =~ /^(localhost|unix):(.*)$/) {
+		if ($1 eq "unix" && $2 eq "fpmsock") {
+			return 'fpm';
+			}
+		else {
+			return 'fcgid';
+			}
+		}
+	}
+return undef;
 }
 
 # feature_save_web_php_mode(&domain, mode)
 sub feature_save_web_php_mode
 {
 my ($d, $mode) = @_;
-$mode eq 'fcgid' || &error($text{'feat_ephpmode'});
+my $server = &find_domain_server($d);
+my $oldmode = &feature_get_web_php_mode($d);
+if ($oldmode eq "fpm" && $mode ne "fpm") {
+	# Shut down FPM pool
+	&virtual_server::delete_php_fpm_pool($d);
+	}
+elsif ($oldmode eq "fcgid" && $mode ne "fcgid") {
+	# Shut down FCGI server
+	&delete_php_fcgi_server($d);
+	delete($d->{'nginx_php_port'});
+	}
+
+my $port;
+if ($mode eq "fcgid" && $oldmode ne "fcgid") {
+	# Setup FCGI server on a new port
+	my $ok;
+	($ok, $port) = &setup_php_fcgi_server($d);
+	$ok || &error($port);
+	$d->{'nginx_php_port'} = $port;
+	}
+elsif ($mode eq "fpm" && $oldmode ne "fpm") {
+	# Setup FPM pool
+	&virtual_server::setup_php_fpm_pool($d);
+	$port = &virtual_server::get_php_fpm_socket_file($d);
+	}
+
+# Update the port in the config, if changed
+if ($port) {
+	my @locs = &find("location", $server);
+	my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
+			   $_->{'words'}->[1] eq '\.php$' } @locs;
+	if ($loc) {
+		&lock_file($loc->{'file'});
+		&save_directive($loc, "fastcgi_pass",
+			$port =~ /^\d+$/ ? [ "localhost:".$port ]
+					 : [ "unix:".$port ]);
+		&unlock_file($loc->{'file'});
+		&flush_file_lines($loc->{'file'});
+		&virtual_server::register_post_action(\&print_apply_nginx);
+		}
+	}
 }
 
 # feature_list_web_php_directories(&domain)
@@ -1039,10 +1088,28 @@ $mode eq 'fcgid' || &error($text{'feat_ephpmode'});
 sub feature_list_web_php_directories
 {
 my ($d) = @_;
-my ($defver) = &get_default_php_version();
-return ( { 'dir' => &virtual_server::public_html_dir($d),
-	   'mode' => 'fcgid',
-	   'version' => $defver } );
+my $mode = &feature_get_web_php_mode($d);
+if ($mode eq 'fcgid') {
+	# Can only run the PHP verson of the php-cgi command
+	my ($defver) = &get_default_php_version();
+	return ( { 'dir' => &virtual_server::public_html_dir($d),
+		   'mode' => 'fcgid',
+		   'version' => $defver } );
+	}
+elsif ($mode eq 'fpm') {
+	# Can only run the PHP version for the FPM server
+	# XXX is this function safe to call?
+	my @avail = &virtual_server::list_available_php_versions($d, $mode);
+        if (@avail) {
+                return ( { 'dir' => &public_html_dir($d),
+                           'version' => $avail[0]->[0],
+                           'mode' => $mode } );
+                }
+        else {
+                return ( );
+                }
+	}
+return ( );	# Should never happen
 }
 
 # feature_save_web_php_directory(&domain, dir, version)
@@ -1068,6 +1135,7 @@ my ($d, $dir) = @_;
 # Returns the timeout set by fastcgi_read_timeout
 sub feature_get_fcgid_max_execution_time
 {
+# XXX FPM support
 my ($d) = @_;
 my $server = &find_domain_server($d);
 if ($server) {
@@ -1093,6 +1161,7 @@ if ($server) {
 # Sets the fcgi timeout with fastcgi_read_timeout
 sub feature_set_fcgid_max_execution_time
 {
+# XXX FPM support
 my ($d, $max) = @_;
 &lock_all_config_files();
 my $server = &find_domain_server($d);
@@ -1160,6 +1229,7 @@ return $d->{'nginx_php_children'} || 1;
 # Update the PHP init script and running process with the new child count
 sub feature_save_web_php_children
 {
+# XXX FPM support
 my ($d, $children) = @_;
 $d->{'nginx_php_children'} ||= 1;
 if ($children != $d->{'nginx_php_children'}) {
