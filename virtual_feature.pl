@@ -531,15 +531,21 @@ if (!$d->{'alias'}) {
 
 	# Update fcgid user, by tearing down and re-running. Killing needs to
 	# be done in the new home, as it may have been moved already
-	# XXX fpm mode
 	if ($d->{'user'} ne $oldd->{'user'} ||
 	    $d->{'home'} ne $oldd->{'home'}) {
 		&$virtual_server::first_print($text{'feat_modifyphp'});
 		my $oldd_copy = { %$oldd };
-		$oldd_copy->{'home'} = $d->{'home'};
-		&delete_php_fcgi_server($oldd_copy);
-		&delete_php_fcgi_server($oldd);
-		&setup_php_fcgi_server($d);
+		my $mode = &feature_get_web_php_mode($d);
+		if ($mode eq "fcgid") {
+			$oldd_copy->{'home'} = $d->{'home'};
+			&delete_php_fcgi_server($oldd_copy);
+			&delete_php_fcgi_server($oldd);
+			&setup_php_fcgi_server($d);
+			}
+		elsif ($mode eq "fpm") {
+			&virtual_server::delete_php_fpm_pool($oldd);
+			&virtual_server::create_php_fpm_pool($d);
+			}
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		}
