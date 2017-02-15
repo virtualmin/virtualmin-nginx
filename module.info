@@ -1,6 +1,6 @@
 desc=Nginx Webserver
 category=servers
-version=2.0
+version=2.1
 readonly=1
 desc_nl=Nginx Webserver
 depends=virtual-server/5.06
