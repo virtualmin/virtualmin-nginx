@@ -1034,11 +1034,15 @@ $server || return undef;
 my @locs = &find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
 		   $_->{'words'}->[1] eq '\.php$' } @locs;
-my $fpmsock = &virtual_server::get_php_fpm_socket_file($d);
+my $fpmsock = &virtual_server::get_php_fpm_socket_file($d, 1);
+my $fpmport = $d->{'php_fpm_port'};
 if ($loc) {
 	my ($pass) = &find("fastcgi_pass", $loc);
 	if ($pass && $pass->{'words'}->[0] =~ /^(localhost|unix):(.*)$/) {
 		if ($1 eq "unix" && $2 eq $fpmsock) {
+			return 'fpm';
+			}
+		elsif ($1 eq "localhost" && $fpmport && $2 eq $fpmport) {
 			return 'fpm';
 			}
 		else {
@@ -1076,7 +1080,8 @@ if ($mode eq "fcgid" && $oldmode ne "fcgid") {
 elsif ($mode eq "fpm" && $oldmode ne "fpm") {
 	# Setup FPM pool
 	&virtual_server::create_php_fpm_pool($d);
-	$port = &virtual_server::get_php_fpm_socket_file($d);
+	$port = $d->{'php_fpm_port'} ||
+		&virtual_server::get_php_fpm_socket_file($d);
 	}
 
 # Update the port in the config, if changed
