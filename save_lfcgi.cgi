@@ -15,7 +15,7 @@ my $location = &find_location($server, $in{'path'});
 $location || &error($text{'location_egone'});
 
 &nginx_opt_parse("fastcgi_pass", $location, undef,
-		 '^[a-zA-Z0-9\.\_\-]+:[0-9]+$');
+		 '^([a-zA-Z0-9\.\_\-]+:[0-9]+|unix:\/\S+)$');
 
 &nginx_opt_parse("fastcgi_index", $server, undef, '^\S+$');
 
