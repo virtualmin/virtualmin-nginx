@@ -17,11 +17,11 @@ $location || &error($text{'location_egone'});
 &nginx_opt_parse("fastcgi_pass", $location, undef,
 		 '^([a-zA-Z0-9\.\_\-]+:[0-9]+|unix:\/\S+)$');
 
-&nginx_opt_parse("fastcgi_index", $server, undef, '^\S+$');
+&nginx_opt_parse("fastcgi_index", $location, undef, '^\S+$');
 
-&nginx_params_parse("fastcgi_param", $server);
+&nginx_params_parse("fastcgi_param", $location);
 
-&nginx_opt_parse("fastcgi_buffer_size", $server, undef, '^\d+[bkmgtp]?$');
+&nginx_opt_parse("fastcgi_buffer_size", $location, undef, '^\d+[bkmgtp]?$');
 
 &flush_config_file_lines();
 &unlock_all_config_files();
