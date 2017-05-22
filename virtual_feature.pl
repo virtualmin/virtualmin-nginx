@@ -2512,4 +2512,23 @@ if ($l =~ /^(\s*)server_name(\s+.*);/) {
 return $l;
 }
 
+# feature_get_domain_web_config(domain-name, port)
+sub feature_get_domain_web_config
+{
+my ($dname, $port) = @_;
+my $conf = &get_config();
+my $http = &find("http", $conf);
+return undef if (!$http);
+my @servers = &find("server", $http);
+foreach my $s (@servers) {
+	my $obj = &find("server_name", $s);
+	foreach my $name (@{$obj->{'words'}}) {
+		if (lc($name) eq lc($dname)) {
+			return $s;
+			}
+		}
+	}
+return undef;
+}
+
 1;
