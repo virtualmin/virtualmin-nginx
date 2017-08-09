@@ -134,7 +134,7 @@ if (!$d->{'alias'}) {
 
 	# Bump up server_names_hash if too low
 	my $snh = &find_value("server_names_hash_bucket_size", $http);
-	$snh ||= int(&get_default("server_names_hash_bucket_size"));
+	$snh ||= int((split(/\//, &get_default("server_names_hash_bucket_size")))[0]);
 	if ($snh <= 32) {
 		&save_directive($http, "server_names_hash_bucket_size",
 				[ 128 ]);
@@ -2004,7 +2004,7 @@ foreach my $l (@$lref[($server->{'line'}+1) .. ($server->{'eline'}-1)]) {
 	}
 &virtual_server::close_tempfile_as_domain_user($d, $fh);
 if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
-    -d $config{'add_to'}) {
+    $config{'add_to'} && -d $config{'add_to'}) {
 	# Domain has it's own file, so save it completely for use
 	# when restoring
 	&virtual_server::copy_write_as_domain_user(
@@ -2056,7 +2056,7 @@ if (!$server) {
 my $alog = &get_nginx_log($d, 0);
 my $elog = &get_nginx_log($d, 1);
 if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
-    -d $config{'add_to'} &&
+    $config{'add_to'} && -d $config{'add_to'} &&
     -s $file."_complete") {
 	# Domain is in its own file, and backup includes the whole file .. so
 	# just copy it into place
