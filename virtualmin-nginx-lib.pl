@@ -179,13 +179,16 @@ return @words;
 sub get_add_to_file
 {
 my ($name) = @_;
-if (-d $config{'add_to'}) {
+if (!$config{'add_to'}) {
+	return undef;
+	}
+elsif (-d $config{'add_to'}) {
 	$name =~ s/[^a-zA-Z0-9\.\_\-]//g;
 	if ($name) {
 		return $config{'add_to'}."/".$name.".conf";
 		}
 	}
-elsif ($config{'add_to'}) {
+else {
 	return $config{'add_to'};
 	}
 return undef;
@@ -1545,13 +1548,21 @@ foreach my $dir (@{$parent->{'members'}}) {
 	}
 }
 
-# get_default_php_version()
+# get_domain_php_version(&domain)
 # Returns the PHP version number and binary path for the best PHP installed
-sub get_default_php_version
+sub get_domain_php_version
 {
-my @vers = sort { $a->[0] <=> $b->[0] }
+my ($d) = @_;
+my @vers = sort { $b->[0] <=> $a->[0] }
                 &virtual_server::list_available_php_versions(undef, "fcgid");
 @vers || return ( );
+if ($d->{'nginx_php_version'}) {
+	# Try to get the template default version
+	my ($tver) = grep { $_->[0] eq $d->{'nginx_php_version'} } @vers;
+	if ($tver) {
+		return @$tver;
+		}
+	}
 my $cmd = $vers[0]->[1];
 $cmd || return ( );
 return @{$vers[0]};
@@ -1574,7 +1585,7 @@ foreach my $looper ("/usr/bin/php-loop.pl", "/etc/php-loop.pl") {
 sub get_php_fcgi_server_command
 {
 my ($d, $port) = @_;
-my ($ver, $cmd) = &get_default_php_version();
+my ($ver, $cmd) = &get_domain_php_version($d);
 $cmd || return ( );
 my $log = "$d->{'home'}/logs/php.log";
 my $piddir = "/var/php-nginx";
@@ -1769,6 +1780,62 @@ foreach my $n ($name, $oldname) {
 		}
 	}
 $init::init_mode = $old_init_mode;
+}
+
+# find_php_fcgi_server(&domain)
+# Returns the full path to the PHP command used by this domain's fcgi server
+sub find_php_fcgi_server
+{
+my ($d) = @_;           
+
+&foreign_require("init");
+my $old_init_mode = $init::init_mode;
+if ($init::init_mode eq "upstart" ||
+    $init::init_mode eq "systemd") {
+        $init::init_mode = "init";
+        }
+
+# Find the script that runs php
+my $name = "php-fcgi-$d->{'dom'}";
+my $oldname = $name;
+$name =~ s/\./-/g;
+my $script;
+foreach my $n ($name, $oldname) {
+	my $fn;
+	if ($init::init_mode eq "init") {
+		$fn = &init::action_filename($n);
+		}
+	elsif ($init::init_mode eq "rc") {
+		my @rcs = &init::list_rc_scripts();
+		my ($rc) = grep { $_->{'name'} eq $n } @rcs;
+		if ($rc) {
+			$fn = $rc->{'file'};
+			}
+		}
+	if ($fn && -r $fn) {
+		$script = $fn;
+		last;
+		}
+	}
+$init::init_mode = $old_init_mode;
+return undef if (!$script);
+
+# Extract the PHP command from it
+my $lref = &read_file_lines($script, 1);
+my $cmd;
+foreach my $l (@$lref) {
+	if ($l =~ /su\s+(\S+)\s+-c\s+(.*)/ &&
+	    $1 eq $d->{'user'}) {
+		# Possible command line - need to unquotemeta
+		my $sucmd = $2;
+		$sucmd = eval "\"$sucmd\"";
+		if ($sucmd =~ /php-loop.pl\s+(\S+)/) {
+			$cmd = $1;
+			last;
+			}
+		}
+	}
+return $cmd;
 }
 
 # list_fastcgi_params(&server)

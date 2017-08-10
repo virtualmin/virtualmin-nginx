@@ -232,6 +232,7 @@ if (!$d->{'alias'}) {
 	# Set up fcgid or FPM server
 	my $mode = $tmpl->{'web_php_suexec'} == 3 ? "fpm" : "fcgid";
 	&$virtual_server::first_print($text{'feat_php'.$mode});
+	$d->{'nginx_php_version'} = $tmpl->{'web_phpver'};
 	$d->{'nginx_php_children'} = $config{'child_procs'} ||
 				     $tmpl->{'web_phpchildren'} || 1;
 
@@ -1107,16 +1108,24 @@ sub feature_list_web_php_directories
 {
 my ($d) = @_;
 my $mode = &feature_get_web_php_mode($d);
+my @avail = &virtual_server::list_available_php_versions($d, $mode);
 if ($mode eq 'fcgid') {
 	# Can only run the PHP verson of the php-cgi command
-	my ($defver) = &get_default_php_version();
+	my ($defver) = &get_domain_php_version();
+	my $phpcmd = &find_php_fcgi_server($d);
+	if ($phpcmd) {
+		foreach my $vers (@avail) {
+			if ($vers->[1] && $vers->[1] eq $phpcmd) {
+				$defver = $vers->[0];
+				}
+			}
+		}
 	return ( { 'dir' => &virtual_server::public_html_dir($d),
 		   'mode' => 'fcgid',
 		   'version' => $defver } );
 	}
 elsif ($mode eq 'fpm') {
 	# Can only run the PHP version for the FPM server
-	my @avail = &virtual_server::list_available_php_versions($d, $mode);
         if (@avail) {
                 return ( { 'dir' => &virtual_server::public_html_dir($d),
                            'version' => $avail[0]->[0],
@@ -1136,9 +1145,30 @@ sub feature_save_web_php_directory
 my ($d, $dir, $ver) = @_;
 $dir eq &virtual_server::public_html_dir($d) ||
 	&error($text{'feat_ephpdir'});
-my ($defver) = &get_default_php_version();
-$defver eq $ver ||
-	&error($text{'feat_ephpdirver'});
+my $mode = &feature_get_web_php_mode($d);
+$mode eq "fcgid" ||
+	&error($text{'feat_ephpmode'});
+
+# Get the current version
+my @avail = &virtual_server::list_available_php_versions($d);
+my $phpcmd = &find_php_fcgi_server($d);
+my $defver;
+if ($phpcmd) {
+	foreach my $vers (@avail) {
+		if ($vers->[1] && $vers->[1] eq $phpcmd) {
+			$defver = $vers->[0];
+			}
+		}
+	}
+
+# Change if needed
+if ($defver ne $ver) {
+	$d->{'nginx_php_version'} = $ver;
+	&delete_php_fcgi_server($d);
+	&setup_php_fcgi_server($d);
+	}
+
+return undef;
 }
 
 # feature_delete_web_php_directory(&domain, dir)
