@@ -1980,23 +1980,37 @@ elsif ($mode eq 'key') {
 			$file ? [ $file ] : [ ]);
 	}
 elsif ($mode eq 'ca') {
-	# Append to cert file as well
-	my $certfile = &find_value("ssl_certificate", $server);
-	$certfile || return $text{'feat_echainfile'};
-	my @certs = &split_ssl_certs(&read_file_contents($certfile));
-	my $fh = "CERT";
-	if ($file) {
-		# Append chained cert to main cert
-		my $chain = &read_file_contents($file);
-		&open_tempfile($fh, ">$certfile");
-		&print_tempfile($fh, join("", $certs[0], $chain));
-		&close_tempfile($fh);
+	# Dovecot needs cert and CA in the same file!
+	if ($d->{'ssl_combined'} && -r $d->{'ssl_combined'}) {
+		# Combined file already exists
+		if ($file) {
+			# Use the combined file
+			&save_directive($server, "ssl_certificate", [ $d->{'ssl_combined'} ]);
+			}
+		else {
+			# Revert to just the cert file
+			&save_directive($server, "ssl_certificate", [ $d->{'ssl_cert'} ]);
+			}
 		}
 	else {
-		# Use only main cert
-		&open_tempfile($fh, ">$certfile");
-		&print_tempfile($fh, $certs[0]);
-		&close_tempfile($fh);
+		# Append to cert file as well
+		my $certfile = &find_value("ssl_certificate", $server);
+		$certfile || return $text{'feat_echainfile'};
+		my @certs = &split_ssl_certs(&read_file_contents($certfile));
+		my $fh = "CERT";
+		if ($file) {
+			# Append chained cert to main cert
+			my $chain = &read_file_contents($file);
+			&open_tempfile($fh, ">$certfile");
+			&print_tempfile($fh, join("", $certs[0], $chain));
+			&close_tempfile($fh);
+			}
+		else {
+			# Use only main cert
+			&open_tempfile($fh, ">$certfile");
+			&print_tempfile($fh, $certs[0]);
+			&close_tempfile($fh);
+			}
 		}
 	}
 &flush_config_file_lines();
