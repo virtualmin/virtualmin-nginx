@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-require 'virtualmin-nginx-lib.pl';
+require './virtualmin-nginx-lib.pl';
 &foreign_require("htaccess-htpasswd");
 our (%text, %in, %access);
 &ReadParse();

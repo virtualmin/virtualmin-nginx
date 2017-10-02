@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-require 'virtualmin-nginx-lib.pl';
+require './virtualmin-nginx-lib.pl';
 our (%text, %in, %rewrite);
 &ReadParse();
 my $server = &find_server($in{'id'});

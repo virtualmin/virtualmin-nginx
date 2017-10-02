@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-require 'virtualmin-nginx-lib.pl';
+require './virtualmin-nginx-lib.pl';
 &ReadParse();
 our (%text, %in, %access);
 $access{'global'} || &error($text{'index_eglobal'});
