@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-require 'virtualmin-nginx-lib.pl';
+require './virtualmin-nginx-lib.pl';
 my $ver = &get_nginx_version();
 our (%text, %module_info, %config, $module_name, %access);
 

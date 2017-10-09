@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-require 'virtualmin-nginx-lib.pl';
+require './virtualmin-nginx-lib.pl';
 &ReadParseMime();
 our (%text, %in, %access);
 &error_setup($text{'manual_err'});

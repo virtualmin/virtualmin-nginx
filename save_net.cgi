@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-require 'virtualmin-nginx-lib.pl';
+require './virtualmin-nginx-lib.pl';
 our (%text, %access);
 &lock_all_config_files();
 my $conf = &get_config();

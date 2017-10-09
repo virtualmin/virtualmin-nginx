@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-require 'virtualmin-nginx-lib.pl';
+require './virtualmin-nginx-lib.pl';
 our (%text, %access);
 &error_setup($text{'stop_err'});
 $access{'stop'} || &error($text{'stop_ecannot'});

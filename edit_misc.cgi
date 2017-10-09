@@ -3,7 +3,7 @@
 
 use strict;
 use warnings;
-require 'virtualmin-nginx-lib.pl';
+require './virtualmin-nginx-lib.pl';
 our (%text, %access);
 my $parent = &get_config_parent();
 my $events = &find("events", $parent);
