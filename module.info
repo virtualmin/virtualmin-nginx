@@ -2,4 +2,3 @@ desc=Nginx Webserver
 category=servers
 version=2.5
 readonly=1
-desc_nl=Nginx Webserver
