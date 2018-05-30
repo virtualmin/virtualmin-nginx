@@ -21,7 +21,7 @@ print "<b>$text{'mime_search'}</b> ",
 print &ui_form_end();
 
 # Find types
-my @types = @{$types->{'members'}};
+my @types = $types ? @{$types->{'members'}} : ();
 if ($in{'search'}) {
 	@types = grep { $_->{'name'} =~ /\Q$in{'search'}\E/i ||
 			&indexoflc($in{'search'}, @{$_->{'words'}}) >= 0 }

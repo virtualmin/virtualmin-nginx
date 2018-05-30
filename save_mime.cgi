@@ -12,6 +12,11 @@ $access{'global'} || &error($text{'index_eglobal'});
 my $conf = &get_config();
 my $http = &find("http", $conf);
 my $types = &find("types", $http);
+if (!$types) {
+	&save_directive($http, [ ], [ { 'name' => 'types',
+					'type' => 1,
+					'members' => [ ] } ]);
+	}
 
 # Validate type name and values
 my @words;
