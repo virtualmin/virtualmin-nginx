@@ -900,7 +900,9 @@ sub feature_webmin
 my ($d, $alld) = @_;
 my @doms = map { $_->{'dom'} } grep { $_->{$module_name} } @$alld;
 if (@doms) {
-	return ( [ $module_name,
+	# Grant access to Nginx module
+	my @rv;
+	push(@rv, [ $module_name,
 		   { 'vhosts' => join(' ', @doms),
 		     'root' => $d->{'home'},
 		     'global' => 0,
@@ -909,6 +911,21 @@ if (@doms) {
 		     'edit' => 0,
 		     'stop' => 0,
 		   } ] );
+
+	# Grant access to system logs
+	my @extras;
+	foreach my $sd (@doms) {
+		push(@extras, &get_nginx_log($d, 0));
+		push(@extras, &get_nginx_log($d, 1));
+		}
+	push(@rv, [ "syslog",
+		    { 'extras' => join("\t", @extras),
+		      'any' => 0,
+		      'noconfig' => 1,
+		      'noedit' => 1,
+		      'syslog' => 0,
+		      'others' => 0 } ]);
+	return @rv;
 	}
 else {
 	return ( );
