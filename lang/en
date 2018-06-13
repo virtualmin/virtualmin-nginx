@@ -200,7 +200,6 @@ slogs_err=Failed to save log file options
 
 ssl_title=SSL Configuration
 ssl_header=SSL encryption and certification options
-opt_ssl=SSL enabled?
 opt_ssl_certificate=SSL certificate file
 opt_ssl_certificate_key=SSL key file
 ssl_file=Selected file
