@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+no warnings 'recursion';
 use Socket;
 
 BEGIN { push(@INC, ".."); };
