@@ -12,8 +12,6 @@ my $server = &find_server($in{'id'});
 $server || &error($text{'server_egone'});
 &can_edit_server($server) || &error($text{'server_ecannot'});
 
-&nginx_onoff_parse("ssl", $server);
-
 &nginx_opt_parse("ssl_certificate", $server, undef, undef, \&valid_cert_file);
 
 &nginx_opt_parse("ssl_certificate_key", $server, undef, undef,\&valid_key_file);

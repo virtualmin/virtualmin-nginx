@@ -16,8 +16,6 @@ print &ui_form_start("save_ssl.cgi", "post");
 print &ui_hidden("id", $in{'id'});
 print &ui_table_start($text{'ssl_header'}, undef, 2);
 
-print &nginx_onoff_input("ssl", $server);
-
 print &nginx_opt_input("ssl_certificate", $server, 50, $text{'ssl_file'},
 		       &file_chooser_button("ssl_certificate"));
 
