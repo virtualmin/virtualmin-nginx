@@ -925,6 +925,42 @@ if (@doms) {
 		      'noedit' => 1,
 		      'syslog' => 0,
 		      'others' => 0 } ]);
+
+	# Grant access to phpini module
+	my @pconfs;
+	foreach my $sd (grep { $_->{$module_name} } @$alld) {
+		my $mode = &feature_get_web_php_mode($sd);
+		if ($mode ne "fpm") {
+			# Allow access to .ini files
+			foreach my $ini (&virtual_server::list_domain_php_inis($sd)) {
+				my @st = stat($ini->[1]);
+                                if (@st && $st[4] == $sd->{'uid'}) {
+					push(@pconfs, $ini->[1]."=".
+					  &text('webmin_phpini', $sd->{'dom'}));
+					}
+				}
+			}
+		elsif ($mode eq "fpm") {
+			# Allow access to FPM configs for PHP overrides
+			my $conf = &virtual_server::get_php_fpm_config();
+                        if ($conf) {
+				my $file = $conf->{'dir'}."/".
+                                           $sd->{'id'}.".conf";
+				push(@pconfs, $file."=".
+				  &text('webmin_phpini', $sd->{'dom'}));
+				}
+			}
+		}
+	if (@pconfs) {
+		push(@rv, [ "phpini",
+			    { 'php_inis' => join("\t", @pconfs), 
+			      'noconfig' => 1,
+			      'global' => 0,
+			      'anyfile' => 0,
+			      'user' => $d->{'user'},
+			      'manual' => 1 } ]);
+		}
+
 	return @rv;
 	}
 else {
@@ -970,16 +1006,32 @@ foreach my $log ([ 0, $text{'links_anlog'} ],
 	}
 
 # Links to edit PHP configs
-foreach my $ini (&virtual_server::find_domain_php_ini_files($d)) {
-        push(@rv, { 'mod' => 'phpini',
-                    'desc' => $ini->[0] ?
-                        &text('links_phpini2', $ini->[0]) :
-                        &text('links_phpini'),
-                    'page' => 'list_ini.cgi?file='.
-                                &urlize($ini->[1]),
-                    'cat' => 'services',
-                  });
-        }
+my $mode = &feature_get_web_php_mode($d);
+if ($mode eq "fcgid") {
+	# Link to edit per-version php.ini files
+	foreach my $ini (&virtual_server::find_domain_php_ini_files($d)) {
+		push(@rv, { 'mod' => 'phpini',
+			    'desc' => $ini->[0] ?
+				&text('links_phpini2', $ini->[0]) :
+				&text('links_phpini'),
+			    'page' => 'list_ini.cgi?file='.
+					&urlize($ini->[1]),
+			    'cat' => 'services',
+			  });
+		}
+	}
+elsif ($mode eq "fpm") {
+	# Link to edit FPM configs with PHP settings
+	my $conf = &virtual_server::get_php_fpm_config();
+	if ($conf) {
+		my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+		push(@rv, { 'mod' => 'phpini',
+			    'desc' => &text('links_phpini'),
+			    'page' => 'list_ini.cgi?file='.&urlize($file),
+			    'cat' => 'services',
+			  });
+		}
+	}
 
 return @rv;
 }
