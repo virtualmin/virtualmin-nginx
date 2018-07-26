@@ -15,7 +15,7 @@ $access{'global'} || &error($text{'index_eglobal'});
 
 &nginx_user_parse("user", $parent);
 
-&nginx_opt_parse("worker_processes", $parent, undef, '^[1-9]\d*$');
+&nginx_opt_parse("worker_processes", $parent, undef, '^([1-9]\d*|auto)$');
 
 &nginx_opt_parse("worker_priority", $parent, undef, '^\-?\d+$');
 
