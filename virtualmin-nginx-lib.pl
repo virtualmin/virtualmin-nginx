@@ -84,7 +84,7 @@ while(@lines) {
 		$lnum++;
 		}
 
-	if ($l =~ /^\s*if\s*\((.*)\)\s*\{/) {
+	if ($l =~ /^\s*if\s*\((.*)\)\s*\{\s*$/) {
 		# Start of an if statement
 		my $ns = { 'name' => 'if',
 			   'type' => 2,
@@ -100,7 +100,7 @@ while(@lines) {
 		push(@$addto, $ns);
 		$addto = $ns->{'members'};
 		}
-	elsif ($l =~ /^\s*(\S+)(\s*.*)\{/) {
+	elsif ($l =~ /^\s*(\S+)(\s*.*)\{\s*$/) {
 		# Start of a section
 		my $ns = { 'name' => $1,
 			   'type' => 1,
