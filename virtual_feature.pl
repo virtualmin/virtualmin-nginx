@@ -1325,10 +1325,10 @@ sub feature_restart_web
 }
 
 # feature_restart_web_command()
-# Returns the Nginx restart command
+# Returns the Nginx log rotation command
 sub feature_restart_web_command
 {
-return $config{'apply_cmd'};
+return $config{'rotate_cmd'} || $config{'apply_cmd'};
 }
 
 # feature_get_web_php_children(&domain)
