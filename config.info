@@ -5,6 +5,6 @@ nginx_cmd=Full path to Nginx command,0
 start_cmd=Command to start Nginx,0
 stop_cmd=Command to stop Nginx,0
 apply_cmd=Command to apply Nginx configuration,0
+rotate_cmd=Command to re-open all log files,3,Just use apply command
 child_procs=Default number of PHP child processes,3,Virtualmin default
-php_socket=Connect Nginx to PHP processes with,1,1-Socket files,0-TCP connections
 extra_dirs=Additional Nginx directives for new virtual hosts,9,80,5,\t
