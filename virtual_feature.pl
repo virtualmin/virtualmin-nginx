@@ -1545,6 +1545,7 @@ my $phd = &virtual_server::public_html_dir($d);
 foreach my $r (&find("rewrite", $server)) {
 	if ($r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?/ &&
 	    $r->{'words'}->[2] eq 'break') {
+		# Regular redirect
 		my $redirect = { 'path' => $1,
 				 'dest' => $r->{'words'}->[1],
 				 'object' => $r,
@@ -1557,6 +1558,23 @@ foreach my $r (&find("rewrite", $server)) {
 				$redirect->{'regexp'} = 1;
 				}
 			}
+		if ($r->{'words'}->[1] =~ /^(http|https):/) {
+			$redirect->{'alias'} = 0;
+			}
+		else {
+			$redirect->{'dest'} = $phd.$redirect->{'dest'};
+			$redirect->{'alias'} = 1;
+			}
+		push(@rv, $redirect);
+		}
+	elsif ($r->{'words'}->[0] eq '^/(?!.well-known)(.*)' &&
+	       $r->{'words'}->[2] eq 'break') {
+		# Special case for / which excludes .well-known
+		my $redirect = { 'path' => '^/(?!.well-known)',
+				 'dest' => $r->{'words'}->[1],
+				 'object' => $r,
+				 'regexp' => 1,
+			       };
 		if ($r->{'words'}->[1] =~ /^(http|https):/) {
 			$redirect->{'alias'} = 0;
 			}
@@ -1582,10 +1600,12 @@ my $dest = $redirect->{'dest'};
 if ($dest !~ /^(http|https):/) {
 	$dest =~ s/^\Q$phd\E// || return &text('redirect_ephd', $phd);
 	}
+my $re = $redirect->{'path'};
+if ($re ne '^/(?!.well-known)') {
+	$re = '^\\Q'.$re.'\\E';
+	}
 my $r = { 'name' => 'rewrite',
-	  'words' => [ '^\\Q'.$redirect->{'path'}.'\\E',
-		       $dest,
-		       'break' ],
+	  'words' => [ $re, $dest, 'break' ],
 	};
 if ($redirect->{'regexp'}) {
 	# All sub-directories go to same dest path
