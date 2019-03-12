@@ -52,11 +52,11 @@ undef($get_config_parent_cache);
 undef($get_config_cache);
 }
 
-# read_config_file(file)
+# read_config_file(file, [preserve-includes])
 # Returns an array ref of nginx config objects
 sub read_config_file
 {
-my ($file) = @_;
+my ($file, $noinc) = @_;
 my $link = &resolve_links($file);
 $link || &error("Dangling link $file");
 $file = $link;
@@ -125,7 +125,7 @@ while(@lines) {
 		# Found a directive
 		my ($name, $value) = ($1, $2);
 		my @words = &split_words($value);
-		if ($name eq "include") {
+		if ($name eq "include" && !$noinc) {
 			# Include a file or glob
 			if ($words[0] !~ /^\//) {
 				my $filedir = $file;

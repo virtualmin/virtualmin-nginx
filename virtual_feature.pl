@@ -209,7 +209,7 @@ if (!$d->{'alias'}) {
 		&print_tempfile($fh,
 			join("\n", split(/\t+/, $extra_dirs))."\n");
 		&close_tempfile($fh);
-		my $econf = &read_config_file($temp);
+		my $econf = &read_config_file($temp, 1);
 		&recursive_clear_lines(@$econf);
 		push(@{$server->{'members'}}, @$econf);
 		&unlink_file($temp);
