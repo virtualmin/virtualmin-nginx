@@ -203,6 +203,8 @@ if (!$d->{'alias'}) {
 	$extra_dirs ||= $config{'extra_dirs'};
 	$extra_dirs = "" if (!$extra_dirs || $extra_dirs eq "none");
 	if ($extra_dirs) {
+		$extra_dirs = &virtual_server::substitute_domain_template(
+				$extra_dirs, $d);
 		my $temp = &transname();
 		my $fh = "EXTRA";
 		&open_tempfile($fh, ">$temp", 0, 1);
