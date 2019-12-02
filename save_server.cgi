@@ -163,7 +163,7 @@ else {
 				  'words' => [ $in{'rootdir'} ] },
 				],
 			  } ]);
-		&save_directive($server, "root", $in{'rootdir'});
+		&save_directive($server, "root", [ $in{'rootdir'} ]);
 		}
 	}
 
