@@ -248,6 +248,7 @@ return wantarray ? @rv : $rv[0];
 sub save_directive
 {
 my ($parent, $name_or_oldstructs, $values, $before) = @_;
+$values = [ $values ] if (!ref($values));
 my $oldstructs = ref($name_or_oldstructs) ? $name_or_oldstructs :
 			[ &find($name_or_oldstructs, $parent) ];
 my $name = !ref($name_or_oldstructs) ? $name_or_oldstructs :
