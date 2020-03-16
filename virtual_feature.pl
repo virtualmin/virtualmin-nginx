@@ -1544,14 +1544,28 @@ my $server = &find_domain_server($d);
 return () if (!$server);
 my @rv;
 my $phd = &virtual_server::public_html_dir($d);
-foreach my $r (&find("rewrite", $server)) {
+my @rewrites = &find("rewrite", $server);
+foreach my $i (&find("if", $server)) {
+	my @w = @{$i->{'words'}};
+	if (@{$i->{'members'}} == 1 &&
+	    $w[0] eq "\$scheme" && $w[1] eq "=" &&
+	    ($w[2] eq "http" || $w[2] eq "https")) {
+		# May contain relevant rewrites
+		my ($r) = &find("rewrite", $i);
+		$r->{'_scheme'} = $w[2];
+		$r->{'_if'} = $i;
+		push(@rewrites, $r);
+		}
+	}
+foreach my $r (@rewrites) {
+	my $redirect;
 	if ($r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?/ &&
 	    $r->{'words'}->[2] eq 'break') {
 		# Regular redirect
-		my $redirect = { 'path' => $1,
-				 'dest' => $r->{'words'}->[1],
-				 'object' => $r,
-			       };
+		$redirect = { 'path' => $1,
+			      'dest' => $r->{'words'}->[1],
+			      'object' => $r,
+			    };
 		if ($2) {
 			if ($redirect->{'dest'} =~ s/\$1$//) {
 				$redirect->{'regexp'} = 0;
@@ -1560,29 +1574,30 @@ foreach my $r (&find("rewrite", $server)) {
 				$redirect->{'regexp'} = 1;
 				}
 			}
-		if ($r->{'words'}->[1] =~ /^(http|https):/) {
-			$redirect->{'alias'} = 0;
-			}
-		else {
-			$redirect->{'dest'} = $phd.$redirect->{'dest'};
-			$redirect->{'alias'} = 1;
-			}
-		push(@rv, $redirect);
 		}
 	elsif ($r->{'words'}->[0] eq '^/(?!.well-known)(.*)' &&
 	       $r->{'words'}->[2] eq 'break') {
 		# Special case for / which excludes .well-known
-		my $redirect = { 'path' => '^/(?!.well-known)',
-				 'dest' => $r->{'words'}->[1],
-				 'object' => $r,
-				 'regexp' => 1,
-			       };
+		$redirect = { 'path' => '^/(?!.well-known)',
+			      'dest' => $r->{'words'}->[1],
+			      'object' => $r,
+			      'regexp' => 1,
+			    };
+		}
+	if ($redirect) {
 		if ($r->{'words'}->[1] =~ /^(http|https):/) {
 			$redirect->{'alias'} = 0;
 			}
 		else {
 			$redirect->{'dest'} = $phd.$redirect->{'dest'};
 			$redirect->{'alias'} = 1;
+			}
+		if ($r->{'_scheme'}) {
+			$redirect->{$r->{'_scheme'}} = 1;
+			$redirect->{'ifobject'} = $r->{'_if'};
+			}
+		else {
+			$redirect->{'http'} = $redirect->{'https'} = 1;
 			}
 		push(@rv, $redirect);
 		}
@@ -1619,7 +1634,19 @@ else {
 	$r->{'words'}->[1] .= "\$1";
 	}
 &lock_all_config_files();
-&save_directive($server, [ ], [ $r ]);
+if ($redirect->{'http'} && $redirect->{'https'}) {
+	# Can just go at top level
+	&save_directive($server, [ ], [ $r ]);
+	}
+else {
+	# Put under an 'if' statement
+	my $s = $redirect->{'http'} ? 'http' : 'https';
+	my $i = { 'name' => 'if',
+		  'type' => 1,
+		  'members' => [ $r ],
+		  'words' => [ '$scheme', '=', $s ] }; 
+	&save_directive($server, [ ], [ $i ]);
+	}
 &flush_config_file_lines();
 &unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
@@ -1635,7 +1662,12 @@ my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 return $text{'redirect_eobj'} if (!$redirect->{'object'});
 &lock_all_config_files();
-&save_directive($server, [ $redirect->{'object'} ], [ ]);
+if ($redirect->{'ifobject'}) {
+	&save_directive($server, [ $redirect->{'ifobject'} ], [ ]);
+	}
+else {
+	&save_directive($server, [ $redirect->{'object'} ], [ ]);
+	}
 &flush_config_file_lines();
 &unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
