@@ -1599,6 +1599,7 @@ foreach my $r (@rewrites) {
 		else {
 			$redirect->{'http'} = $redirect->{'https'} = 1;
 			}
+		$redirect->{'id'} = ($redirect->{'alias'} ? 'alias_' : 'redirect_').$redirect->{'path'};
 		push(@rv, $redirect);
 		}
 	}
