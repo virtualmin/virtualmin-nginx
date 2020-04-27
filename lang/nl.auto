@@ -1,0 +1,15 @@
+feat_label2=Nginx-website ingeschakeld?
+feat_phpfpm=PHP pool instellen. ..
+feat_module=Nginx Webserver (voor virtuele host)
+links_anlog=Nginx toegangslog
+links_enlog=Nginx-foutenlogboek
+links_phpini=PHP-configuratie
+links_phpini2=PHP $1 -configuratie
+webmin_phpini=PHP-configuratie voor $1 
+webmin_phpini2=PHP $2 -configuratie voor $1 
+monitor_missing=Nginx is niet geïnstalleerd
+monitor_type=Nginx Webserver
+tmpl_directives=Nginx-configuratierichtlijnen toevoegen
+tmpl_default=Standaard (van bovenliggende sjabloon)
+tmpl_none=Geen
+tmpl_below=Hieronder opgesomd ..
