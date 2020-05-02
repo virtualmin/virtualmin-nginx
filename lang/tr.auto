@@ -149,6 +149,7 @@ server_ip=IP adresi
 server_port=Port numarası
 server_default=Varsayılan ana makine?
 server_ssl=SSL modu?
+server_http2=HTTP2 modu?
 server_ipv6=Sadece IPv6 mı?
 server_ipany=Herhangi bir IPv4 adresi
 server_ip6any=Herhangi bir IPv6 adresi

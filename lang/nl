@@ -149,6 +149,7 @@ server_ip=IP adres
 server_port=Poort nummer
 server_default=Standaard host?
 server_ssl=SSL mode?
+server_http2=HTTP2 mode?
 server_ipv6=Alleen IPv6?
 server_ipany=Ieder IPv4 adres
 server_ip6any=Ieder IPv6 adres

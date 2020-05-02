@@ -158,6 +158,7 @@ server_ip=IP address
 server_port=Port number
 server_default=Default host?
 server_ssl=SSL mode?
+server_http2=HTTP2 mode?
 server_ipv6=IPv6 only?
 server_ipany=Any IPv4 address
 server_ip6any=Any IPv6 address
