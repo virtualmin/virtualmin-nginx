@@ -263,7 +263,7 @@ mail_ssl	ssl_certificate	cert.pem	mail,server
 mail_ssl	ssl_certificate_key	cert.pem	mail,server
 mail_ssl	ssl_ciphers	ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP	mail,server
 mail_ssl	ssl_prefer_server_ciphers	off	mail,server
-mail_ssl	ssl_protocols	SSLv2 SSLv3 TLSv1	mail,server
+mail_ssl	ssl_protocols	SSLv2 SSLv3 TLSv1 TLSv1.1 TLSv1.2 TLSv1.3	mail,server
 mail_ssl	ssl_session_cache	builtin:20480	mail,server
 mail_ssl	ssl_session_timeout	5m	mail,server
 mail_ssl	starttls	off	mail,server
@@ -275,7 +275,7 @@ http_ssl	ssl_dhparam	none	http,server
 http_ssl	ssl_ciphers	ALL:!ADH:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP	http,server
 http_ssl	ssl_crl	none	http,server
 http_ssl	ssl_prefer_server_ciphers	off	http,server
-http_ssl	ssl_protocols	SSLv2 SSLv3 TLSv1	http,server
+http_ssl	ssl_protocols	TLSv1 TLSv1.1 TLSv1.2 TLSv1.3	http,server
 http_ssl	ssl_verify_client	off	http,server
 http_ssl	ssl_verify_depth	1	http,server
 http_ssl	ssl_session_cache	off	http,server
