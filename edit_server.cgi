@@ -100,6 +100,7 @@ if ($access{'edit'}) {
 					$text{'server_port'},
 					$text{'server_default'},
 					$text{'server_ssl'},
+					$text{'server_http2'},
 					$text{'server_ipv6'} ], 100);
 	my $i = 0;
 	my @tds = ( "valign=top", "valign=top", "valign=top",
@@ -107,13 +108,16 @@ if ($access{'edit'}) {
 	foreach my $l (@listen, { 'words' => [ ] }) {
 		my @w = @{$l->{'words'}};
 		my ($ip, $port) = @w ? &split_ip_port(shift(@w)) : ( );
-		my ($default, $ssl, $ipv6) = (0, 0, "");
+		my ($default, $ssl, $http2, $ipv6) = (0, 0, 0, "");
 		foreach my $w (@w) {
 			if ($w eq "default" || $w eq "default_server") {
 				$default = 1;
 				}
 			elsif ($w eq "ssl") {
 				$ssl = 1;
+				}
+			elsif ($w eq "http2") {
+				$http2 = 1;
 				}
 			elsif ($w =~ /^ipv6only=(\S+)/) {
 				$ipv6 = lc($1);
@@ -133,6 +137,8 @@ if ($access{'edit'}) {
 			&ui_select("default_$i", $default,
 			   [ [ 0, $text{'no'} ], [ 1, $text{'yes'} ] ]),
 			&ui_select("ssl_$i", $ssl,
+			   [ [ 0, $text{'no'} ], [ 1, $text{'yes'} ] ]),
+			&ui_select("http2_$i", $http2,
 			   [ [ 0, $text{'no'} ], [ 1, $text{'yes'} ] ]),
 			&ui_select("ipv6_$i", $ipv6,
 			   [ [ "", $text{'server_auto'} ],

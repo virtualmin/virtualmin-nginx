@@ -134,6 +134,9 @@ else {
 		if ($in{"ssl_$i"}) {
 			push(@words, "ssl");
 			}
+		if ($in{"http2_$i"}) {
+			push(@words, "http2");
+			}
 		if ($in{"ipv6_$i"}) {
 			push(@words, "ipv6only=".$in{"ipv6_$i"});
 			}
