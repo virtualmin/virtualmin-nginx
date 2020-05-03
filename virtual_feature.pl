@@ -1110,8 +1110,12 @@ my $fpmsock = &virtual_server::get_php_fpm_socket_file($d, 1);
 my $fpmport = $d->{'php_fpm_port'};
 if ($loc) {
 	my ($pass) = &find("fastcgi_pass", $loc);
+	my ($return) = &find("return", $loc);
 	if ($pass && $pass->{'words'}->[0] =~ /^(localhost|unix):(.*)$/) {
-		if ($1 eq "unix" && $2 eq $fpmsock) {
+		if($return && $return->{'words'}->[0] == "404"){
+			return 'none';
+			}
+		elsif ($1 eq "unix" && $2 eq $fpmsock) {
 			return 'fpm';
 			}
 		elsif ($1 eq "localhost" && $fpmport && $2 eq $fpmport) {
@@ -1140,6 +1144,19 @@ elsif ($oldmode eq "fcgid" && $mode ne "fcgid") {
 	&delete_php_fcgi_server($d);
 	delete($d->{'nginx_php_port'});
 	}
+elsif ($oldmode eq "none" && $mode ne "none") {
+	# Enable php block in vhost by removing "return 404"
+	my @locs = &find("location", $server);
+	my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
+		$_->{'words'}->[1] eq '\.php$' } @locs;
+	if ($loc) {
+		&lock_file($loc->{'file'});
+		&save_directive($loc, "return", []);
+		&flush_file_lines($loc->{'file'});
+		&unlock_file($loc->{'file'});
+		&virtual_server::register_post_action(\&print_apply_nginx);
+		}
+	}
 
 my $port;
 if ($mode eq "fcgid" && $oldmode ne "fcgid") {
@@ -1154,6 +1171,19 @@ elsif ($mode eq "fpm" && $oldmode ne "fpm") {
 	&virtual_server::create_php_fpm_pool($d);
 	$port = $d->{'php_fpm_port'} ||
 		&virtual_server::get_php_fpm_socket_file($d);
+	}
+elsif ($mode eq "none" && $oldmode ne "none") {
+	# Disable php block in vhost by returning 404
+	my @locs = &find("location", $server);
+	my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
+		$_->{'words'}->[1] eq '\.php$' } @locs;
+	if ($loc) {
+		&lock_file($loc->{'file'});
+		&save_directive($loc, "return", "404");
+		&flush_file_lines($loc->{'file'});
+		&unlock_file($loc->{'file'});
+		&virtual_server::register_post_action(\&print_apply_nginx);
+		}
 	}
 
 # Update the port in the config, if changed
