@@ -1094,6 +1094,7 @@ my @rv = ('fcgid');
 if (&virtual_server::get_php_fpm_config()) {
 	push(@rv, 'fpm');
 	}
+	push(@rv, 'none');
 return @rv;
 }
 
