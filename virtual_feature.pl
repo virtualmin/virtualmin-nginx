@@ -1547,7 +1547,8 @@ my $phd = &virtual_server::public_html_dir($d);
 my @rewrites = &find("rewrite", $server);
 foreach my $i (&find("if", $server)) {
 	my @w = @{$i->{'words'}};
-	if (@{$i->{'members'}} == 1 &&
+	if ($i->{'type'} &&
+	    @{$i->{'members'}} == 1 &&
 	    $w[0] eq "\$scheme" && $w[1] eq "=" &&
 	    ($w[2] eq "http" || $w[2] eq "https")) {
 		# May contain relevant rewrites
