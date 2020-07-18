@@ -1,4 +1,4 @@
 desc=Nginx Webserver
 category=servers
-version=2.7
+version=2.11
 readonly=1
