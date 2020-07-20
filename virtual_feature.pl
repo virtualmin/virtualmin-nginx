@@ -489,7 +489,7 @@ if (!$d->{'alias'}) {
 	# Rename log files if needed
 	my $new_alog = &virtual_server::get_apache_template_log($d, 0);
 	my $new_elog = &virtual_server::get_apache_template_log($d, 1);
-	if ($old_alog && $old_elog && $old_alog ne $new_alog) {
+	if (defined($old_alog) && defined($old_elog) && $old_alog ne $new_alog) {
 		&$virtual_server::first_print($text{'feat_modifylog'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
