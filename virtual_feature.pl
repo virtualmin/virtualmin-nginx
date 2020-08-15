@@ -1210,18 +1210,25 @@ return ( );	# Should never happen
 }
 
 # feature_save_web_php_directory(&domain, dir, version)
-# Cannot set the version for any sub-directory
+# Change the PHP version for the whole site
 sub feature_save_web_php_directory
 {
 my ($d, $dir, $ver) = @_;
 $dir eq &virtual_server::public_html_dir($d) ||
 	&error($text{'feat_ephpdir'});
 my $mode = &feature_get_web_php_mode($d);
-$mode eq "fcgid" ||
-	&error($text{'feat_ephpmode'});
+my @avail = &virtual_server::list_available_php_versions($d, $mode);
+if ($mode eq "fpm") {
+	# Multiple FPM versions aren't supported yet, but we can at least
+	# use the actual version of FPM running
+	if ($avail[0]->[0] eq $ver) {
+		$d->{'nginx_php_version'} = $ver;
+		return undef;
+		}
+	return $text{'feat_ephpmode'};
+	}
 
 # Get the current version
-my @avail = &virtual_server::list_available_php_versions($d);
 my $phpcmd = &find_php_fcgi_server($d);
 my $defver;
 if ($phpcmd) {
