@@ -1129,6 +1129,7 @@ return undef;
 sub feature_save_web_php_mode
 {
 my ($d, $mode) = @_;
+my $tmpl = &virtual_server::get_template($d->{'template'});
 my $server = &find_domain_server($d);
 my $oldmode = &feature_get_web_php_mode($d) || "";
 if ($oldmode eq "fpm" && $mode ne "fpm") {
@@ -1151,6 +1152,19 @@ if ($mode eq "fcgid" && $oldmode ne "fcgid") {
 	}
 elsif ($mode eq "fpm" && $oldmode ne "fpm") {
 	# Setup FPM pool
+	if (!$d->{'php_fpm_version'}) {
+		# Work out the default FPM version from the template
+		my @avail = &virtual_server::list_available_php_versions(
+				$d, "fpm");
+		@avail || &error("No FPM versions found!");
+		my $fpm;
+		if ($tmpl->{'web_phpver'}) {
+			($fpm) = grep { $_->[0] eq $tmpl->{'web_phpver'} }
+				      @avail;
+			}
+		$fpm ||= $avail[0];
+		$d->{'php_fpm_version'} = $fpm->[0];
+		}
 	&virtual_server::create_php_fpm_pool($d);
 	$port = $d->{'php_fpm_port'} ||
 		&virtual_server::get_php_fpm_socket_file($d);
@@ -1181,7 +1195,7 @@ my ($d) = @_;
 my $mode = &feature_get_web_php_mode($d);
 my @avail = &virtual_server::list_available_php_versions($d, $mode);
 if ($mode eq 'fcgid') {
-	# Can only run the PHP verson of the php-cgi command
+	# Map from the PHP FPM binary to the version number
 	my ($defver) = &get_domain_php_version();
 	my $phpcmd = &find_php_fcgi_server($d);
 	if ($phpcmd) {
@@ -1196,10 +1210,16 @@ if ($mode eq 'fcgid') {
 		   'version' => $defver } );
 	}
 elsif ($mode eq 'fpm') {
-	# Can only run the PHP version for the FPM server
+	# Find the FPM version installed that matches the version in use
+	my $ver = $d->{'php_fpm_version'} || $avail[0]->[0];
+	my ($a) = grep { $_->[0] eq $ver } @avail;
+	if (!$a) {
+		# Selected version doesn't exist .. assume first one
+		$a = $avail[0];
+		}
         if (@avail) {
                 return ( { 'dir' => &virtual_server::public_html_dir($d),
-                           'version' => $avail[0]->[0],
+                           'version' => $a->[0],
                            'mode' => $mode } );
                 }
         else {
@@ -1219,31 +1239,38 @@ $dir eq &virtual_server::public_html_dir($d) ||
 my $mode = &feature_get_web_php_mode($d);
 my @avail = &virtual_server::list_available_php_versions($d, $mode);
 if ($mode eq "fpm") {
-	# Multiple FPM versions aren't supported yet, but we can at least
-	# use the actual version of FPM running
-	if ($avail[0]->[0] eq $ver) {
-		$d->{'nginx_php_version'} = $ver;
-		return undef;
+	# If the FPM version changed, just reset up
+	if (!$d->{'php_fpm_version'}) {
+		# Assume currently on first version
+		$d->{'php_fpm_version'} = $avail[0]->[0];
 		}
-	return $text{'feat_ephpmode'};
+	if ($ver ne $d->{'php_fpm_version'}) {
+		&virtual_server::delete_php_fpm_pool($d);
+		$d->{'php_fpm_version'} = $ver;
+		&virtual_server::save_domain($d);
+		&virtual_server::create_php_fpm_pool($d);
+		}
 	}
+else {
+	# Assume this is FCGId mode
 
-# Get the current version
-my $phpcmd = &find_php_fcgi_server($d);
-my $defver;
-if ($phpcmd) {
-	foreach my $vers (@avail) {
-		if ($vers->[1] && $vers->[1] eq $phpcmd) {
-			$defver = $vers->[0];
+	# Get the current version
+	my $phpcmd = &find_php_fcgi_server($d);
+	my $defver;
+	if ($phpcmd) {
+		foreach my $vers (@avail) {
+			if ($vers->[1] && $vers->[1] eq $phpcmd) {
+				$defver = $vers->[0];
+				}
 			}
 		}
-	}
 
-# Change if needed
-if ($defver ne $ver) {
-	$d->{'nginx_php_version'} = $ver;
-	&delete_php_fcgi_server($d);
-	&setup_php_fcgi_server($d);
+	# Change if needed
+	if ($defver ne $ver) {
+		$d->{'nginx_php_version'} = $ver;
+		&delete_php_fcgi_server($d);
+		&setup_php_fcgi_server($d);
+		}
 	}
 
 return undef;
