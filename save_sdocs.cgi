@@ -18,7 +18,7 @@ $in{'root_def'} || &can_directory($in{'root'}) ||
 		     "<tt>".&html_escape($in{'root'})."</tt>",
 		     "<tt>".&html_escape($access{'root'})."</tt>"));
 
-&nginx_opt_parse("index", $server, undef);
+&nginx_opt_parse("index", $server, undef, undef, undef, 1);
 
 &nginx_opt_parse("default_type", $server, undef,
 		 '^[a-zA-Z0-9\.\_\-]+\/[a-zA-Z0-9\.\_\-]+$');
