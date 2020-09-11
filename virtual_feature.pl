@@ -254,7 +254,7 @@ if (!$d->{'alias'}) {
 		     'type' => 1,
 		     'members' => [
 			{ 'name' => 'try_files',
-			  'words' => [ '$uri', '=404' ],
+			  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
 			},
 		     ],
 		   };
