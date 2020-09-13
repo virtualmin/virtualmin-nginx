@@ -1147,7 +1147,7 @@ if ($mode eq "fcgid" && $oldmode ne "fcgid") {
 	# Setup FCGI server on a new port
 	my $ok;
 	($ok, $port) = &setup_php_fcgi_server($d);
-	$ok || &error($port);
+	$ok || return $port;
 	$d->{'nginx_php_port'} = $port;
 	}
 elsif ($mode eq "fpm" && $oldmode ne "fpm") {
@@ -1185,6 +1185,7 @@ if ($port) {
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
 	}
+return undef;
 }
 
 # feature_list_web_php_directories(&domain)
