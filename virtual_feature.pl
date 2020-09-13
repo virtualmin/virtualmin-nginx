@@ -247,16 +247,25 @@ if (!$d->{'alias'}) {
 			  &find("fastcgi_param", $server));
 	&save_directive($server, "fastcgi_param",
 		[ map { { 'words' => $_ } } @params ]);
+	
+	# Add location
 	my $ploc = { 'name' => 'location',
-		     'words' => [ '~', '\.php$' ],
+		     'words' => [ '~', '\.php(/|$)' ],
 		     'type' => 1,
 		     'members' => [
 			{ 'name' => 'try_files',
-			  'words' => [ '$uri', '=404' ],
+			  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
 			},
 		     ],
 		   };
 	&save_directive($server, [ ], [ $ploc ]);
+
+	# Add extra directive
+	&save_directive($server, "fastcgi_split_path_info",
+        [ {  'name'  => 'fastcgi_split_path_info',
+             'words' => [ &split_quoted_string('^(.+\.php)(/.+)$') ]
+          } ]);
+
 	&flush_config_file_lines();
 	&unlock_all_config_files();
 
@@ -1105,7 +1114,8 @@ my $server = &find_domain_server($d);
 $server || return undef;
 my @locs = &find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
-		   $_->{'words'}->[1] eq '\.php$' } @locs;
+		   ($_->{'words'}->[1] eq '\.php$' ||
+		   	$_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 my $fpmsock = &virtual_server::get_php_fpm_socket_file($d, 1);
 my $fpmport = $d->{'php_fpm_port'};
 if ($loc) {
@@ -1174,7 +1184,8 @@ elsif ($mode eq "fpm" && $oldmode ne "fpm") {
 if ($port) {
 	my @locs = &find("location", $server);
 	my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
-			   $_->{'words'}->[1] eq '\.php$' } @locs;
+			   ($_->{'words'}->[1] eq '\.php$' ||
+			   	$_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 	if ($loc) {
 		&lock_file($loc->{'file'});
 		&save_directive($loc, "fastcgi_pass",
@@ -2305,7 +2316,8 @@ if ($oldd && $d->{'home'} ne $oldd->{'home'}) {
 
 # Put back old port for PHP server
 if ($oldd && $oldd->{'nginx_php_port'} ne $d->{'nginx_php_port'}) {
-	my ($l) = grep { $_->{'words'}->[1] eq '\.php$' }
+	my ($l) = grep { ($_->{'words'}->[1] eq '\.php$' ||
+                      $_->{'words'}->[1] eq '\.php(/|$)') }
 		       &find("location", $server);
 	if ($l) {
 		&save_directive($l, "fastcgi_pass",
@@ -2427,7 +2439,8 @@ if (!$server) {
 			     $d->{'dom'}, 0, 0, 1);
 
 # Fix PHP server port, which is incorrect in copied directives
-my ($l) = grep { $_->{'words'}->[1] eq '\.php$' }
+my ($l) = grep { ($_->{'words'}->[1] eq '\.php$' ||
+                  $_->{'words'}->[1] eq '\.php(/|$)') }
 	       &find("location", $server);
 if ($l) {
 	&save_directive($l, "fastcgi_pass",

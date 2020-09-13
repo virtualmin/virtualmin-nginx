@@ -1875,6 +1875,7 @@ my @rv = (
 	[ 'SERVER_ADDR',       '$server_addr' ],
 	[ 'SERVER_PORT',       '$server_port' ],
 	[ 'SERVER_NAME',       '$server_name' ],
+	[ 'PATH_INFO',         '$fastcgi_path_info' ],
        );
 my $ver = &get_nginx_version();
 if ($ver =~ /^(\d+)\./ && $1 >= 2 ||
