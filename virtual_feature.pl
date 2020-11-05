@@ -247,16 +247,25 @@ if (!$d->{'alias'}) {
 			  &find("fastcgi_param", $server));
 	&save_directive($server, "fastcgi_param",
 		[ map { { 'words' => $_ } } @params ]);
+	
+	# Add location
 	my $ploc = { 'name' => 'location',
-		     'words' => [ '~', '\.php$' ],
+		     'words' => [ '~', '\.php(/|$)' ],
 		     'type' => 1,
 		     'members' => [
 			{ 'name' => 'try_files',
-			  'words' => [ '$uri', '=404' ],
+			  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
 			},
 		     ],
 		   };
 	&save_directive($server, [ ], [ $ploc ]);
+
+	# Add extra directive
+	&save_directive($server, "fastcgi_split_path_info",
+        [ {  'name'  => 'fastcgi_split_path_info',
+             'words' => [ &split_quoted_string('^(.+\.php)(/.+)$') ]
+          } ]);
+
 	&flush_config_file_lines();
 	&unlock_all_config_files();
 
@@ -489,7 +498,7 @@ if (!$d->{'alias'}) {
 	# Rename log files if needed
 	my $new_alog = &virtual_server::get_apache_template_log($d, 0);
 	my $new_elog = &virtual_server::get_apache_template_log($d, 1);
-	if ($old_alog ne $new_alog) {
+	if (defined($old_alog) && defined($old_elog) && $old_alog ne $new_alog) {
 		&$virtual_server::first_print($text{'feat_modifylog'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
@@ -1106,7 +1115,8 @@ my $server = &find_domain_server($d);
 $server || return undef;
 my @locs = &find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
-		   $_->{'words'}->[1] eq '\.php$' } @locs;
+		   ($_->{'words'}->[1] eq '\.php$' ||
+		   	$_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 my $fpmsock = &virtual_server::get_php_fpm_socket_file($d, 1);
 my $fpmport = $d->{'php_fpm_port'};
 if ($loc) {
@@ -1134,6 +1144,7 @@ return undef;
 sub feature_save_web_php_mode
 {
 my ($d, $mode) = @_;
+my $tmpl = &virtual_server::get_template($d->{'template'});
 my $server = &find_domain_server($d);
 my $oldmode = &feature_get_web_php_mode($d) || "";
 if ($oldmode eq "fpm" && $mode ne "fpm") {
@@ -1164,11 +1175,24 @@ if ($mode eq "fcgid" && $oldmode ne "fcgid") {
 	# Setup FCGI server on a new port
 	my $ok;
 	($ok, $port) = &setup_php_fcgi_server($d);
-	$ok || &error($port);
+	$ok || return $port;
 	$d->{'nginx_php_port'} = $port;
 	}
 elsif ($mode eq "fpm" && $oldmode ne "fpm") {
 	# Setup FPM pool
+	if (!$d->{'php_fpm_version'}) {
+		# Work out the default FPM version from the template
+		my @avail = &virtual_server::list_available_php_versions(
+				$d, "fpm");
+		@avail || &error("No FPM versions found!");
+		my $fpm;
+		if ($tmpl->{'web_phpver'}) {
+			($fpm) = grep { $_->[0] eq $tmpl->{'web_phpver'} }
+				      @avail;
+			}
+		$fpm ||= $avail[0];
+		$d->{'php_fpm_version'} = $fpm->[0];
+		}
 	&virtual_server::create_php_fpm_pool($d);
 	$port = $d->{'php_fpm_port'} ||
 		&virtual_server::get_php_fpm_socket_file($d);
@@ -1191,7 +1215,8 @@ elsif ($mode eq "none" && $oldmode ne "none") {
 if ($port) {
 	my @locs = &find("location", $server);
 	my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
-			   $_->{'words'}->[1] eq '\.php$' } @locs;
+			   ($_->{'words'}->[1] eq '\.php$' ||
+			   	$_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 	if ($loc) {
 		&lock_file($loc->{'file'});
 		&save_directive($loc, "fastcgi_pass",
@@ -1202,6 +1227,7 @@ if ($port) {
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
 	}
+return undef;
 }
 
 # feature_list_web_php_directories(&domain)
@@ -1212,7 +1238,7 @@ my ($d) = @_;
 my $mode = &feature_get_web_php_mode($d);
 my @avail = &virtual_server::list_available_php_versions($d, $mode);
 if ($mode eq 'fcgid') {
-	# Can only run the PHP verson of the php-cgi command
+	# Map from the PHP FPM binary to the version number
 	my ($defver) = &get_domain_php_version();
 	my $phpcmd = &find_php_fcgi_server($d);
 	if ($phpcmd) {
@@ -1227,10 +1253,16 @@ if ($mode eq 'fcgid') {
 		   'version' => $defver } );
 	}
 elsif ($mode eq 'fpm') {
-	# Can only run the PHP version for the FPM server
+	# Find the FPM version installed that matches the version in use
+	my $ver = $d->{'php_fpm_version'} || $avail[0]->[0];
+	my ($a) = grep { $_->[0] eq $ver } @avail;
+	if (!$a) {
+		# Selected version doesn't exist .. assume first one
+		$a = $avail[0];
+		}
         if (@avail) {
                 return ( { 'dir' => &virtual_server::public_html_dir($d),
-                           'version' => $avail[0]->[0],
+                           'version' => $a->[0],
                            'mode' => $mode } );
                 }
         else {
@@ -1241,33 +1273,47 @@ return ( );	# Should never happen
 }
 
 # feature_save_web_php_directory(&domain, dir, version)
-# Cannot set the version for any sub-directory
+# Change the PHP version for the whole site
 sub feature_save_web_php_directory
 {
 my ($d, $dir, $ver) = @_;
 $dir eq &virtual_server::public_html_dir($d) ||
 	&error($text{'feat_ephpdir'});
 my $mode = &feature_get_web_php_mode($d);
-$mode eq "fcgid" ||
-	&error($text{'feat_ephpmode'});
-
-# Get the current version
-my @avail = &virtual_server::list_available_php_versions($d);
-my $phpcmd = &find_php_fcgi_server($d);
-my $defver;
-if ($phpcmd) {
-	foreach my $vers (@avail) {
-		if ($vers->[1] && $vers->[1] eq $phpcmd) {
-			$defver = $vers->[0];
-			}
+my @avail = &virtual_server::list_available_php_versions($d, $mode);
+if ($mode eq "fpm") {
+	# If the FPM version changed, just reset up
+	if (!$d->{'php_fpm_version'}) {
+		# Assume currently on first version
+		$d->{'php_fpm_version'} = $avail[0]->[0];
+		}
+	if ($ver ne $d->{'php_fpm_version'}) {
+		&virtual_server::delete_php_fpm_pool($d);
+		$d->{'php_fpm_version'} = $ver;
+		&virtual_server::save_domain($d);
+		&virtual_server::create_php_fpm_pool($d);
 		}
 	}
+else {
+	# Assume this is FCGId mode
 
-# Change if needed
-if ($defver ne $ver) {
-	$d->{'nginx_php_version'} = $ver;
-	&delete_php_fcgi_server($d);
-	&setup_php_fcgi_server($d);
+	# Get the current version
+	my $phpcmd = &find_php_fcgi_server($d);
+	my $defver;
+	if ($phpcmd) {
+		foreach my $vers (@avail) {
+			if ($vers->[1] && $vers->[1] eq $phpcmd) {
+				$defver = $vers->[0];
+				}
+			}
+		}
+
+	# Change if needed
+	if ($defver ne $ver) {
+		$d->{'nginx_php_version'} = $ver;
+		&delete_php_fcgi_server($d);
+		&setup_php_fcgi_server($d);
+		}
 	}
 
 return undef;
@@ -1578,7 +1624,8 @@ my $phd = &virtual_server::public_html_dir($d);
 my @rewrites = &find("rewrite", $server);
 foreach my $i (&find("if", $server)) {
 	my @w = @{$i->{'words'}};
-	if (@{$i->{'members'}} == 1 &&
+	if ($i->{'type'} &&
+	    @{$i->{'members'}} == 1 &&
 	    $w[0] eq "\$scheme" && $w[1] eq "=" &&
 	    ($w[2] eq "http" || $w[2] eq "https")) {
 		# May contain relevant rewrites
@@ -2300,7 +2347,8 @@ if ($oldd && $d->{'home'} ne $oldd->{'home'}) {
 
 # Put back old port for PHP server
 if ($oldd && $oldd->{'nginx_php_port'} ne $d->{'nginx_php_port'}) {
-	my ($l) = grep { $_->{'words'}->[1] eq '\.php$' }
+	my ($l) = grep { ($_->{'words'}->[1] eq '\.php$' ||
+                      $_->{'words'}->[1] eq '\.php(/|$)') }
 		       &find("location", $server);
 	if ($l) {
 		&save_directive($l, "fastcgi_pass",
@@ -2422,7 +2470,8 @@ if (!$server) {
 			     $d->{'dom'}, 0, 0, 1);
 
 # Fix PHP server port, which is incorrect in copied directives
-my ($l) = grep { $_->{'words'}->[1] eq '\.php$' }
+my ($l) = grep { ($_->{'words'}->[1] eq '\.php$' ||
+                  $_->{'words'}->[1] eq '\.php(/|$)') }
 	       &find("location", $server);
 if ($l) {
 	&save_directive($l, "fastcgi_pass",

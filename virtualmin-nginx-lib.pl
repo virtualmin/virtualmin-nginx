@@ -1587,8 +1587,9 @@ foreach my $looper ("/usr/bin/php-loop.pl", "/etc/php-loop.pl") {
 sub get_php_fcgi_server_command
 {
 my ($d, $port) = @_;
-my ($ver, $cmd) = &get_domain_php_version($d);
-$cmd || return ( );
+my ($ver, $basecmd) = &get_domain_php_version($d);
+$basecmd || return ( );
+my $cmd = $basecmd;
 my $log = "$d->{'home'}/logs/php.log";
 my $piddir = "/var/php-nginx";
 if (!-d $piddir) {
@@ -1606,7 +1607,7 @@ if ($d->{'nginx_php_children'} && $d->{'nginx_php_children'} > 1) {
 	$envs_to_set{'PHP_FCGI_CHILDREN'} = $d->{'nginx_php_children'};
 	}
 $cmd = &create_loop_script()." ".$cmd;
-return ($cmd, \%envs_to_set, $log, $pidfile);
+return ($cmd, \%envs_to_set, $log, $pidfile, $basecmd);
 }
 
 # start_php_fcgi_server_command(&domain, cmd, &envs, logfile, pidfile)
@@ -1711,9 +1712,18 @@ else {
 	}
 
 # Get the command
-my ($cmd, $envs_to_set, $log, $pidfile) =
+my ($cmd, $envs_to_set, $log, $pidfile, $basecmd) =
 	&get_php_fcgi_server_command($d, $port);
 $cmd || return (0, $text{'fcgid_ecmd'});
+
+# Check that the PHP command supports the -b flag
+my $out = &backquote_command("$basecmd -h 2>&1 </dev/null");
+if ($?) {
+	return (0, &text('fcgid_ecmdexec', "<tt>$basecmd</tt>"));
+	}
+if ($out !~ /\s-b\s/) {
+	return (0, &text('fcgid_ecmdb', "<tt>$basecmd</tt>"));
+	}
 
 # Launch it, and save the PID
 &start_php_fcgi_server_command($d, $cmd, $envs_to_set, $log, $pidfile);
@@ -1865,6 +1875,7 @@ my @rv = (
 	[ 'SERVER_ADDR',       '$server_addr' ],
 	[ 'SERVER_PORT',       '$server_port' ],
 	[ 'SERVER_NAME',       '$server_name' ],
+	[ 'PATH_INFO',         '$fastcgi_path_info' ],
        );
 my $ver = &get_nginx_version();
 if ($ver =~ /^(\d+)\./ && $1 >= 2 ||
