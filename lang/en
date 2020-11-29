@@ -460,7 +460,7 @@ feat_modifyproxy=Modifying proxy destination ..
 feat_module=Nginx Webserver (for virtual host)
 
 fcgid_ecmd=No PHP command found!
-fcgid_ecmdexec=PHP command $1 could not be executed
+fcgid_ecmdexec=PHP command $1 could not be executed : $2
 fcgid_ecmdb=PHP command $1 does not support the -b flag needed to run as an FCGId server. You likely need to install a separate PHP CGI package.
 
 redirect_efind=No virtualhost for $1 was found

@@ -1719,7 +1719,8 @@ $cmd || return (0, $text{'fcgid_ecmd'});
 # Check that the PHP command supports the -b flag
 my $out = &backquote_command("$basecmd -h 2>&1 </dev/null");
 if ($?) {
-	return (0, &text('fcgid_ecmdexec', "<tt>$basecmd</tt>"));
+	return (0, &text('fcgid_ecmdexec', "<tt>$basecmd</tt>",
+			 "<tt>".&html_escape($out)."</tt>"));
 	}
 if ($out !~ /\s-b\s/) {
 	return (0, &text('fcgid_ecmdb', "<tt>$basecmd</tt>"));
