@@ -1717,7 +1717,9 @@ my ($cmd, $envs_to_set, $log, $pidfile, $basecmd) =
 $cmd || return (0, $text{'fcgid_ecmd'});
 
 # Check that the PHP command supports the -b flag
+&clean_environment();
 my $out = &backquote_command("$basecmd -h 2>&1 </dev/null");
+&reset_environment();
 if ($?) {
 	return (0, &text('fcgid_ecmdexec', "<tt>$basecmd</tt>",
 			 "<tt>".&html_escape($out)."</tt>"));
