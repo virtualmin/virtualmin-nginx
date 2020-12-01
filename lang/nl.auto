@@ -1,7 +1,7 @@
 feat_label2=Nginx-website ingeschakeld?
 feat_phpfpm=PHP pool instellen. ..
 feat_module=Nginx Webserver (voor virtuele host)
-fcgid_ecmdexec=PHP-opdracht $1 kan niet worden uitgevoerd
+fcgid_ecmdexec=PHP-opdracht $1 kan niet worden uitgevoerd : $2 
 fcgid_ecmdb=PHP-opdracht $1 ondersteunt de vlag -b die nodig is om als FCGId-server te worden uitgevoerd, niet. U moet waarschijnlijk een afzonderlijk PHP CGI-pakket installeren.
 links_anlog=Nginx toegangslog
 links_enlog=Nginx-foutenlogboek

@@ -1721,8 +1721,9 @@ $cmd || return (0, $text{'fcgid_ecmd'});
 my $out = &backquote_command("$basecmd -h 2>&1 </dev/null");
 &reset_environment();
 if ($?) {
+	$out = &virtual_server::html_tags_to_text($out, 1, 1);
 	return (0, &text('fcgid_ecmdexec', "<tt>$basecmd</tt>",
-			 "<tt>".&html_escape($out)."</tt>"));
+			 "<tt>$out</tt>"));
 	}
 if ($out !~ /\s-b\s/) {
 	return (0, &text('fcgid_ecmdb', "<tt>$basecmd</tt>"));
