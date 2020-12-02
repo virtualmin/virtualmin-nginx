@@ -1149,7 +1149,6 @@ elsif ($oldmode eq "fcgid" && $mode ne "fcgid") {
 	}
 
 my $port;
-print STDERR "mode=$mode oldmode=$oldmode\n";
 if ($mode eq "fcgid" && $oldmode ne "fcgid") {
 	# Setup FCGI server on a new port
 	my $ok;
@@ -1280,7 +1279,7 @@ else {
 	# Change if needed
 	if ($defver ne $ver || !$d->{'nginx_php_version'}) {
 		$d->{'nginx_php_version'} = $ver;
-		&save_domain($d);
+		&virtual_server::save_domain($d);
 		&delete_php_fcgi_server($d);
 		&setup_php_fcgi_server($d);
 		}
