@@ -234,10 +234,6 @@ if (!$d->{'alias'}) {
 	# Set up fcgid or FPM server
 	my $mode = $tmpl->{'web_php_suexec'} == 3 ? "fpm" : "fcgid";
 	&$virtual_server::first_print($text{'feat_php'.$mode});
-	$d->{'nginx_php_version'} = $tmpl->{'web_phpver'};
-	$d->{'nginx_php_children'} = $config{'child_procs'} ||
-				     $tmpl->{'web_phpchildren'} || 1;
-
 
 	# Create initial config block for running PHP scripts. The port gets
 	# filled in later by save_domain_php_mode
@@ -1153,9 +1149,13 @@ elsif ($oldmode eq "fcgid" && $mode ne "fcgid") {
 	}
 
 my $port;
+print STDERR "mode=$mode oldmode=$oldmode\n";
 if ($mode eq "fcgid" && $oldmode ne "fcgid") {
 	# Setup FCGI server on a new port
 	my $ok;
+	$d->{'nginx_php_version'} ||= $tmpl->{'web_phpver'};
+	$d->{'nginx_php_children'} ||= $config{'child_procs'} ||
+				       $tmpl->{'web_phpchildren'} || 1;
 	($ok, $port) = &setup_php_fcgi_server($d);
 	$ok || return $port;
 	$d->{'nginx_php_port'} = $port;
@@ -1208,7 +1208,7 @@ my $mode = &feature_get_web_php_mode($d);
 my @avail = &virtual_server::list_available_php_versions($d, $mode);
 if ($mode eq 'fcgid') {
 	# Map from the PHP FPM binary to the version number
-	my ($defver) = &get_domain_php_version();
+	my ($defver) = &get_domain_php_version($d);
 	my $phpcmd = &find_php_fcgi_server($d);
 	if ($phpcmd) {
 		foreach my $vers (@avail) {
@@ -1278,8 +1278,9 @@ else {
 		}
 
 	# Change if needed
-	if ($defver ne $ver) {
+	if ($defver ne $ver || !$d->{'nginx_php_version'}) {
 		$d->{'nginx_php_version'} = $ver;
+		&save_domain($d);
 		&delete_php_fcgi_server($d);
 		&setup_php_fcgi_server($d);
 		}

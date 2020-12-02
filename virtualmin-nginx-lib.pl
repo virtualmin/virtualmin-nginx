@@ -1550,21 +1550,40 @@ foreach my $dir (@{$parent->{'members'}}) {
 	}
 }
 
+# list_available_fcgid_php_versions(&domain)
+# List PHP versions that can be used in FCGId mode
+sub list_available_fcgid_php_versions
+{
+my @vers = &virtual_server::list_available_php_versions(undef, "fcgid");
+my @rv;
+foreach my $v (@vers) {
+	if ($v->[1]) {
+		&clean_environment();
+		my $out = &backquote_command("$v->[1] -h 2>&1 </dev/null");
+		&reset_environment();
+		if (!$? && $out =~ /\s-b\s/) {
+			push(@rv, $v);
+			}
+		}
+	}
+return @rv;
+}
+
 # get_domain_php_version(&domain)
 # Returns the PHP version number and binary path for the best PHP installed
 sub get_domain_php_version
 {
 my ($d) = @_;
-my @vers = sort { $b->[0] <=> $a->[0] }
-                &virtual_server::list_available_php_versions(undef, "fcgid");
+my @vers = sort { $b->[0] <=> $a->[0] } &list_available_fcgid_php_versions($d);
 @vers || return ( );
 if ($d->{'nginx_php_version'}) {
-	# Try to get the template default version
+	# Try to get the version the domain is using
 	my ($tver) = grep { $_->[0] eq $d->{'nginx_php_version'} } @vers;
 	if ($tver) {
 		return @$tver;
 		}
 	}
+# Fall back to the first one available
 my $cmd = $vers[0]->[1];
 $cmd || return ( );
 return @{$vers[0]};
