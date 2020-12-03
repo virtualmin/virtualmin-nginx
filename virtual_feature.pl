@@ -1355,13 +1355,9 @@ sub feature_restart_web_php
 {
 my ($d) = @_;
 if ($d->{'nginx_php_port'}) {
-	&stop_php_fcgi_server_command($d, 0);
-	my ($cmd, $envs_to_set, $log, $pidfile) = &get_php_fcgi_server_command(
-			$d, $d->{'nginx_php_port'});
-	if ($cmd) {
-		&start_php_fcgi_server_command(
-			$d, $cmd, $envs_to_set, $log, $pidfile);
-		}
+	&foreign_require("init");
+	my $name = &init_script_name($d);
+	&init::restart_action($name);
 	}
 }
 
