@@ -1701,7 +1701,7 @@ if ($init::init_mode eq "upstart") {
 my $name = &init_script_name($d);
 my $envs = join(" ", map { $_."=".$envs_to_set->{$_} } keys %$envs_to_set);
 &init::enable_at_boot($name,
-	      "Start Nginx PHP fcgi server for $d->{'dom'}",
+	      "Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
 	      &command_as_user($d->{'user'}, 0,
 		"$envs $cmd >>$log 2>&1 </dev/null")." & echo \$! >$pidfile && chmod +r $pidfile",
 	      &command_as_user($d->{'user'}, 0,
