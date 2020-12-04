@@ -1703,7 +1703,7 @@ my $envs = join(" ", map { $_."=".$envs_to_set->{$_} } keys %$envs_to_set);
 &init::enable_at_boot($name,
 	      "Start Nginx PHP fcgi server for $d->{'dom'}",
 	      &command_as_user($d->{'user'}, 0,
-		"$envs $cmd >>$log 2>&1 </dev/null & echo \$! >$pidfile"),
+		"$envs $cmd >>$log 2>&1 </dev/null")." & echo \$! >$pidfile && chmod +r $pidfile",
 	      &command_as_user($d->{'user'}, 0,
 		"kill `cat $pidfile`")." ; sleep 1",
 	      undef,
