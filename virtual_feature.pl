@@ -1246,7 +1246,7 @@ sub feature_save_web_php_directory
 {
 my ($d, $dir, $ver) = @_;
 $dir eq &virtual_server::public_html_dir($d) ||
-	&error($text{'feat_ephpdir'});
+	return $text{'feat_ephpdir'};
 my $mode = &feature_get_web_php_mode($d);
 my @avail = &virtual_server::list_available_php_versions($d, $mode);
 if ($mode eq "fpm") {
