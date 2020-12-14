@@ -156,15 +156,25 @@ if (!$d->{'alias'}) {
 		  'words' => [ &domain_server_names($d) ] });
 
 	# Add listen on the correct IP and port
-	my $portstr = $d->{'web_port'} == 80 ? '' : ':'.$d->{'web_port'};
-	push(@{$server->{'members'}},
-		{ 'name' => 'listen',
-		  'words' => [ $d->{'ip'}.$portstr ] });
-	if ($d->{'ip6'}) {
+	if ($config{'listen_mode'}) {
+		# Just use port numbers
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
-			  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
+			  'words' => [ $d->{'web_port'} ] });
+		}
+	else {
+		# Use IP and port
+		my $portstr = $d->{'web_port'} == 80 ? ''
+						     : ':'.$d->{'web_port'};
+		push(@{$server->{'members'}},
+			{ 'name' => 'listen',
+			  'words' => [ $d->{'ip'}.$portstr ] });
+		if ($d->{'ip6'}) {
+			push(@{$server->{'members'}},
+				{ 'name' => 'listen',
+				  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
 				       $d->{'virt6'} ? ( 'default' ) : ( ) ] });
+			}
 		}
 
 	# Set the root correctly
@@ -472,6 +482,9 @@ if (!$d->{'alias'}) {
 				$w[0] =~ s/:\d+$//;
 				$w[0] .= ":".$d->{'web_port'}
 					if ($d->{'web_port'} != 80);
+				}
+			elsif ($w[0] eq $oldd->{'web_port'}) {
+				$w[0] = $d->{'web_port'};
 				}
 			push(@newlisten, { 'words' => \@w });
 			}
@@ -879,6 +892,7 @@ if (!$d->{'alias'}) {
 			      $d->{'web_port'} == 80 ||
 			     $l =~ /^\Q$d->{'ip'}\E:(\d+)$/ &&
 			      $d->{'web_port'} == $1);
+		$found++ if ($l eq $d->{'web_port'} && $config{'listen_mode'});
 		}
 	$found || return &text('feat_evalidateip',
 			       $d->{'ip'}, $d->{'web_port'});
@@ -889,6 +903,8 @@ if (!$d->{'alias'}) {
 				       $d->{'web_port'} == 80 ||
 				      $l =~ /^\[\Q$d->{'ip6'}\E\]:(\d+)$/ &&
 				       $d->{'web_port'} == $1);
+			$found6++ if ($l eq $d->{'web_port'} &&
+				      $config{'listen_mode'});
 			}
 		$found6 || return &text('feat_evalidateip6',
 					$d->{'ip6'}, $d->{'web_port'});

@@ -8,3 +8,4 @@ apply_cmd=Command to apply Nginx configuration,0
 rotate_cmd=Command to re-open all log files,3,Just use apply command
 child_procs=Default number of PHP child processes,3,Virtualmin default
 extra_dirs=Additional Nginx directives for new virtual hosts,9,80,5,\t
+listen_mode=Add IP addresses to <tt>listen</tt> directives?,1,1-Yes,0-No

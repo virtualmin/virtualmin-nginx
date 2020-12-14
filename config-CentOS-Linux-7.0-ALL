@@ -5,3 +5,4 @@ stop_cmd=systemctl stop nginx
 apply_cmd=systemctl restart nginx
 child_procs=4
 php_socket=1
+listen_mode=0
