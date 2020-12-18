@@ -156,11 +156,12 @@ if (!$d->{'alias'}) {
 		  'words' => [ &domain_server_names($d) ] });
 
 	# Add listen on the correct IP and port
+	my @h2 = $config{'http2'} ? ( "http2" ) : ( );
 	if ($config{'listen_mode'}) {
 		# Just use port numbers
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
-			  'words' => [ $d->{'web_port'} ] });
+			  'words' => [ $d->{'web_port'}, @h2 ] });
 		}
 	else {
 		# Use IP and port
@@ -168,12 +169,13 @@ if (!$d->{'alias'}) {
 						     : ':'.$d->{'web_port'};
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
-			  'words' => [ $d->{'ip'}.$portstr ] });
+			  'words' => [ $d->{'ip'}.$portstr, @h2 ] });
 		if ($d->{'ip6'}) {
 			push(@{$server->{'members'}},
 				{ 'name' => 'listen',
 				  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
-				       $d->{'virt6'} ? ( 'default' ) : ( ) ] });
+				       $d->{'virt6'} ? ( 'default' ) : ( ),
+				       @h2 ] });
 			}
 		}
 

@@ -8,3 +8,4 @@ add_link=/etc/nginx/sites-enabled
 child_procs=4
 php_socket=1
 listen_mode=0
+http2=0
