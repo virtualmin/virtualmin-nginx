@@ -1620,8 +1620,9 @@ foreach my $i (&find("if", $server)) {
 	}
 foreach my $r (@rewrites) {
 	my $redirect;
-	if ($r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?/ &&
-	    $r->{'words'}->[2] eq 'break') {
+	if ($r->{'words'}->[2] &&
+	    $r->{'words'}->[2] =~ /break|redirect|permanent/ &&
+	    $r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?/) {
 		# Regular redirect
 		$redirect = { 'path' => $1,
 			      'dest' => $r->{'words'}->[1],
@@ -1635,6 +1636,9 @@ foreach my $r (@rewrites) {
 				$redirect->{'regexp'} = 1;
 				}
 			}
+		my $m = $r->{'words'}->[2];
+		$redirect->{'code'} = $m eq 'permanent' ? 301 :
+				      $m eq 'redirect' ? 302 : undef;
 		}
 	elsif ($r->{'words'}->[0] eq '^/(?!.well-known)(.*)' &&
 	       $r->{'words'}->[2] eq 'break') {
@@ -1683,8 +1687,11 @@ my $re = $redirect->{'path'};
 if ($re ne '^/(?!.well-known)') {
 	$re = '^\\Q'.$re.'\\E';
 	}
+my @c = !$redirect->{'code'} ? ( 'break' ) :
+	$redirect->{'code'} eq '301' ? ( 'permanent' ) :
+	$redirect->{'code'} eq '302' ? ( 'redirect' ) : ( 'break' );
 my $r = { 'name' => 'rewrite',
-	  'words' => [ $re, $dest, 'break' ],
+	  'words' => [ $re, $dest, @c ],
 	};
 if ($redirect->{'regexp'}) {
 	# All sub-directories go to same dest path
