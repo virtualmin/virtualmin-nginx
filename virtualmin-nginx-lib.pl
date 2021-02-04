@@ -1700,12 +1700,19 @@ if ($init::init_mode eq "upstart") {
 	}
 my $name = &init_script_name($d);
 my $envs = join(" ", map { $_."=".$envs_to_set->{$_} } keys %$envs_to_set);
+my %cmds_abs = (
+	'echo', &has_command('echo'),
+	'cat', &has_command('cat'),
+	'chmod', &has_command('chmod'),
+	'kill', &has_command('kill'),
+	'sleep', &has_command('sleep'),
+);
 &init::enable_at_boot($name,
 	      "Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
 	      &command_as_user($d->{'user'}, 0,
-		"$envs $cmd >>$log 2>&1 </dev/null")." & echo \$! >$pidfile && chmod +r $pidfile",
+		"$envs $cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile",
 	      &command_as_user($d->{'user'}, 0,
-		"kill `cat $pidfile`")." ; sleep 1",
+		"$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`")." ; $cmds_abs{'sleep'} 1",
 	      undef,
 	      { 'fork' => 1,
 		'pidfile' => $pidfile },
