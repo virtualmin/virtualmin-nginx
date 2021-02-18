@@ -2627,9 +2627,14 @@ sub set_nginx_log_permissions
 {
 my ($d, $log) = @_;
 my $web_user = &get_nginx_user();
-my @uinfo = getpwnam($web_user);
-my $web_group = getgrgid($uinfo[3]) || $uinfo[3];
-&set_ownership_permissions($d->{'uid'}, $web_group, 0660, $log);
+if (&virtual_server::is_under_directory($d->{'home'}, $log)) {
+	&virtual_server::set_permissions_as_domain_user($d, 0660, $log);
+	}
+else {
+	my @uinfo = getpwnam($web_user);
+	my $web_group = getgrgid($uinfo[3]) || $uinfo[3];
+	&set_ownership_permissions($d->{'uid'}, $web_group, 0660, $log);
+	}
 }
 
 # domain_server_names(&domain)
