@@ -156,7 +156,7 @@ if (!$d->{'alias'}) {
 		  'words' => [ &domain_server_names($d) ] });
 
 	# Add listen on the correct IP and port
-	if ($config{'listen_mode'}) {
+	if ($config{'listen_mode'} eq '0') {
 		# Just use port numbers
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
@@ -892,7 +892,7 @@ if (!$d->{'alias'}) {
 			      $d->{'web_port'} == 80 ||
 			     $l =~ /^\Q$d->{'ip'}\E:(\d+)$/ &&
 			      $d->{'web_port'} == $1);
-		$found++ if ($l eq $d->{'web_port'} && $config{'listen_mode'});
+		$found++ if ($l eq $d->{'web_port'} && $config{'listen_mode'} eq '0');
 		}
 	$found || return &text('feat_evalidateip',
 			       $d->{'ip'}, $d->{'web_port'});
@@ -904,7 +904,7 @@ if (!$d->{'alias'}) {
 				      $l =~ /^\[\Q$d->{'ip6'}\E\]:(\d+)$/ &&
 				       $d->{'web_port'} == $1);
 			$found6++ if ($l eq $d->{'web_port'} &&
-				      $config{'listen_mode'});
+				      $config{'listen_mode'} eq '0');
 			}
 		$found6 || return &text('feat_evalidateip6',
 					$d->{'ip6'}, $d->{'web_port'});

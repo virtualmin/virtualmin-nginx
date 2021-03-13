@@ -5,5 +5,5 @@ stop_cmd=killall nginx
 apply_cmd=killall nginx ; sleep 1 ; /usr/local/nginx/sbin/nginx >/dev/null 2>&1 </dev/null &
 child_procs=4
 php_socket=1
-listen_mode=0
+listen_mode=1
 http2=0
