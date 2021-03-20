@@ -156,12 +156,11 @@ if (!$d->{'alias'}) {
 		  'words' => [ &domain_server_names($d) ] });
 
 	# Add listen on the correct IP and port
-	my @h2 = $config{'http2'} ? ( "http2" ) : ( );
-	if ($config{'listen_mode'}) {
+	if ($config{'listen_mode'} eq '0') {
 		# Just use port numbers
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
-			  'words' => [ $d->{'web_port'}, @h2 ] });
+			  'words' => [ $d->{'web_port'} ] });
 		}
 	else {
 		# Use IP and port
@@ -169,13 +168,12 @@ if (!$d->{'alias'}) {
 						     : ':'.$d->{'web_port'};
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
-			  'words' => [ $d->{'ip'}.$portstr, @h2 ] });
+			  'words' => [ $d->{'ip'}.$portstr ] });
 		if ($d->{'ip6'}) {
 			push(@{$server->{'members'}},
 				{ 'name' => 'listen',
 				  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
-				       $d->{'virt6'} ? ( 'default' ) : ( ),
-				       @h2 ] });
+				       $d->{'virt6'} ? ( 'default' ) : ( ) ] });
 			}
 		}
 
@@ -187,7 +185,7 @@ if (!$d->{'alias'}) {
 	# Allow sensible index files
 	push(@{$server->{'members'}},
                 { 'name' => 'index',
-		  'words' => [ 'index.html', 'index.htm', 'index.php' ] });
+		  'words' => [ 'index.php', 'index.html', 'index.htm' ] });
 
 	# Add a location for the root
 	#push(@{$server->{'members'}},
@@ -894,7 +892,7 @@ if (!$d->{'alias'}) {
 			      $d->{'web_port'} == 80 ||
 			     $l =~ /^\Q$d->{'ip'}\E:(\d+)$/ &&
 			      $d->{'web_port'} == $1);
-		$found++ if ($l eq $d->{'web_port'} && $config{'listen_mode'});
+		$found++ if ($l eq $d->{'web_port'} && $config{'listen_mode'} eq '0');
 		}
 	$found || return &text('feat_evalidateip',
 			       $d->{'ip'}, $d->{'web_port'});
@@ -906,7 +904,7 @@ if (!$d->{'alias'}) {
 				      $l =~ /^\[\Q$d->{'ip6'}\E\]:(\d+)$/ &&
 				       $d->{'web_port'} == $1);
 			$found6++ if ($l eq $d->{'web_port'} &&
-				      $config{'listen_mode'});
+				      $config{'listen_mode'} eq '0');
 			}
 		$found6 || return &text('feat_evalidateip6',
 					$d->{'ip6'}, $d->{'web_port'});
