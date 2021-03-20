@@ -384,7 +384,8 @@ foreach my $f (&unique(@open_config_files)) {
 sub lock_all_config_files
 {
 my ($parent) = @_;
-foreach my $f (&get_all_config_files($parent)) {
+@lock_all_config_files_cache = &get_all_config_files($parent);
+foreach my $f (@lock_all_config_files_cache) {
 	&lock_file($f);
 	}
 }
@@ -394,9 +395,10 @@ foreach my $f (&get_all_config_files($parent)) {
 sub unlock_all_config_files
 {
 my ($parent) = @_;
-foreach my $f (reverse(&get_all_config_files($parent))) {
+foreach my $f (reverse(@lock_all_config_files_cache)) {
 	&unlock_file($f);
 	}
+@lock_all_config_files_cache = ();
 }
 
 # get_all_config_files([&parent])
