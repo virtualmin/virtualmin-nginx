@@ -185,7 +185,7 @@ if (!$d->{'alias'}) {
 	# Allow sensible index files
 	push(@{$server->{'members'}},
                 { 'name' => 'index',
-		  'words' => [ 'index.php', 'index.html', 'index.htm' ] });
+		  'words' => [ 'index.php', 'index.htm', 'index.html' ] });
 
 	# Add a location for the root
 	#push(@{$server->{'members'}},
