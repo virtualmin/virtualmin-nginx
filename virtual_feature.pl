@@ -2484,7 +2484,14 @@ my ($d, $subdir) = @_;
 my $server = &find_domain_server($d);
 $server || return &text('redirect_efind', $d->{'dom'});
 &lock_all_config_files();
-&save_directive($server, "root", [ $d->{'home'}."/".$subdir ]);
+my $oldroot = &find_value("root", $server);
+my $root = $d->{'home'}."/".$subdir;
+&save_directive($server, "root", [ $root ]);
+my @fp = &find("fastcgi_param", $server);
+foreach my $fp (@fp) {
+	$fp->{'words'}->[1] =~ s/\Q$oldroot\E/$root/g;
+	}
+&save_directive($server, "fastcgi_param", \@fp);
 &flush_config_file_lines();
 &unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
