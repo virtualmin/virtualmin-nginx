@@ -13,6 +13,8 @@ our ($get_config_cache, $get_config_parent_cache, %list_directives_cache,
      @list_modules_cache, @open_config_files);
 our (%config, %text, %in, $module_root_directory);
 
+my @lock_all_config_files_cache;
+
 # get_config()
 # Parses the Nginx config file into an array ref
 sub get_config
