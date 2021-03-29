@@ -13,6 +13,8 @@ our ($get_config_cache, $get_config_parent_cache, %list_directives_cache,
      @list_modules_cache, @open_config_files);
 our (%config, %text, %in, $module_root_directory);
 
+my @lock_all_config_files_cache;
+
 # get_config()
 # Parses the Nginx config file into an array ref
 sub get_config
@@ -384,7 +386,8 @@ foreach my $f (&unique(@open_config_files)) {
 sub lock_all_config_files
 {
 my ($parent) = @_;
-foreach my $f (&get_all_config_files($parent)) {
+@lock_all_config_files_cache = &get_all_config_files($parent);
+foreach my $f (@lock_all_config_files_cache) {
 	&lock_file($f);
 	}
 }
@@ -394,9 +397,10 @@ foreach my $f (&get_all_config_files($parent)) {
 sub unlock_all_config_files
 {
 my ($parent) = @_;
-foreach my $f (reverse(&get_all_config_files($parent))) {
+foreach my $f (reverse(@lock_all_config_files_cache)) {
 	&unlock_file($f);
 	}
+@lock_all_config_files_cache = ();
 }
 
 # get_all_config_files([&parent])
@@ -1550,21 +1554,40 @@ foreach my $dir (@{$parent->{'members'}}) {
 	}
 }
 
+# list_available_fcgid_php_versions(&domain)
+# List PHP versions that can be used in FCGId mode
+sub list_available_fcgid_php_versions
+{
+my @vers = &virtual_server::list_available_php_versions(undef, "fcgid");
+my @rv;
+foreach my $v (@vers) {
+	if ($v->[1]) {
+		&clean_environment();
+		my $out = &backquote_command("$v->[1] -h 2>&1 </dev/null");
+		&reset_environment();
+		if (!$? && $out =~ /\s-b\s/) {
+			push(@rv, $v);
+			}
+		}
+	}
+return @rv;
+}
+
 # get_domain_php_version(&domain)
 # Returns the PHP version number and binary path for the best PHP installed
 sub get_domain_php_version
 {
 my ($d) = @_;
-my @vers = sort { $b->[0] <=> $a->[0] }
-                &virtual_server::list_available_php_versions(undef, "fcgid");
+my @vers = sort { $b->[0] <=> $a->[0] } &list_available_fcgid_php_versions($d);
 @vers || return ( );
 if ($d->{'nginx_php_version'}) {
-	# Try to get the template default version
+	# Try to get the version the domain is using
 	my ($tver) = grep { $_->[0] eq $d->{'nginx_php_version'} } @vers;
 	if ($tver) {
 		return @$tver;
 		}
 	}
+# Fall back to the first one available
 my $cmd = $vers[0]->[1];
 $cmd || return ( );
 return @{$vers[0]};
@@ -1608,62 +1631,6 @@ if ($d->{'nginx_php_children'} && $d->{'nginx_php_children'} > 1) {
 	}
 $cmd = &create_loop_script()." ".$cmd;
 return ($cmd, \%envs_to_set, $log, $pidfile, $basecmd);
-}
-
-# start_php_fcgi_server_command(&domain, cmd, &envs, logfile, pidfile)
-# Actually start the PHP fcgid server for a domain
-sub start_php_fcgi_server_command
-{
-my ($d, $cmd, $envs_to_set, $log, $pidfile) = @_;
-my $pid = fork();
-if (!$pid) {
-	untie(*STDIN); untie(*STDOUT); untie(*STDERR);
-	close(STDIN); close(STDOUT); close(STDERR);
-	my @u = getpwnam($d->{'user'});
-	&switch_to_unix_user(\@u);
-	open(STDOUT, ">>", "$log");
-	open(STDERR, ">", "&STDOUT");
-	&clean_environment();
-	foreach my $e (keys %$envs_to_set) {
-		$ENV{$e} = $envs_to_set->{$e};
-		}
-	exec($cmd);
-	exit(1);
-	}
-my $fh = "PIDFILE";
-&virtual_server::open_tempfile_as_domain_user($d, $fh, ">$pidfile");
-&print_tempfile($fh, $pid."\n");
-&virtual_server::close_tempfile_as_domain_user($d, $fh);
-}
-
-# stop_php_fcgi_server_command(&domain, [delete-dir])
-# Kills the running PHP server process for a domain
-sub stop_php_fcgi_server_command
-{
-my ($d, $deletedir) = @_;
-my (undef, undef, undef, $pidfile) =
-	&get_php_fcgi_server_command($d, $d->{'nginx_php_port'});
-my $pid = &check_pid_file($pidfile);
-if ($pid) {
-	if (&virtual_server::has_domain_user($d)) {
-		&virtual_server::run_as_domain_user(
-			$d, "kill ".quotemeta($pid));
-		}
-	else {
-		&kill_logged('TERM', $pid);
-		}
-	sleep(1);	# Give it time to exit cleanly
-	}
-
-# Delete PID file
-&virtual_server::unlink_file_as_domain_user($d, $pidfile);
-
-# Delete socket file, if any
-if ($d->{'nginx_php_port'} =~ /^(\/\S+)\/socket$/) {
-	my $domdir = $1;
-	&unlink_file($d->{'nginx_php_port'});
-	&unlink_file($domdir) if ($deletedir);
-	}
 }
 
 # setup_php_fcgi_server(&domain)
@@ -1717,37 +1684,47 @@ my ($cmd, $envs_to_set, $log, $pidfile, $basecmd) =
 $cmd || return (0, $text{'fcgid_ecmd'});
 
 # Check that the PHP command supports the -b flag
+&clean_environment();
 my $out = &backquote_command("$basecmd -h 2>&1 </dev/null");
+&reset_environment();
 if ($?) {
-	return (0, &text('fcgid_ecmdexec', "<tt>$basecmd</tt>"));
+	$out = &virtual_server::html_tags_to_text($out, 1, 1);
+	return (0, &text('fcgid_ecmdexec', "<tt>$basecmd</tt>",
+			 "<tt>$out</tt>"));
 	}
 if ($out !~ /\s-b\s/) {
 	return (0, &text('fcgid_ecmdb', "<tt>$basecmd</tt>"));
 	}
 
-# Launch it, and save the PID
-&start_php_fcgi_server_command($d, $cmd, $envs_to_set, $log, $pidfile);
-
 # Create init script
 &foreign_require("init");
 my $old_init_mode = $init::init_mode;
-if ($init::init_mode eq "upstart" ||
-    $init::init_mode eq "systemd") {
+if ($init::init_mode eq "upstart") {
 	$init::init_mode = "init";
 	}
-my $name = "php-fcgi-$d->{'dom'}";
-my $oldname = $name;
-$name =~ s/\./-/g;
+my $name = &init_script_name($d);
 my $envs = join(" ", map { $_."=".$envs_to_set->{$_} } keys %$envs_to_set);
+my %cmds_abs = (
+	'echo', &has_command('echo'),
+	'cat', &has_command('cat'),
+	'chmod', &has_command('chmod'),
+	'kill', &has_command('kill'),
+	'sleep', &has_command('sleep'),
+);
 &init::enable_at_boot($name,
-	      "Start Nginx PHP fcgi server for $d->{'dom'}",
+	      "Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
 	      &command_as_user($d->{'user'}, 0,
-		"$envs $cmd >>$log 2>&1 </dev/null & echo \$! >$pidfile"),
+		"$envs $cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile",
 	      &command_as_user($d->{'user'}, 0,
-		"kill `cat $pidfile`")." ; sleep 1",
+		"$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`")." ; $cmds_abs{'sleep'} 1",
+	      undef,
+	      { 'fork' => 1,
+		'pidfile' => $pidfile },
 	      );
-&init::disable_at_boot($oldname);
 $init::init_mode = $old_init_mode;
+
+# Launch it, and save the PID
+&init::start_action($name);
 
 return (1, $port);
 }
@@ -1759,39 +1736,44 @@ sub delete_php_fcgi_server
 my ($d) = @_;
 
 # Stop the server
-&stop_php_fcgi_server_command($d, 1);
+&foreign_require("init");
+my $name = &init_script_name($d);
+&init::stop_action($name);
 
 # Delete init script
-&foreign_require("init");
 my $old_init_mode = $init::init_mode;
-if ($init::init_mode eq "upstart" ||
-    $init::init_mode eq "systemd") {
+if ($init::init_mode eq "upstart") {
         $init::init_mode = "init";
         }
-my $name = "php-fcgi-$d->{'dom'}";
-my $oldname = $name;
-$name =~ s/\./-/g;
-foreach my $n ($name, $oldname) {
-	&init::disable_at_boot($n);
-	if ($init::init_mode eq "init") {
-		my $fn = &init::action_filename($n);
-		foreach my $l (&init::action_levels('S', $n)) {
-			if ($l =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
-				&init::delete_rl_action($n, $1, 'S');
-				}
-			}
-		foreach my $l (&init::action_levels('K', $n)) {
-			if ($l =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
-				&init::delete_rl_action($n, $1, 'K');
-				}
-			}
-		&unlink_logged($fn);
-		}
-	elsif ($init::init_mode eq "rc") {
-		&init::delete_rc_script($n);
-		}
-	}
+&init::disable_at_boot($name);
+&init::delete_at_boot($name);
 $init::init_mode = $old_init_mode;
+
+# Previously we created init scripts under system
+if ($init::init_mode eq "systemd") {
+	my $old_init_mode = $init::init_mode;
+        $init::init_mode = "init";
+	&init::disable_at_boot($name);
+	&init::delete_at_boot($name);
+	$init::init_mode = $old_init_mode;
+	}
+
+# Delete socket file, if any
+if ($d->{'nginx_php_port'} =~ /^(\/\S+)\/socket$/) {
+	my $domdir = $1;
+	&unlink_file($d->{'nginx_php_port'});
+	&unlink_file($domdir);
+	}
+}
+
+# init_script_name(&domain)
+# Returns the name of the init script for the FCGId server
+sub init_script_name
+{
+my ($d) = @_;
+my $name = "php-fcgi-$d->{'dom'}";
+$name =~ s/\./-/g;
+return $name;
 }
 
 # find_php_fcgi_server(&domain)

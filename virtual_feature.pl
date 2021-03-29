@@ -156,15 +156,25 @@ if (!$d->{'alias'}) {
 		  'words' => [ &domain_server_names($d) ] });
 
 	# Add listen on the correct IP and port
-	my $portstr = $d->{'web_port'} == 80 ? '' : ':'.$d->{'web_port'};
-	push(@{$server->{'members'}},
-		{ 'name' => 'listen',
-		  'words' => [ $d->{'ip'}.$portstr ] });
-	if ($d->{'ip6'}) {
+	if ($config{'listen_mode'} eq '0') {
+		# Just use port numbers
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
-			  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
+			  'words' => [ $d->{'web_port'} ] });
+		}
+	else {
+		# Use IP and port
+		my $portstr = $d->{'web_port'} == 80 ? ''
+						     : ':'.$d->{'web_port'};
+		push(@{$server->{'members'}},
+			{ 'name' => 'listen',
+			  'words' => [ $d->{'ip'}.$portstr ] });
+		if ($d->{'ip6'}) {
+			push(@{$server->{'members'}},
+				{ 'name' => 'listen',
+				  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
 				       $d->{'virt6'} ? ( 'default' ) : ( ) ] });
+			}
 		}
 
 	# Set the root correctly
@@ -175,7 +185,7 @@ if (!$d->{'alias'}) {
 	# Allow sensible index files
 	push(@{$server->{'members'}},
                 { 'name' => 'index',
-		  'words' => [ 'index.html', 'index.htm', 'index.php' ] });
+		  'words' => [ 'index.php', 'index.htm', 'index.html' ] });
 
 	# Add a location for the root
 	#push(@{$server->{'members'}},
@@ -234,10 +244,6 @@ if (!$d->{'alias'}) {
 	# Set up fcgid or FPM server
 	my $mode = $tmpl->{'web_php_suexec'} == 3 ? "fpm" : "fcgid";
 	&$virtual_server::first_print($text{'feat_php'.$mode});
-	$d->{'nginx_php_version'} = $tmpl->{'web_phpver'};
-	$d->{'nginx_php_children'} = $config{'child_procs'} ||
-				     $tmpl->{'web_phpchildren'} || 1;
-
 
 	# Create initial config block for running PHP scripts. The port gets
 	# filled in later by save_domain_php_mode
@@ -476,6 +482,9 @@ if (!$d->{'alias'}) {
 				$w[0] =~ s/:\d+$//;
 				$w[0] .= ":".$d->{'web_port'}
 					if ($d->{'web_port'} != 80);
+				}
+			elsif ($w[0] eq $oldd->{'web_port'}) {
+				$w[0] = $d->{'web_port'};
 				}
 			push(@newlisten, { 'words' => \@w });
 			}
@@ -883,6 +892,7 @@ if (!$d->{'alias'}) {
 			      $d->{'web_port'} == 80 ||
 			     $l =~ /^\Q$d->{'ip'}\E:(\d+)$/ &&
 			      $d->{'web_port'} == $1);
+		$found++ if ($l eq $d->{'web_port'} && $config{'listen_mode'} eq '0');
 		}
 	$found || return &text('feat_evalidateip',
 			       $d->{'ip'}, $d->{'web_port'});
@@ -893,6 +903,8 @@ if (!$d->{'alias'}) {
 				       $d->{'web_port'} == 80 ||
 				      $l =~ /^\[\Q$d->{'ip6'}\E\]:(\d+)$/ &&
 				       $d->{'web_port'} == $1);
+			$found6++ if ($l eq $d->{'web_port'} &&
+				      $config{'listen_mode'} eq '0');
 			}
 		$found6 || return &text('feat_evalidateip6',
 					$d->{'ip6'}, $d->{'web_port'});
@@ -1174,6 +1186,9 @@ my $port;
 if ($mode eq "fcgid" && $oldmode ne "fcgid") {
 	# Setup FCGI server on a new port
 	my $ok;
+	$d->{'nginx_php_version'} ||= $tmpl->{'web_phpver'};
+	$d->{'nginx_php_children'} ||= $config{'child_procs'} ||
+				       $tmpl->{'web_phpchildren'} || 1;
 	($ok, $port) = &setup_php_fcgi_server($d);
 	$ok || return $port;
 	$d->{'nginx_php_port'} = $port;
@@ -1239,7 +1254,7 @@ my $mode = &feature_get_web_php_mode($d);
 my @avail = &virtual_server::list_available_php_versions($d, $mode);
 if ($mode eq 'fcgid') {
 	# Map from the PHP FPM binary to the version number
-	my ($defver) = &get_domain_php_version();
+	my ($defver) = &get_domain_php_version($d);
 	my $phpcmd = &find_php_fcgi_server($d);
 	if ($phpcmd) {
 		foreach my $vers (@avail) {
@@ -1278,7 +1293,7 @@ sub feature_save_web_php_directory
 {
 my ($d, $dir, $ver) = @_;
 $dir eq &virtual_server::public_html_dir($d) ||
-	&error($text{'feat_ephpdir'});
+	return $text{'feat_ephpdir'};
 my $mode = &feature_get_web_php_mode($d);
 my @avail = &virtual_server::list_available_php_versions($d, $mode);
 if ($mode eq "fpm") {
@@ -1309,8 +1324,9 @@ else {
 		}
 
 	# Change if needed
-	if ($defver ne $ver) {
+	if ($defver ne $ver || !$d->{'nginx_php_version'}) {
 		$d->{'nginx_php_version'} = $ver;
+		&virtual_server::save_domain($d);
 		&delete_php_fcgi_server($d);
 		&setup_php_fcgi_server($d);
 		}
@@ -1386,13 +1402,9 @@ sub feature_restart_web_php
 {
 my ($d) = @_;
 if ($d->{'nginx_php_port'}) {
-	&stop_php_fcgi_server_command($d, 0);
-	my ($cmd, $envs_to_set, $log, $pidfile) = &get_php_fcgi_server_command(
-			$d, $d->{'nginx_php_port'});
-	if ($cmd) {
-		&start_php_fcgi_server_command(
-			$d, $cmd, $envs_to_set, $log, $pidfile);
-		}
+	&foreign_require("init");
+	my $name = &init_script_name($d);
+	&init::restart_action($name);
 	}
 }
 
@@ -1637,8 +1649,9 @@ foreach my $i (&find("if", $server)) {
 	}
 foreach my $r (@rewrites) {
 	my $redirect;
-	if ($r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?/ &&
-	    $r->{'words'}->[2] eq 'break') {
+	if ($r->{'words'}->[2] &&
+	    $r->{'words'}->[2] =~ /break|redirect|permanent/ &&
+	    $r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?/) {
 		# Regular redirect
 		$redirect = { 'path' => $1,
 			      'dest' => $r->{'words'}->[1],
@@ -1652,6 +1665,9 @@ foreach my $r (@rewrites) {
 				$redirect->{'regexp'} = 1;
 				}
 			}
+		my $m = $r->{'words'}->[2];
+		$redirect->{'code'} = $m eq 'permanent' ? 301 :
+				      $m eq 'redirect' ? 302 : undef;
 		}
 	elsif ($r->{'words'}->[0] eq '^/(?!.well-known)(.*)' &&
 	       $r->{'words'}->[2] eq 'break') {
@@ -1700,8 +1716,11 @@ my $re = $redirect->{'path'};
 if ($re ne '^/(?!.well-known)') {
 	$re = '^\\Q'.$re.'\\E';
 	}
+my @c = !$redirect->{'code'} ? ( 'break' ) :
+	$redirect->{'code'} eq '301' ? ( 'permanent' ) :
+	$redirect->{'code'} eq '302' ? ( 'redirect' ) : ( 'break' );
 my $r = { 'name' => 'rewrite',
-	  'words' => [ $re, $dest, 'break' ],
+	  'words' => [ $re, $dest, @c ],
 	};
 if ($redirect->{'regexp'}) {
 	# All sub-directories go to same dest path
@@ -2496,7 +2515,14 @@ my ($d, $subdir) = @_;
 my $server = &find_domain_server($d);
 $server || return &text('redirect_efind', $d->{'dom'});
 &lock_all_config_files();
-&save_directive($server, "root", [ $d->{'home'}."/".$subdir ]);
+my $oldroot = &find_value("root", $server);
+my $root = $d->{'home'}."/".$subdir;
+&save_directive($server, "root", [ $root ]);
+my @fp = &find("fastcgi_param", $server);
+foreach my $fp (@fp) {
+	$fp->{'words'}->[1] =~ s/\Q$oldroot\E/$root/g;
+	}
+&save_directive($server, "fastcgi_param", \@fp);
 &flush_config_file_lines();
 &unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
@@ -2637,9 +2663,14 @@ sub set_nginx_log_permissions
 {
 my ($d, $log) = @_;
 my $web_user = &get_nginx_user();
-my @uinfo = getpwnam($web_user);
-my $web_group = getgrgid($uinfo[3]) || $uinfo[3];
-&set_ownership_permissions($d->{'uid'}, $web_group, 0660, $log);
+if (&virtual_server::is_under_directory($d->{'home'}, $log)) {
+	&virtual_server::set_permissions_as_domain_user($d, 0660, $log);
+	}
+else {
+	my @uinfo = getpwnam($web_user);
+	my $web_group = getgrgid($uinfo[3]) || $uinfo[3];
+	&set_ownership_permissions($d->{'uid'}, $web_group, 0660, $log);
+	}
 }
 
 # domain_server_names(&domain)

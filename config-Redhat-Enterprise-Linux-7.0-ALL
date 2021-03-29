@@ -5,3 +5,5 @@ stop_cmd=service nginx stop
 apply_cmd=service nginx restart
 child_procs=4
 php_socket=1
+listen_mode=1
+http2=0
