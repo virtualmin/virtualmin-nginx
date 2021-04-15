@@ -23,6 +23,7 @@ index_startdesc=Starta Nginx webbserver med den aktuella konfigurationen.
 index_restart=Använd Nginx-konfiguration
 index_restartdesc=Använd den aktuella konfigurationen genom att stoppa och starta om Nginx webserver.
 index_eglobal=Du får inte redigera globala inställningar
+
 net_title=nätverkskonfiguration
 net_header=Globala nätverksalternativ
 opt_missing=Inget inmatat för fältet : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Timeout för keepalive-anslutningar måste vara ett antal
 opt_keepalive_requests=Begärgräns för hållbara anslutningar
 opt_ekeepalive_requests=Begäran om begränsningar för hållbara anslutningar måste vara ett antal förfrågningar
 opt_secs=sekunder
+
 mime_title=MIME-typer
 mime_search=Hitta MIME-typer som matchar :
 mime_ok=Sök
@@ -54,6 +56,7 @@ mime_eword=Filändelsen innehåller ogiltiga tecken eller börjar med en prick
 mime_eold=MIME-typen finns inte längre!
 mime_eclash=En MIME-typ med samma namn finns redan
 mime_enone=Inga MIME-typer har valts för att radera
+
 logs_title=Loggningsinställningar
 logs_header=Log- och PID-filalternativ
 opt_error_log=Felloggfil
@@ -75,6 +78,7 @@ logs_ftext=Formatera sträng
 logs_efname=Loggformatsnamn $1 kan bara innehålla bokstäver, siffror, punkt, streck och understruk
 logs_etext=Saknad formatsträng för loggformat $1 
 logs_ecannot=Du får inte konfigurera loggfiler
+
 misc_title=Andra inställningar
 misc_header=Användare och processalternativ
 opt_worker_processes=Antal arbetarprocesser
@@ -92,6 +96,7 @@ opt_eworker_priority=Arbetarens prioritering måste vara ett positivt eller nega
 opt_index=Katalogindexfiler
 opt_default_type=MIME-typ för okända filer
 opt_edefault_type=Ogiltig standard MIME-typ
+
 docs_title=Dokumentalternativ
 sdocs_title=Dokumentalternativ
 ldocs_title=Dokumentalternativ
@@ -99,6 +104,7 @@ docs_header=Inställningar för fil, sida och dokument
 docs_err=Det gick inte att spara dokumentalternativ
 opt_root=Standardkatalog för rot
 opt_eroot=Standardkatalogen måste vara en absolut sökväg
+
 fcgi_title=FastCGI-alternativ
 lfcgi_title=FastCGI-alternativ
 fcgi_header=FastCGI-server och protokollalternativ
@@ -117,6 +123,7 @@ fcgi_epvalue=Värdet för parameter $1 saknas
 opt_fastcgi_buffer_size=Buffertstorlek för rubriker
 fcgi_buffer=Storlek som 4k
 opt_efastcgi_buffer_size=Buffertstorlek måste vara 4k eller 1M.
+
 ssi_title=Inkludera inställningar på serversidan
 sssi_title=Inkludera inställningar på serversidan
 lssi_title=Inkludera inställningar på serversidan
@@ -129,6 +136,7 @@ opt_ssi_value_length=Maximal parameterlängd
 ssi_err=Det gick inte att spara serversidan inkludera inställningar
 opt_essi_types=$1 är inte en giltig MIME-typ
 opt_essi_value_length=Maximal parameterlängd måste vara ett nummer
+
 manual_title=Redigera konfigurationsfiler
 manual_file=Redigerar konfigurationsfil:
 manual_ok=Växla
@@ -136,6 +144,7 @@ manual_efile=Den valda filen är inte en del av Nginx-konfigurationen!
 manual_test=Testa ny konfiguration innan du sparar?
 manual_elink=Hänglande symbolisk länk!
 manual_err=Det gick inte att spara konfigurationsfilen
+
 server_create=Skapa virtuell värd
 server_edit=Redigera virtuell värd
 server_egone=Virtuell värd finns inte längre!
@@ -184,10 +193,12 @@ server_settings=Inställningar för virtuell värd
 server_server=Definition av virtuell värd
 server_eclash=En virtuell värd med samma namn finns redan
 server_pp=Proxy till $1 
+
 slogs_title=Virtuell värdloggning
 slogs_header=Loggfilalternativ
 opt_global=Från globala inställningar
 slogs_err=Det gick inte att spara alternativ för loggfil
+
 ssl_title=SSL-konfiguration
 ssl_header=SSL-krypterings- och certifieringsalternativ
 opt_ssl_certificate=SSL-certifikatfil
@@ -211,6 +222,7 @@ opt_ssl_protocols=SSL-protokoll som stöds
 opt_essl_ciphers=Ogiltig snygg chifferlista - bör vara som <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Valt nedan
 ssl_clist=Listade cifrar
+
 gzip_title=GZip-komprimeringsalternativ
 sgzip_title=GZip-komprimeringsalternativ
 lgzip_title=GZip-komprimeringsalternativ
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Kompressionsnivån måste vara ett nummer mellan 1 och 9
 gzip_level=1 = minst, 9 = bäst
 opt_gzip_types=MIME-typer för att komprimera
 opt_egzip_types=$1 är inte en giltig MIME-typ
+
 proxy_title=Proxyinställningar
 sproxy_title=Proxyinställningar
 lproxy_title=Proxyinställningar
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 är inte ett giltigt rubriknamn
 opt_eproxy_hide_header=$1 är inte ett giltigt rubriknamn
 opt_proxy_pass=Proxy begär till
 proxy_url=URL
+
 access_title=Åtkomstkontroll
 saccess_title=Åtkomstkontroll
 laccess_title=Åtkomstkontroll
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Grundläggande autentiseringsfil
 access_eabsolute=Lösenordsfil måste vara en absolut sökväg
 access_edir=Lösenordsfil kan inte vara en katalog
 access_ecannot=Lösenordsfilen $1 ligger inte under din tillåtna katalog $2 
+
 rewrite_title=URL-omskrivning
 srewrite_title=URL-omskrivning
 lrewrite_title=URL-omskrivning
@@ -277,6 +292,7 @@ rewrite_redirect=Returnera 302 omdirigering
 rewrite_permanent=Retur 301-omdirigering
 rewrite_efrom=Källväg $1 innehåller mellanslag
 rewrite_eto=Destinationsadress $1 saknas eller innehåller mellanslag
+
 location_create=Skapa plats
 location_edit=Redigera plats
 location_desc=Plats $2 i virtuell värd $1 
@@ -292,6 +308,7 @@ location_rusure=Är du säker på att du vill ta bort platsen $1 ? Alla konfigur
 location_epath=URL-sökvägen kan inte vara tom eller innehålla mellanslag
 location_return=platsalternativ
 location_ecannot=Rotkatalogen $1 ligger inte under din tillåtna katalog $2 
+
 log_net=Ändrad nätverkskonfiguration
 log_logs=Ändrade loggningsinställningar
 log_misc=Ändrade andra inställningar
@@ -330,23 +347,29 @@ log_rewrite_location=Ändrad URL-omskrivning för plats $1 i $2
 log_create_user=Skapade användare $1 i $2 
 log_modify_user=Ändrad användare $1 i $2 
 log_delete_user=Användaren $1 i $2 har tagits bort
+
 stop_err=Det gick inte att stoppa Nginx
 stop_ecannot=Du får inte stoppa webbservern
+
 start_err=Det gick inte att starta Nginx
 start_ecannot=Du får inte starta webbservern
+
 restart_err=Det gick inte att tillämpa Nginx-konfiguration
 restart_etest=Konfigurationen är ogiltig : $1 
+
 match_default=Underkatalog
 match_exact=Exakt katalog
 match_case=Skiftlägeskänsligt regelbundet uttryck
 match_nocase=Fall okänsligt regelbundet uttryck
 match_noregexp=Inaktivera vanliga uttryck
 match_named=Namngivna plats
+
 users_title=Hantera användare
 users_none=Den här lösenordsfilen innehåller inga användare ännu.
 users_add=Lägg till en ny användare.
 users_efile=Filparameter saknas!
 users_return=användarlista
+
 user_create=Skapa användare
 user_edit=Redigera användare
 user_header=Lösenordsskyddad kataloganvändarinformation
@@ -357,6 +380,7 @@ user_passset=Satt till
 user_enabled=Logga in aktiverat?
 user_egone=Användaren finns inte längre!
 user_err=Det gick inte att spara användaren
+
 acl_vhosts=Tillåtna virtuella värdar
 acl_hosts1=Allt
 acl_hosts0=Anges nedan ..
@@ -365,6 +389,7 @@ acl_root=Tillåtna kataloger för platser
 acl_global=Kan redigera globala inställningar?
 acl_logs=Kan konfigurera loggfiler?
 acl_user=Skriv lösenordsfiler som användare
+
 feat_name=Nginx webbplats
 feat_losing=Den virtuella Nginx-värden och alla dess konfigurationsdirektiv kommer att raderas
 feat_disname=Nginx webbplats
@@ -433,9 +458,11 @@ feat_clonealias=.. inte nödvändigt för aliasdomäner
 feat_eclonefind=.. kunde inte hitta en ny virtuell värd med namnet $1 efter kloning!
 feat_modifyproxy=Ändrar proxy-destination ..
 feat_module=Nginx webbserver (för virtuell värd)
+
 fcgid_ecmd=Inget PHP-kommando hittades!
 fcgid_ecmdexec=PHP-kommandot $1 kunde inte köras : $2 
 fcgid_ecmdb=PHP-kommandot $1 stöder inte flaggan -b som behövs för att köras som en FCGId-server. Du måste troligen installera ett separat PHP CGI-paket.
+
 redirect_efind=Ingen virtualhost för $1 hittades
 redirect_eobj=Omdirigering är inte associerad med ett Nginx-konfigurationsobjekt
 redirect_eobj2=Proxy är inte associerat med ett Nginx-konfigurationsobjekt
@@ -444,14 +471,18 @@ redirect_eurl=Inte en URL : $1
 redirect_eurlhost=Det går inte att lösa värdnamn i URL : $1 
 redirect_eclash=En plats för $1 finns redan
 redirect_ephd=Nginx tillåter bara att destinationskataloger för alias är under $1 
+
 links_anlog=Nginx åtkomstlogg
 links_enlog=Nginx-fellogg
-links_phpini=PHP-konfiguration
+links_phpini=PHP-FPM-konfiguration
 links_phpini2=PHP $1 -konfiguration
+
 webmin_phpini=PHP-konfiguration för $1 
 webmin_phpini2=PHP $2 -konfiguration för $1 
+
 monitor_missing=Nginx är inte installerat
 monitor_type=Nginx webbserver
+
 tmpl_directives=Lägga till Nginx-konfigurationsdirektiv
 tmpl_default=Standard (från överordnad mall)
 tmpl_none=Ingen

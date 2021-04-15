@@ -23,6 +23,7 @@ index_startdesc=Porniți Nginx webserver folosind configurația curentă.
 index_restart=Aplicați Nginx Configuration
 index_restartdesc=Aplicați configurația curentă oprind și reluând serverul web Nginx.
 index_eglobal=Nu aveți voie să editați setările globale
+
 net_title=Configurarea Rețelei
 net_header=Opțiuni de rețea globală
 opt_missing=Nimic introdus pentru câmp : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Perioada de timp pentru conexiunile de păstrare trebuie 
 opt_keepalive_requests=Limită de solicitare pentru conexiuni de păstrare
 opt_ekeepalive_requests=Limita de solicitare pentru conexiunile de păstrare trebuie să fie un număr de cereri
 opt_secs=secunde
+
 mime_title=Tipuri MIME
 mime_search=Găsiți tipuri de MIME potrivite :
 mime_ok=Căutare
@@ -54,6 +56,7 @@ mime_eword=Extensia de fișier conține caractere nevalide sau începe cu un pun
 mime_eold=Tipul MIME nu mai există!
 mime_eclash=Există deja un tip MIME cu același nume
 mime_enone=Nu au fost selectate tipuri MIME de șters
+
 logs_title=Setări de logare
 logs_header=Opțiuni de fișiere jurnal și PID
 opt_error_log=Fișier jurnal de eroare
@@ -75,6 +78,7 @@ logs_ftext=Formatează șirul
 logs_efname=Numele formatului de jurnal $1 poate conține doar litere, numere, punct, liniuță și subliniere
 logs_etext=Lipsește șirul de format pentru formatul de jurnal $1 
 logs_ecannot=Nu aveți voie să configurați fișierele jurnal
+
 misc_title=Alte setari
 misc_header=Utilizatori și opțiuni de proces
 opt_worker_processes=Numărul proceselor lucrătorilor
@@ -92,6 +96,7 @@ opt_eworker_priority=Prioritatea lucrătorului trebuie să fie un număr pozitiv
 opt_index=Fișiere index index
 opt_default_type=Tipul MIME pentru fișierele necunoscute
 opt_edefault_type=Tip MIME implicit nevalid
+
 docs_title=Opțiuni document
 sdocs_title=Opțiuni document
 ldocs_title=Opțiuni document
@@ -99,6 +104,7 @@ docs_header=Setări fișier, pagină și document
 docs_err=Nu a reușit să salvați opțiunile documentului
 opt_root=Directorul rădăcină implicit
 opt_eroot=Directorul rădăcină implicit trebuie să fie o cale absolută
+
 fcgi_title=Opțiuni FastCGI
 lfcgi_title=Opțiuni FastCGI
 fcgi_header=Opțiuni de protocol și server FastCGI
@@ -117,6 +123,7 @@ fcgi_epvalue=Valoarea lipsește pentru parametrul $1
 opt_fastcgi_buffer_size=Dimensiune tampon pentru anteturi
 fcgi_buffer=Dimensiune de 4k
 opt_efastcgi_buffer_size=Dimensiunea tamponului trebuie să fie de 4k sau 1M.
+
 ssi_title=Partea serverului include setări
 sssi_title=Partea serverului include setări
 lssi_title=Partea serverului include setări
@@ -129,6 +136,7 @@ opt_ssi_value_length=Lungimea maximă a parametrilor
 ssi_err=Nu a reușit să salvați partea serverului, inclusiv setările
 opt_essi_types=$1 nu este un tip MIME valid
 opt_essi_value_length=Lungimea maximă a parametrului trebuie să fie un număr
+
 manual_title=Editați fișierele de configurare
 manual_file=Editarea fișierului de configurare:
 manual_ok=Intrerupator
@@ -136,6 +144,7 @@ manual_efile=Fișierul selectat nu face parte din configurația Nginx!
 manual_test=Încercați configurația nouă înainte de a salva?
 manual_elink=Legănarea simbolică!
 manual_err=Nu a reușit să salvați fișierul de configurare
+
 server_create=Creați gazdă virtuală
 server_edit=Editează gazdă virtuală
 server_egone=Gazda virtuală nu mai există!
@@ -184,10 +193,12 @@ server_settings=Setări virtuale pentru gazdă
 server_server=Definiție virtuală gazdă
 server_eclash=Există deja o gazdă virtuală cu același nume
 server_pp=Proxy pentru $1 
+
 slogs_title=Jurnal virtual de gazdă
 slogs_header=Opțiuni fișier jurnal
 opt_global=Din setări globale
 slogs_err=Nu a reușit să salvați opțiunile fișierului jurnal
+
 ssl_title=Configurare SSL
 ssl_header=Opțiuni de criptare și certificare SSL
 opt_ssl_certificate=Fișier certificat SSL
@@ -211,6 +222,7 @@ opt_ssl_protocols=Protocoale SSL acceptate
 opt_essl_ciphers=Lista de <tt>HIGH:!aNULL:!MD5</tt> cu aspect nevalid - ar trebui să fie ca <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Selectat mai jos
 ssl_clist=Criptare listate
+
 gzip_title=Opțiuni de compresie GZip
 sgzip_title=Opțiuni de compresie GZip
 lgzip_title=Opțiuni de compresie GZip
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Nivelul de compresie trebuie să fie un număr între 1 și
 gzip_level=1 = cel puțin, 9 = cel mai bun
 opt_gzip_types=Tipuri MIME pentru comprimare
 opt_egzip_types=$1 nu este un tip MIME valid
+
 proxy_title=Setări proxy
 sproxy_title=Setări proxy
 lproxy_title=Setări proxy
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 nu este un nume de antet valid
 opt_eproxy_hide_header=$1 nu este un nume de antet valid
 opt_proxy_pass=Solicitări de procură pentru
 proxy_url=URL-
+
 access_title=Controlul accesului
 saccess_title=Controlul accesului
 laccess_title=Controlul accesului
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Fișier de autentificare de bază
 access_eabsolute=Fișierul de parolă trebuie să fie o cale absolută
 access_edir=Fișierul cu parolă nu poate fi un director
 access_ecannot=Fișierul de parolă $1 nu se află în directorul permis $2 
+
 rewrite_title=Re-scriere URL
 srewrite_title=Re-scriere URL
 lrewrite_title=Re-scriere URL
@@ -277,6 +292,7 @@ rewrite_redirect=Redirecționați redirecționarea 302
 rewrite_permanent=Redirecționați redirecțiunea 301
 rewrite_efrom=Calea sursă $1 conține spații
 rewrite_eto=URL-ul de destinație $1 lipsește sau conține spații
+
 location_create=Creați locația
 location_edit=Modificați locația
 location_desc=Locația $2 în gazda virtuală $1 
@@ -292,6 +308,7 @@ location_rusure=Sigur doriți să ștergeți locația $1 ? Toate setările de co
 location_epath=Calea URL-ului nu poate fi goală sau conține spații
 location_return=opțiuni de locație
 location_ecannot=Directorul rădăcină $1 nu se află în directorul permis $2 
+
 log_net=Configurație de rețea modificată
 log_logs=Setări de jurnal modificate
 log_misc=S-au schimbat alte setări
@@ -330,23 +347,29 @@ log_rewrite_location=Schimbarea rescrierii URL pentru locația $1 în $2
 log_create_user=Utilizator creat $1 în $2 
 log_modify_user=Utilizator modificat $1 în $2 
 log_delete_user=Utilizatorul șters $1 în $2 
+
 stop_err=Nu a reușit să oprească Nginx
 stop_ecannot=Nu aveți voie să opriți serverul web
+
 start_err=Nu a reușit să pornească Nginx
 start_ecannot=Nu aveți voie să porniți serverul web
+
 restart_err=A eșuat aplicarea configurației Nginx
 restart_etest=Configurația este nevalidă : $1 
+
 match_default=Subdirector
 match_exact=Directorul exact
 match_case=Expresie regulată sensibilă la caz
 match_nocase=Expresie regulată insensibilă din caz
 match_noregexp=Dezactivează expresiile obișnuite
 match_named=Locație numită
+
 users_title=Gestionare Utilizatori
 users_none=Acest fișier parola nu conține încă niciun utilizator.
 users_add=Adăugați un utilizator nou.
 users_efile=Parametrul fișierului lipsește!
 users_return=lista de utilizatori
+
 user_create=Creaza utilizator
 user_edit=Editare utilizator
 user_header=Detalii despre utilizator protejate prin parolă
@@ -357,6 +380,7 @@ user_passset=Setat la
 user_enabled=Conectare activată?
 user_egone=Utilizatorul nu mai există!
 user_err=Nu a reușit salvarea utilizatorului
+
 acl_vhosts=Gazde virtuale permise
 acl_hosts1=Toate
 acl_hosts0=Enumerate mai jos ..
@@ -365,6 +389,7 @@ acl_root=Directoare permise pentru locații
 acl_global=Poate edita setările globale?
 acl_logs=Poate configura fișierele de jurnal?
 acl_user=Scrieți fișiere cu parolă ca utilizator
+
 feat_name=Site-ul Nginx
 feat_losing=Gazda virtuală Nginx și toate directivele sale de configurare vor fi șterse
 feat_disname=Site-ul Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. nu este necesar pentru domenii alias
 feat_eclonefind=.. nu a putut găsi o nouă gazdă virtuală numită $1 după clonare!
 feat_modifyproxy=Modificarea destinației proxy ..
 feat_module=Nginx Webserver (pentru gazdă virtuală)
+
 fcgid_ecmd=Nu a fost găsită nicio comandă PHP!
 fcgid_ecmdexec=Comanda PHP $1 nu a putut fi executată : $2 
 fcgid_ecmdb=Comanda PHP $1 nu acceptă semnalizatorul -b necesar pentru a rula ca server FCGId. Probabil că trebuie să instalați un pachet PHP CGI separat.
+
 redirect_efind=Nu a fost găsit niciun virtualhost pentru $1 
 redirect_eobj=Redirecționarea nu este asociată cu un obiect de configurare Nginx
 redirect_eobj2=Proxy-ul nu este asociat cu un obiect de configurare Nginx
@@ -444,14 +471,18 @@ redirect_eurl=Nu este o adresă URL : $1
 redirect_eurlhost=Numele de gazdă din URL nu poate fi rezolvat : $1 
 redirect_eclash=O locație pentru $1 există deja
 redirect_ephd=Nginx permite doar directoarele de destinație de alias să fie sub $1 
+
 links_anlog=Jgin de acces Nginx
 links_enlog=Jurnal de eroare Nginx
-links_phpini=Configurare PHP
+links_phpini=Configurare PHP-FPM
 links_phpini2=PHP $1 Configurare
+
 webmin_phpini=Configurație PHP pentru $1 
 webmin_phpini2=Configurație PHP $2 pentru $1 
+
 monitor_missing=Nginx nu este instalat
 monitor_type=Nginx Webserver
+
 tmpl_directives=Adăugarea directivelor de configurare Nginx
 tmpl_default=Implicit (din șablonul părinte)
 tmpl_none=Nici unul

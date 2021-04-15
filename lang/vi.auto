@@ -23,6 +23,7 @@ index_startdesc=Khởi động máy chủ web Nginx bằng cấu hình hiện t�
 index_restart=Áp dụng cấu hình Nginx
 index_restartdesc=Áp dụng cấu hình hiện tại bằng cách dừng và khởi động lại máy chủ web Nginx.
 index_eglobal=Bạn không được phép chỉnh sửa cài đặt toàn cầu
+
 net_title=cấu hình mạng
 net_header=Tùy chọn mạng toàn cầu
 opt_missing=Không có gì được nhập cho trường : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Thời gian chờ cho các kết nối cố định phả
 opt_keepalive_requests=Giới hạn yêu cầu cho các kết nối cố định
 opt_ekeepalive_requests=Giới hạn yêu cầu cho các kết nối cố định phải là một số yêu cầu
 opt_secs=giây
+
 mime_title=Các loại MIME
 mime_search=Tìm loại MIME phù hợp :
 mime_ok=Tìm kiếm
@@ -54,6 +56,7 @@ mime_eword=Phần mở rộng tệp chứa các ký tự không hợp lệ hoặ
 mime_eold=Loại MIME không còn tồn tại!
 mime_eclash=Một loại MIME có cùng tên đã tồn tại
 mime_enone=Không có loại MIME nào được chọn để xóa
+
 logs_title=Cài đặt ghi nhật ký
 logs_header=Tùy chọn tệp nhật ký và PID
 opt_error_log=Tệp nhật ký lỗi
@@ -75,6 +78,7 @@ logs_ftext=Chuỗi định dạng
 logs_efname=Tên định dạng nhật ký $1 chỉ có thể chứa chữ cái, số, dấu chấm, dấu gạch ngang và dấu gạch dưới
 logs_etext=Thiếu chuỗi định dạng cho định dạng nhật ký $1 
 logs_ecannot=Bạn không được phép cấu hình các tệp nhật ký
+
 misc_title=Các thiết lập khác
 misc_header=Người dùng và tùy chọn xử lý
 opt_worker_processes=Số quy trình công nhân
@@ -92,6 +96,7 @@ opt_eworker_priority=Ưu tiên công nhân phải là số dương hoặc âm
 opt_index=Thư mục chỉ mục
 opt_default_type=Loại MIME cho các tệp không xác định
 opt_edefault_type=Loại MIME mặc định không hợp lệ
+
 docs_title=Tùy chọn tài liệu
 sdocs_title=Tùy chọn tài liệu
 ldocs_title=Tùy chọn tài liệu
@@ -99,6 +104,7 @@ docs_header=Cài đặt tệp, trang và tài liệu
 docs_err=Không thể lưu tùy chọn tài liệu
 opt_root=Thư mục gốc mặc định
 opt_eroot=Thư mục gốc mặc định phải là một đường dẫn tuyệt đối
+
 fcgi_title=Tùy chọn FastCGI
 lfcgi_title=Tùy chọn FastCGI
 fcgi_header=Tùy chọn giao thức và máy chủ FastCGI
@@ -117,6 +123,7 @@ fcgi_epvalue=Thiếu giá trị cho tham số $1
 opt_fastcgi_buffer_size=Kích thước bộ đệm cho các tiêu đề
 fcgi_buffer=Kích thước như 4k
 opt_efastcgi_buffer_size=Kích thước bộ đệm phải giống như 4k hoặc 1M.
+
 ssi_title=Cài đặt phía máy chủ
 sssi_title=Cài đặt phía máy chủ
 lssi_title=Cài đặt phía máy chủ
@@ -129,6 +136,7 @@ opt_ssi_value_length=Độ dài tham số tối đa
 ssi_err=Không thể lưu phía máy chủ bao gồm các cài đặt
 opt_essi_types=$1 không phải là loại MIME hợp lệ
 opt_essi_value_length=Độ dài tham số tối đa phải là một số
+
 manual_title=Chỉnh sửa tập tin cấu hình
 manual_file=Chỉnh sửa tập tin cấu hình:
 manual_ok=Công tắc điện
@@ -136,6 +144,7 @@ manual_efile=Tệp được chọn không phải là một phần của cấu h�
 manual_test=Kiểm tra cấu hình mới trước khi lưu?
 manual_elink=Liên kết tượng trưng lủng lẳng!
 manual_err=Không thể lưu tệp cấu hình
+
 server_create=Tạo máy chủ ảo
 server_edit=Chỉnh sửa máy chủ ảo
 server_egone=Máy chủ ảo không còn tồn tại!
@@ -184,10 +193,12 @@ server_settings=Cài đặt máy chủ ảo
 server_server=Định nghĩa máy chủ ảo
 server_eclash=Một máy chủ ảo có cùng tên đã tồn tại
 server_pp=Proxy cho $1 
+
 slogs_title=Ghi nhật ký máy chủ ảo
 slogs_header=Tùy chọn tệp nhật ký
 opt_global=Từ cài đặt toàn cầu
 slogs_err=Không thể lưu tùy chọn tệp nhật ký
+
 ssl_title=Cấu hình SSL
 ssl_header=Tùy chọn chứng nhận và mã hóa SSL
 opt_ssl_certificate=Tệp chứng chỉ SSL
@@ -211,6 +222,7 @@ opt_ssl_protocols=Các giao thức SSL để hỗ trợ
 opt_essl_ciphers=Danh sách mật mã tìm kiếm không hợp lệ - phải giống như <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Chọn bên dưới
 ssl_clist=Mật mã được liệt kê
+
 gzip_title=Tùy chọn nén GZip
 sgzip_title=Tùy chọn nén GZip
 lgzip_title=Tùy chọn nén GZip
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Mức nén phải là một số từ 1 đến 9
 gzip_level=1 = ít nhất, 9 = tốt nhất
 opt_gzip_types=Các loại MIME để nén
 opt_egzip_types=$1 không phải là loại MIME hợp lệ
+
 proxy_title=Cài đặt proxy
 sproxy_title=Cài đặt proxy
 lproxy_title=Cài đặt proxy
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 không phải là tên tiêu đề hợp lệ
 opt_eproxy_hide_header=$1 không phải là tên tiêu đề hợp lệ
 opt_proxy_pass=Yêu cầu proxy để
 proxy_url=URL
+
 access_title=Kiểm soát truy cập
 saccess_title=Kiểm soát truy cập
 laccess_title=Kiểm soát truy cập
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Tệp xác thực cơ bản
 access_eabsolute=Tệp mật khẩu phải là một đường dẫn tuyệt đối
 access_edir=Mật khẩu tập tin có thể là một thư mục
 access_ecannot=Tệp mật khẩu $1 không nằm trong thư mục được phép của bạn $2 
+
 rewrite_title=Viết lại URL
 srewrite_title=Viết lại URL
 lrewrite_title=Viết lại URL
@@ -277,6 +292,7 @@ rewrite_redirect=Trả lại 302 chuyển hướng
 rewrite_permanent=Trả lại chuyển hướng 301
 rewrite_efrom=Đường dẫn nguồn $1 chứa khoảng trắng
 rewrite_eto=URL đích $1 bị thiếu hoặc chứa dấu cách
+
 location_create=Tạo vị trí
 location_edit=Chỉnh sửa vị trí
 location_desc=Vị trí $2 trong máy chủ ảo $1 
@@ -292,6 +308,7 @@ location_rusure=Bạn có chắc chắn muốn xóa vị trí $1 không? Tất c
 location_epath=Đường dẫn URL không thể để trống hoặc chứa dấu cách
 location_return=tùy chọn vị trí
 location_ecannot=Thư mục gốc $1 không thuộc thư mục được phép của bạn $2 
+
 log_net=Thay đổi cấu hình mạng
 log_logs=Thay đổi cài đặt ghi nhật ký
 log_misc=Thay đổi cài đặt khác
@@ -330,23 +347,29 @@ log_rewrite_location=Thay đổi URL viết lại cho vị trí $1 trong $2
 log_create_user=Đã tạo người dùng $1 trong $2 
 log_modify_user=Người dùng đã sửa đổi $1 trong $2 
 log_delete_user=Đã xóa người dùng $1 trong $2 
+
 stop_err=Không thể ngăn Nginx
 stop_ecannot=Bạn không được phép dừng máy chủ web
+
 start_err=Không thể bắt đầu Nginx
 start_ecannot=Bạn không được phép khởi động máy chủ web
+
 restart_err=Không thể áp dụng cấu hình Nginx
 restart_etest=Cấu hình không hợp lệ : $1 
+
 match_default=Thư mục con
 match_exact=Thư mục chính xác
 match_case=Biểu hiện thường xuyên nhạy cảm
 match_nocase=Trường hợp biểu hiện thường xuyên không nhạy cảm
 match_noregexp=Vô hiệu hóa biểu thức thông thường
 match_named=Vị trí đặt tên
+
 users_title=Quản lý người dùng
 users_none=Tệp mật khẩu này chưa chứa bất kỳ người dùng nào.
 users_add=Thêm một người dùng mới.
 users_efile=Thiếu tham số tập tin!
 users_return=Danh sách người dùng
+
 user_create=Tạo người dùng
 user_edit=Người dùng biên tập
 user_header=Mật khẩu bảo vệ thư mục chi tiết người dùng
@@ -357,6 +380,7 @@ user_passset=Đặt thành
 user_enabled=Đăng nhập kích hoạt?
 user_egone=Người dùng không còn tồn tại!
 user_err=Không thể lưu người dùng
+
 acl_vhosts=Máy chủ ảo được phép
 acl_hosts1=Tất cả
 acl_hosts0=Được liệt kê dưới đây ..
@@ -365,6 +389,7 @@ acl_root=Thư mục được phép cho các địa điểm
 acl_global=Có thể chỉnh sửa cài đặt toàn cầu?
 acl_logs=Có thể cấu hình các tập tin nhật ký?
 acl_user=Viết tập tin mật khẩu như người dùng
+
 feat_name=Trang web Nginx
 feat_losing=Máy chủ ảo Nginx và tất cả các chỉ thị cấu hình của nó sẽ bị xóa
 feat_disname=Trang web Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. không cần thiết cho các miền bí danh
 feat_eclonefind=.. không thể tìm thấy máy chủ ảo mới có tên $1 sau khi nhân bản!
 feat_modifyproxy=Sửa đổi đích proxy ..
 feat_module=Máy chủ web Nginx (dành cho máy chủ ảo)
+
 fcgid_ecmd=Không tìm thấy lệnh PHP!
 fcgid_ecmdexec=Không thể thực hiện lệnh PHP $1 : $2 
 fcgid_ecmdb=Lệnh PHP $1 không hỗ trợ cờ -b cần thiết để chạy như một máy chủ FCGId. Bạn có thể cần cài đặt một gói PHP CGI riêng biệt.
+
 redirect_efind=Không tìm thấy virtualhost cho $1 
 redirect_eobj=Chuyển hướng không được liên kết với một đối tượng cấu hình Nginx
 redirect_eobj2=Proxy không được liên kết với một đối tượng cấu hình Nginx
@@ -444,14 +471,18 @@ redirect_eurl=Không phải là URL : $1
 redirect_eurlhost=Tên máy chủ trong URL không thể được giải quyết : $1 
 redirect_eclash=Vị trí cho $1 đã tồn tại
 redirect_ephd=Nginx chỉ cho phép các thư mục đích bí danh dưới $1 
+
 links_anlog=Nhật ký truy cập Nginx
 links_enlog=Nhật ký lỗi Nginx
-links_phpini=Cấu hình PHP
+links_phpini=Cấu hình PHP-FPM
 links_phpini2=Cấu hình PHP $1 
+
 webmin_phpini=Cấu hình PHP cho $1 
 webmin_phpini2=Cấu hình PHP $2 cho $1 
+
 monitor_missing=Nginx chưa được cài đặt
 monitor_type=Máy chủ web Nginx
+
 tmpl_directives=Thêm chỉ thị cấu hình Nginx
 tmpl_default=Mặc định (từ mẫu gốc)
 tmpl_none=không ai

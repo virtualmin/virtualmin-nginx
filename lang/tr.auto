@@ -23,6 +23,7 @@ index_startdesc=Geçerli yapılandırmayı kullanarak Nginx web sunucusunu başl
 index_restart=Nginx Yapılandırmasını Uygula
 index_restartdesc=Nginx web sunucusunu durdurup yeniden başlatarak mevcut yapılandırmayı uygulayın.
 index_eglobal=Genel ayarları düzenlemenize izin verilmiyor
+
 net_title=Ağ Yapılandırması
 net_header=Global ağ seçenekleri
 opt_missing=Alan için hiçbir şey girilmedi : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Kalıcı bağlantılar için zaman aşımı birkaç saniy
 opt_keepalive_requests=Kalıcı bağlantılar için istek limiti
 opt_ekeepalive_requests=Kalıcı bağlantılar için istek sınırı bir dizi istek olmalıdır
 opt_secs=saniye
+
 mime_title=MIME Türleri
 mime_search=Eşleşen MIME türlerini bulun :
 mime_ok=Arama
@@ -54,6 +56,7 @@ mime_eword=Dosya uzantısı geçersiz karakterler içeriyor veya bir nokta ile b
 mime_eold=MIME türü artık mevcut değil!
 mime_eclash=Aynı ada sahip bir MIME türü zaten var
 mime_enone=Silinecek MIME türü seçilmedi
+
 logs_title=Günlük Ayarları
 logs_header=Günlük ve PID dosya seçenekleri
 opt_error_log=Hata günlük dosyası
@@ -75,6 +78,7 @@ logs_ftext=Dizeyi biçimlendir
 logs_efname=Günlük biçimi adı $1 yalnızca harf, sayı, nokta, tire ve alt çizgi içerebilir
 logs_etext=$1 günlük biçimi için eksik biçim dizesi
 logs_ecannot=Günlük dosyalarını yapılandırma izniniz yok
+
 misc_title=Diğer ayarlar
 misc_header=Kullanıcılar ve işlem seçenekleri
 opt_worker_processes=Çalışan işlemi sayısı
@@ -92,6 +96,7 @@ opt_eworker_priority=Çalışan önceliği pozitif veya negatif bir sayı olmal�
 opt_index=Dizin dizin dosyaları
 opt_default_type=Bilinmeyen dosyalar için MIME türü
 opt_edefault_type=Geçersiz varsayılan MIME türü
+
 docs_title=Belge Seçenekleri
 sdocs_title=Belge Seçenekleri
 ldocs_title=Belge Seçenekleri
@@ -99,6 +104,7 @@ docs_header=Dosya, sayfa ve belge ayarları
 docs_err=Belge seçenekleri kaydedilemedi
 opt_root=Varsayılan kök dizin
 opt_eroot=Varsayılan kök dizin mutlak bir yol olmalıdır
+
 fcgi_title=FastCGI Seçenekleri
 lfcgi_title=FastCGI Seçenekleri
 fcgi_header=FastCGI sunucusu ve protokol seçenekleri
@@ -117,6 +123,7 @@ fcgi_epvalue=$1 parametresi için eksik değer
 opt_fastcgi_buffer_size=Başlıklar için arabellek boyutu
 fcgi_buffer=4k gibi boyut
 opt_efastcgi_buffer_size=Arabellek boyutu 4k veya 1M gibi olmalıdır.
+
 ssi_title=Sunucu Tarafı İçerme Ayarları
 sssi_title=Sunucu Tarafı İçerme Ayarları
 lssi_title=Sunucu Tarafı İçerme Ayarları
@@ -129,6 +136,7 @@ opt_ssi_value_length=Maksimum parametre uzunluğu
 ssi_err=Sunucu tarafı dahil ayarları kaydedilemedi
 opt_essi_types=$1 geçerli bir MIME türü değil
 opt_essi_value_length=Maksimum parametre uzunluğu bir sayı olmalıdır
+
 manual_title=Yapılandırma Dosyalarını Düzenle
 manual_file=Yapılandırma dosyasını düzenleme:
 manual_ok=Değiştirmek
@@ -136,6 +144,7 @@ manual_efile=Seçilen dosya Nginx yapılandırmasının bir parçası değil!
 manual_test=Kaydetmeden önce yeni yapılandırma test edilsin mi?
 manual_elink=Sarkan sembolik bağlantı!
 manual_err=Yapılandırma dosyası kaydedilemedi
+
 server_create=Sanal Ana Bilgisayar Oluştur
 server_edit=Sanal Ana Bilgisayarı Düzenle
 server_egone=Sanal ana bilgisayar artık mevcut değil!
@@ -184,10 +193,12 @@ server_settings=Sanal Ana Bilgisayar Ayarları
 server_server=Sanal Ana Makine Tanımı
 server_eclash=Aynı ada sahip bir sanal ana makine zaten var
 server_pp=$1 oranında proxy
+
 slogs_title=Sanal Ana Makine Günlüğü
 slogs_header=Günlük dosyası seçenekleri
 opt_global=Global ayarlardan
 slogs_err=Günlük dosyası seçenekleri kaydedilemedi
+
 ssl_title=SSL Yapılandırması
 ssl_header=SSL şifreleme ve sertifika seçenekleri
 opt_ssl_certificate=SSL sertifika dosyası
@@ -211,6 +222,7 @@ opt_ssl_protocols=Desteklenecek SSL protokolleri
 opt_essl_ciphers=Geçersiz görünümlü şifre listesi - <tt>HIGH:!aNULL:!MD5</tt> gibi olmalıdır
 opt_selected=Aşağıda seçildi
 ssl_clist=Listelenen şifreler
+
 gzip_title=GZip Sıkıştırma Seçenekleri
 sgzip_title=GZip Sıkıştırma Seçenekleri
 lgzip_title=GZip Sıkıştırma Seçenekleri
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Sıkıştırma seviyesi 1 ile 9 arasında bir sayı olmalı
 gzip_level=1 = en az, 9 = en iyi
 opt_gzip_types=Sıkıştırılacak MIME türleri
 opt_egzip_types=$1 geçerli bir MIME türü değil
+
 proxy_title=Vekil sunucu Ayarları
 sproxy_title=Vekil sunucu Ayarları
 lproxy_title=Vekil sunucu Ayarları
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 geçerli bir başlık adı değil
 opt_eproxy_hide_header=$1 geçerli bir başlık adı değil
 opt_proxy_pass=Proxy istekleri
 proxy_url=URL
+
 access_title=Giriş kontrolu
 saccess_title=Giriş kontrolu
 laccess_title=Giriş kontrolu
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Temel kimlik doğrulama dosyası
 access_eabsolute=Parola dosyası mutlak bir yol olmalıdır
 access_edir=Parola dosyası bir dizin olamaz
 access_ecannot=$1 parola dosyası, izin verilen $2 dizininizin altında değil
+
 rewrite_title=URL Yeniden Yazma
 srewrite_title=URL Yeniden Yazma
 lrewrite_title=URL Yeniden Yazma
@@ -277,6 +292,7 @@ rewrite_redirect=302 dönüş yönlendirmesi
 rewrite_permanent=301 dönüş yönlendirmesi
 rewrite_efrom=$1 kaynak yolu boşluk içeriyor
 rewrite_eto=$1 hedef URL'si eksik veya boşluk içeriyor
+
 location_create=Konum Oluştur
 location_edit=Konumunu düzenle
 location_desc=$1 sanal ana bilgisayarındaki $2 konumu
@@ -292,6 +308,7 @@ location_rusure=$1 konumunu silmek istediğinizden emin misiniz? İçindeki tüm
 location_epath=URL yolu boş olamaz veya boşluk içeremez
 location_return=konum seçenekleri
 location_ecannot=$1 kök dizini, izin verilen $2 dizininizin altında değil
+
 log_net=Değişen ağ yapılandırması
 log_logs=Günlük kaydı ayarları değiştirildi
 log_misc=Diğer ayarlar değişti
@@ -330,23 +347,29 @@ log_rewrite_location=$2 içindeki $1 konumu için URL yeniden yazma değiştiril
 log_create_user=$2 içinde $1 kullanıcısı oluşturuldu
 log_modify_user=$2 içinde $1 değiştirilmiş kullanıcı
 log_delete_user=$2 içinde $1 kullanıcı silindi
+
 stop_err=Nginx durdurulamadı
 stop_ecannot=Web sunucusunu durdurmanıza izin verilmiyor
+
 start_err=Nginx başlatılamadı
 start_ecannot=Web sunucusunu başlatma izniniz yok
+
 restart_err=Nginx yapılandırması uygulanamadı
 restart_etest=Yapılandırma geçersiz : $1 
+
 match_default=Alt dizin
 match_exact=Tam dizin
 match_case=Büyük / küçük harfe duyarlı düzenli ifade
 match_nocase=Büyük / küçük harfe duyarlı olmayan düzenli ifade
 match_noregexp=Normal ifadeleri devre dışı bırak
 match_named=Adlandırılmış konum
+
 users_title=Kullanıcıları Yönet
 users_none=Bu şifre dosyası henüz kullanıcı içermiyor.
 users_add=Yeni bir kullanıcı ekleyin.
 users_efile=Dosya parametresi eksik!
 users_return=Kullanıcı listesi
+
 user_create=Kullanıcı oluştur
 user_edit=kullanıcıyı düzenle
 user_header=Parola korumalı dizin kullanıcı ayrıntıları
@@ -357,6 +380,7 @@ user_passset=Ayarlanır
 user_enabled=Giriş etkin mi?
 user_egone=Kullanıcı artık mevcut değil!
 user_err=Kullanıcı kaydedilemedi
+
 acl_vhosts=İzin verilen sanal ana bilgisayarlar
 acl_hosts1=Herşey
 acl_hosts0=Aşağıda listelenmiş ..
@@ -365,6 +389,7 @@ acl_root=Konumlar için izin verilen dizinler
 acl_global=Genel ayarları düzenleyebilir mi?
 acl_logs=Günlük dosyalarını yapılandırabilir mi?
 acl_user=Şifre dosyalarını kullanıcı olarak yazma
+
 feat_name=Nginx web sitesi
 feat_losing=Nginx sanal ana bilgisayarı ve tüm yapılandırma yönergeleri silinecek
 feat_disname=Nginx web sitesi
@@ -433,9 +458,11 @@ feat_clonealias=.. takma ad alanları için gerekli değildir
 feat_eclonefind=.. klonlamadan sonra $1 adlı yeni sanal ana makine bulunamadı!
 feat_modifyproxy=Proxy hedefi değiştiriliyor ..
 feat_module=Nginx Web sunucusu (sanal ana bilgisayar için)
+
 fcgid_ecmd=PHP komutu bulunamadı!
 fcgid_ecmdexec=PHP komutu $1 çalıştırılamadı : $2 
 fcgid_ecmdb=PHP komutu $1, FCGId sunucusu olarak çalıştırmak için gereken -b işaretini desteklemiyor. Muhtemelen ayrı bir PHP CGI paketi kurmanız gerekir.
+
 redirect_efind=$1 için sanal ana makine bulunamadı
 redirect_eobj=Yönlendirme, bir Nginx yapılandırma nesnesiyle ilişkili değil
 redirect_eobj2=Proxy, bir Nginx yapılandırma nesnesiyle ilişkili değil
@@ -444,14 +471,18 @@ redirect_eurl=URL değil : $1
 redirect_eurlhost=URL'deki ana bilgisayar adı çözülemiyor : $1 
 redirect_eclash=$1 için bir konum zaten var
 redirect_ephd=Nginx yalnızca takma ad hedef dizinlerinin $1 'in altında olmasına izin verir
+
 links_anlog=Nginx Erişim Günlüğü
 links_enlog=Nginx Hata Günlüğü
-links_phpini=PHP Yapılandırması
+links_phpini=PHP-FPM Yapılandırması
 links_phpini2=PHP $1 Yapılandırması
+
 webmin_phpini=$1 için PHP yapılandırması
 webmin_phpini2=$1 için PHP $2 yapılandırması
+
 monitor_missing=Nginx kurulu değil
 monitor_type=Nginx Web Sunucusu
+
 tmpl_directives=Nginx yapılandırma yönergeleri ekleme
 tmpl_default=Varsayılan (üst şablondan)
 tmpl_none=Yok

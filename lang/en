@@ -474,7 +474,7 @@ redirect_ephd=Nginx only allows aliases destination directories to be under $1
 
 links_anlog=Nginx Access Log
 links_enlog=Nginx Error Log
-links_phpini=PHP Configuration
+links_phpini=PHP-FPM Configuration
 links_phpini2=PHP $1 Configuration
 
 webmin_phpini=PHP configuration for $1

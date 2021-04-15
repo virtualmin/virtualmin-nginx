@@ -23,6 +23,7 @@ index_startdesc=使用當前配置啟動Nginx Web服務器。
 index_restart=應用Nginx配置
 index_restartdesc=通過停止並重新啟動Nginx Web服務器來應用當前配置。
 index_eglobal=您無權編輯全局設置
+
 net_title=網絡配置
 net_header=全球聯網選項
 opt_missing=沒有為字段 $1輸入任何內容
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=保持活動連接的超時時間必須為秒
 opt_keepalive_requests=請求保持連接的限制
 opt_ekeepalive_requests=保持連接的請求限制必須是多個請求
 opt_secs=秒
+
 mime_title=MIME類型
 mime_search=查找匹配的MIME類型：
 mime_ok=搜索
@@ -54,6 +56,7 @@ mime_eword=文件擴展名包含無效字符或以點開頭
 mime_eold=MIME類型不再存在！
 mime_eclash=具有相同名稱的MIME類型已存在
 mime_enone=未選擇要刪除的MIME類型
+
 logs_title=記錄設定
 logs_header=日誌和PID文件選項
 opt_error_log=錯誤日誌文件
@@ -75,6 +78,7 @@ logs_ftext=格式字符串
 logs_efname=日誌格式名稱 $1只能包含字母，數字，點，破折號和下劃線
 logs_etext=日誌格式 $1缺少格式字符串
 logs_ecannot=您無權配置日誌文件
+
 misc_title=其他設定
 misc_header=用戶和流程選項
 opt_worker_processes=工作進程數
@@ -92,6 +96,7 @@ opt_eworker_priority=工人優先級必須為正數或負數
 opt_index=目錄索引文件
 opt_default_type=未知文件的MIME類型
 opt_edefault_type=無效的默認MIME類型
+
 docs_title=文件選項
 sdocs_title=文件選項
 ldocs_title=文件選項
@@ -99,6 +104,7 @@ docs_header=文件，頁面和文檔設置
 docs_err=保存文檔選項失敗
 opt_root=默認根目錄
 opt_eroot=默認根目錄必須是絕對路徑
+
 fcgi_title=FastCGI選項
 lfcgi_title=FastCGI選項
 fcgi_header=FastCGI服務器和協議選項
@@ -117,6 +123,7 @@ fcgi_epvalue=參數 $1缺少值
 opt_fastcgi_buffer_size=標頭的緩衝區大小
 fcgi_buffer=大小像4k
 opt_efastcgi_buffer_size=緩衝區大小必須為4k或1M。
+
 ssi_title=服務器端包含設置
 sssi_title=服務器端包含設置
 lssi_title=服務器端包含設置
@@ -129,6 +136,7 @@ opt_ssi_value_length=最大參數長度
 ssi_err=無法保存服務器端包含設置
 opt_essi_types=$1不是有效的MIME類型
 opt_essi_value_length=最大參數長度必須是一個數字
+
 manual_title=編輯配置文件
 manual_file=編輯配置文件：
 manual_ok=開關
@@ -136,6 +144,7 @@ manual_efile=所選文件不屬於Nginx配置！
 manual_test=保存前測試新配置？
 manual_elink=懸掛的符號鏈接！
 manual_err=保存配置文件失敗
+
 server_create=創建虛擬主機
 server_edit=編輯虛擬主機
 server_egone=虛擬主機不再存在！
@@ -184,10 +193,12 @@ server_settings=虛擬主機設置
 server_server=虛擬主機定義
 server_eclash=具有相同名稱的虛擬主機已存在
 server_pp=代理 $1
+
 slogs_title=虛擬主機記錄
 slogs_header=日誌文件選項
 opt_global=從全局設置
 slogs_err=無法保存日誌文件選項
+
 ssl_title=SSL配置
 ssl_header=SSL加密和認證選項
 opt_ssl_certificate=SSL證書文件
@@ -211,6 +222,7 @@ opt_ssl_protocols=支持SSL協議
 opt_essl_ciphers=看起來無效的密碼列表-應該像<tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=在下面選擇
 ssl_clist=列出的密碼
+
 gzip_title=GZip壓縮選項
 sgzip_title=GZip壓縮選項
 lgzip_title=GZip壓縮選項
@@ -220,6 +232,7 @@ opt_egzip_comp_level=壓縮等級必須是1到9之間的數字
 gzip_level=1 =最少，9 =最佳
 opt_gzip_types=要壓縮的MIME類型
 opt_egzip_types=$1不是有效的MIME類型
+
 proxy_title=代理設定
 sproxy_title=代理設定
 lproxy_title=代理設定
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1不是有效的標題名稱
 opt_eproxy_hide_header=$1不是有效的標題名稱
 opt_proxy_pass=代理請求
 proxy_url=網址
+
 access_title=訪問控制
 saccess_title=訪問控制
 laccess_title=訪問控制
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=基本認證文件
 access_eabsolute=密碼文件必須是絕對路徑
 access_edir=密碼文件不能是目錄
 access_ecannot=密碼文件 $1不在您允許的目錄 $2下
+
 rewrite_title=URL重寫
 srewrite_title=URL重寫
 lrewrite_title=URL重寫
@@ -277,6 +292,7 @@ rewrite_redirect=返回302重定向
 rewrite_permanent=返回301重定向
 rewrite_efrom=源路徑 $1包含空格
 rewrite_eto=目標網址 $1丟失或包含空格
+
 location_create=建立位置
 location_edit=修改位置
 location_desc=虛擬主機 $1中的位置 $2
@@ -292,6 +308,7 @@ location_rusure=您確定要刪除位置 $1嗎？其中的所有配置設置也�
 location_epath=網址路徑不能為空或包含空格
 location_return=位置選項
 location_ecannot=根目錄 $1不在您允許的目錄 $2下
+
 log_net=更改網絡配置
 log_logs=更改日誌記錄設置
 log_misc=更改了其他設置
@@ -330,23 +347,29 @@ log_rewrite_location=已更改 $2中位置 $1的URL重寫
 log_create_user=已在 $2中創建用戶 $1
 log_modify_user=已在 $2中修改用戶 $1
 log_delete_user=已刪除 $2中的用戶 $1
+
 stop_err=無法停止Nginx
 stop_ecannot=您無權停止Web服務器
+
 start_err=無法啟動Nginx
 start_ecannot=您無權啟動Web服務器
+
 restart_err=無法應用Nginx配置
 restart_etest=配置無效： $1
+
 match_default=子目錄
 match_exact=確切目錄
 match_case=區分大小寫的正則表達式
 match_nocase=不區分大小寫的正則表達式
 match_noregexp=禁用正則表達式
 match_named=命名地點
+
 users_title=管理用戶
 users_none=該密碼文件尚不包含任何用戶。
 users_add=添加一個新用戶。
 users_efile=缺少文件參數！
 users_return=用戶清單
+
 user_create=創建用戶
 user_edit=編輯使用者
 user_header=受密碼保護的目錄用戶詳細信息
@@ -357,6 +380,7 @@ user_passset=設置
 user_enabled=啟用登錄？
 user_egone=用戶不再存在！
 user_err=保存用戶失敗
+
 acl_vhosts=允許的虛擬主機
 acl_hosts1=所有
 acl_hosts0=下面列出 ..
@@ -365,6 +389,7 @@ acl_root=允許的目錄位置
 acl_global=可以編輯全局設置嗎？
 acl_logs=可以配置日誌文件嗎？
 acl_user=以用戶身份寫入密碼文件
+
 feat_name=Nginx網站
 feat_losing=Nginx虛擬主機及其所有配置指令將被刪除
 feat_disname=Nginx網站
@@ -433,9 +458,11 @@ feat_clonealias=..對於別名域不是必需的
 feat_eclonefind=..克隆後找不到名為 $1的新虛擬主機！
 feat_modifyproxy=修改代理目標 ..
 feat_module=Nginx Web服務器（用於虛擬主機）
+
 fcgid_ecmd=找不到PHP命令！
 fcgid_ecmdexec=PHP命令 $1無法執行： $2
 fcgid_ecmdb=PHP命令 $1不支持作為FCGId服務器運行所需的-b標誌。您可能需要安裝一個單獨的PHP CGI軟件包。
+
 redirect_efind=找不到 $1的virtualhost
 redirect_eobj=重定向與Nginx配置對像不相關
 redirect_eobj2=代理未與Nginx配置對象關聯
@@ -444,14 +471,18 @@ redirect_eurl=不是網址： $1
 redirect_eurlhost=URL中的主機名無法解析： $1
 redirect_eclash=$1的位置已存在
 redirect_ephd=Nginx僅允許別名目標目錄位於 $1以下
+
 links_anlog=Nginx訪問日誌
 links_enlog=Nginx錯誤日誌
-links_phpini=PHP配置
+links_phpini=PHP-FPM配置
 links_phpini2=PHP $1配置
+
 webmin_phpini=$1的PHP配置
 webmin_phpini2=$1的PHP $2配置
+
 monitor_missing=未安裝Nginx
 monitor_type=Nginx Web服務器
+
 tmpl_directives=添加Nginx配置指令
 tmpl_default=默認值（來自父模板）
 tmpl_none=沒有

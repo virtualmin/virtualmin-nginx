@@ -23,6 +23,7 @@ index_startdesc=Spustite webový server Nginx pomocou aktuálnej konfigurácie.
 index_restart=Použiť konfiguráciu Nginx
 index_restartdesc=Použite aktuálnu konfiguráciu zastavením a opätovným spustením webového servera Nginx.
 index_eglobal=Nemáte oprávnenie upravovať globálne nastavenia
+
 net_title=Konfigurácia siete
 net_header=Možnosti globálnej siete
 opt_missing=Pre pole nebolo zadané nič : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Časový limit pre udržiavacie spojenia musí byť nieko
 opt_keepalive_requests=Limit žiadosti o udržiavacie spojenia
 opt_ekeepalive_requests=Limit požiadaviek na udržiavacie spojenia musí byť niekoľko žiadostí
 opt_secs=sekundy
+
 mime_title=Typy MIME
 mime_search=Nájsť zodpovedajúce typy MIME :
 mime_ok=Vyhľadávanie
@@ -54,6 +56,7 @@ mime_eword=Prípona súboru obsahuje neplatné znaky alebo začína bodkou
 mime_eold=Typ MIME už neexistuje!
 mime_eclash=Typ MIME s rovnakým názvom už existuje
 mime_enone=Na odstránenie neboli vybraté žiadne typy MIME
+
 logs_title=Nastavenia protokolovania
 logs_header=Možnosti protokolu a súboru PID
 opt_error_log=Súbor denníka chýb
@@ -75,6 +78,7 @@ logs_ftext=Formátovanie reťazca
 logs_efname=Názov formátu denníka $1 môže obsahovať iba písmená, čísla, bodky, pomlčky a podčiarknutia
 logs_etext=Chýba formátovací reťazec pre formát denníka $1 
 logs_ecannot=Nemáte povolenie konfigurovať protokolové súbory
+
 misc_title=Ďalšie nastavenia
 misc_header=Používatelia a možnosti procesu
 opt_worker_processes=Počet pracovných procesov
@@ -92,6 +96,7 @@ opt_eworker_priority=Prioritou pracovníka musí byť kladné alebo záporné č
 opt_index=Indexové súbory adresárov
 opt_default_type=Typ MIME pre neznáme súbory
 opt_edefault_type=Neplatný predvolený typ MIME
+
 docs_title=Možnosti dokumentu
 sdocs_title=Možnosti dokumentu
 ldocs_title=Možnosti dokumentu
@@ -99,6 +104,7 @@ docs_header=Nastavenia súboru, stránky a dokumentu
 docs_err=Možnosti dokumentu sa nepodarilo uložiť
 opt_root=Predvolený koreňový adresár
 opt_eroot=Predvolený koreňový adresár musí byť absolútnou cestou
+
 fcgi_title=Možnosti FastCGI
 lfcgi_title=Možnosti FastCGI
 fcgi_header=Možnosti servera FastCGI a protokolu
@@ -117,6 +123,7 @@ fcgi_epvalue=Chýba hodnota parametra $1
 opt_fastcgi_buffer_size=Veľkosť vyrovnávacej pamäte pre hlavičky
 fcgi_buffer=Veľkosť ako 4k
 opt_efastcgi_buffer_size=Veľkosť vyrovnávacej pamäte musí byť 4k alebo 1M.
+
 ssi_title=Zahrnúť nastavenia na strane servera
 sssi_title=Zahrnúť nastavenia na strane servera
 lssi_title=Zahrnúť nastavenia na strane servera
@@ -129,6 +136,7 @@ opt_ssi_value_length=Maximálna dĺžka parametra
 ssi_err=Uloženie nastavení na strane servera zlyhalo
 opt_essi_types=$1 nie je platný typ MIME
 opt_essi_value_length=Maximálna dĺžka parametra musí byť číslo
+
 manual_title=Upravte konfiguračné súbory
 manual_file=Úprava konfiguračného súboru:
 manual_ok=prepínač
@@ -136,6 +144,7 @@ manual_efile=Vybratý súbor nie je súčasťou konfigurácie Nginx!
 manual_test=Pred uložením otestovať novú konfiguráciu?
 manual_elink=Visiaci symbolický odkaz!
 manual_err=Nepodarilo sa uložiť konfiguračný súbor
+
 server_create=Vytvorte virtuálneho hostiteľa
 server_edit=Upraviť virtuálneho hostiteľa
 server_egone=Virtuálny hostiteľ už neexistuje!
@@ -184,10 +193,12 @@ server_settings=Nastavenia virtuálneho hostiteľa
 server_server=Definícia virtuálneho hostiteľa
 server_eclash=Virtuálny hostiteľ s rovnakým názvom už existuje
 server_pp=Proxy na $1 
+
 slogs_title=Protokolovanie virtuálneho hostiteľa
 slogs_header=Možnosti súboru denníka
 opt_global=Z globálneho nastavenia
 slogs_err=Nepodarilo sa uložiť možnosti súboru denníka
+
 ssl_title=Konfigurácia SSL
 ssl_header=Možnosti šifrovania a certifikácie SSL
 opt_ssl_certificate=Súbor certifikátu SSL
@@ -211,6 +222,7 @@ opt_ssl_protocols=Podpora protokolov SSL
 opt_essl_ciphers=Neplatný zoznam šifry - mal by byť ako <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Vybraté nižšie
 ssl_clist=Uvedené šifry
+
 gzip_title=Možnosti kompresie GZip
 sgzip_title=Možnosti kompresie GZip
 lgzip_title=Možnosti kompresie GZip
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Úroveň kompresie musí byť číslo od 1 do 9
 gzip_level=1 = najmenej, 9 = najlepšie
 opt_gzip_types=Typy MIME, ktoré sa majú komprimovať
 opt_egzip_types=$1 nie je platný typ MIME
+
 proxy_title=Nastavenia servera proxy
 sproxy_title=Nastavenia servera proxy
 lproxy_title=Nastavenia servera proxy
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 nie je platný názov hlavičky
 opt_eproxy_hide_header=$1 nie je platný názov hlavičky
 opt_proxy_pass=Žiadosti proxy pre
 proxy_url=URL
+
 access_title=Riadenie prístupu
 saccess_title=Riadenie prístupu
 laccess_title=Riadenie prístupu
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Základný autentifikačný súbor
 access_eabsolute=Súbor s heslom musí byť absolútnou cestou
 access_edir=Súbor s heslom nemôže byť adresárom
 access_ecannot=Súbor s heslom $1 sa nenachádza vo vašom povolenom adresári $2 
+
 rewrite_title=Prepisovanie adresy URL
 srewrite_title=Prepisovanie adresy URL
 lrewrite_title=Prepisovanie adresy URL
@@ -277,6 +292,7 @@ rewrite_redirect=Návrat 302 presmerovanie
 rewrite_permanent=Návrat 301 presmerovanie
 rewrite_efrom=Zdrojová cesta $1 obsahuje medzery
 rewrite_eto=Cieľová adresa URL $1 chýba alebo obsahuje medzery
+
 location_create=Vytvoriť polohu
 location_edit=Upraviť polohu
 location_desc=Poloha $2 vo virtuálnom hostiteľovi $1 
@@ -292,6 +308,7 @@ location_rusure=Naozaj chcete odstrániť miesto $1 ? Všetky konfiguračné nas
 location_epath=Cesta URL nemôže byť prázdna alebo obsahovať medzery
 location_return=možnosti umiestnenia
 location_ecannot=Koreňový adresár $1 sa nenachádza vo vašom povolenom adresári $2 
+
 log_net=Zmenená konfigurácia siete
 log_logs=Zmenené nastavenia protokolovania
 log_misc=Zmenené ďalšie nastavenia
@@ -330,23 +347,29 @@ log_rewrite_location=Zmenené prepisovanie adresy URL pre miesto $1 v $2
 log_create_user=Vytvorený používateľ $1 v $2 
 log_modify_user=Upravený používateľ $1 v $2 
 log_delete_user=Vymazaný používateľ $1 v $2 
+
 stop_err=Nginx sa nepodarilo zastaviť
 stop_ecannot=Nemáte povolenie zastaviť webový server
+
 start_err=Nginx sa nepodarilo spustiť
 start_ecannot=Nemáte povolenie spustiť webový server
+
 restart_err=Nepodarilo sa použiť konfiguráciu Nginx
 restart_etest=Konfigurácia je neplatná : $1 
+
 match_default=Sub-directory
 match_exact=Presný adresár
 match_case=Regulárny výraz citlivý na veľkosť písmen
 match_nocase=Regulárny výraz nerozlišujúci veľké a malé písmená
 match_noregexp=Zakázať regulárne výrazy
 match_named=Pomenované miesto
+
 users_title=Správa používateľov
 users_none=Tento súbor hesiel zatiaľ neobsahuje žiadnych používateľov.
 users_add=Pridajte nového používateľa.
 users_efile=Chýba parameter súboru!
 users_return=zoznam používateľov
+
 user_create=Vytvorenie používateľa
 user_edit=Upraviť používateľa
 user_header=Detaily o adresári chránenom heslom
@@ -357,6 +380,7 @@ user_passset=Nastavený na
 user_enabled=Prihlásenie povolené?
 user_egone=Používateľ už neexistuje!
 user_err=Nepodarilo sa uložiť používateľa
+
 acl_vhosts=Povolení virtuálni hostitelia
 acl_hosts1=všetko
 acl_hosts0=Uvedené nižšie ..
@@ -365,6 +389,7 @@ acl_root=Povolené adresáre miest
 acl_global=Môžete upraviť globálne nastavenia?
 acl_logs=Môžete konfigurovať súbory denníka?
 acl_user=Píšte súbory hesiel ako užívateľ
+
 feat_name=Webové stránky Nginx
 feat_losing=Virtuálny hostiteľ Nginx a všetky jeho konfiguračné smernice budú odstránené
 feat_disname=Webové stránky Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. nie je potrebné pre aliasové domény
 feat_eclonefind=.. po klonovaní sa nepodarilo nájsť nového virtuálneho hostiteľa s názvom $1 !
 feat_modifyproxy=Upravuje sa cieľ proxy servera.
 feat_module=Webový server Nginx (pre virtuálneho hostiteľa)
+
 fcgid_ecmd=Nenašiel sa žiadny príkaz PHP!
 fcgid_ecmdexec=Príkaz PHP $1 nebolo možné vykonať : $2 
 fcgid_ecmdb=Príkaz PHP $1 nepodporuje príznak -b potrebný na spustenie ako server FCGId. Pravdepodobne budete musieť nainštalovať samostatný balík PHP CGI.
+
 redirect_efind=Nenašiel sa žiadny virtuálny hostiteľ pre $1 
 redirect_eobj=Presmerovanie nie je spojené s konfiguračným objektom Nginx
 redirect_eobj2=Proxy nie je spojený s konfiguračným objektom Nginx
@@ -444,14 +471,18 @@ redirect_eurl=Nie URL : $1
 redirect_eurlhost=Názov hostiteľa v adrese URL nie je možné rozlíšiť : $1 
 redirect_eclash=Miesto pre $1 už existuje
 redirect_ephd=Nginx umožňuje, aby cieľové adresáre alias boli iba pod $1 
+
 links_anlog=Protokol prístupu Nginx
 links_enlog=Denník chýb Nginx
-links_phpini=Konfigurácia PHP
+links_phpini=Konfigurácia PHP-FPM
 links_phpini2=Konfigurácia PHP $1 
+
 webmin_phpini=Konfigurácia PHP pre $1 
 webmin_phpini2=Konfigurácia PHP $2 pre $1 
+
 monitor_missing=Nginx nie je nainštalovaný
 monitor_type=Webový server Nginx
+
 tmpl_directives=Pridanie konfiguračných smerníc Nginx
 tmpl_default=Predvolené (z nadradenej šablóny)
 tmpl_none=nikto

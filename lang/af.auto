@@ -23,6 +23,7 @@ index_startdesc=Begin die Nginx-webbediener met die huidige konfigurasie.
 index_restart=Pas Nginx-opstelling toe
 index_restartdesc=Pas die huidige opset toe deur die Nginx-webbediener te stop en weer te begin.
 index_eglobal=U mag nie globale instellings wysig nie
+
 net_title=Netwerkopstelling
 net_header=Wêreldwye netwerkopsies
 opt_missing=Niks vir die veld ingevoer nie : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Die tydsduur vir 'n halteverbinding moet 'n paar sekondes
 opt_keepalive_requests=Versoeklimiet vir houverbindings
 opt_ekeepalive_requests='N Aantal versoeke vir limietverbindings moet wees
 opt_secs=sekondes
+
 mime_title=MIME-tipes
 mime_search=Vind MIME-tipes wat ooreenstem :
 mime_ok=Soek
@@ -54,6 +56,7 @@ mime_eword=Lêeruitbreiding bevat ongeldige karakters of begin met 'n punt
 mime_eold=MIME-tipe bestaan nie meer nie!
 mime_eclash=Daar bestaan reeds 'n MIME-tipe met dieselfde naam
 mime_enone=Geen MIME-tipes is gekies om uit te vee nie
+
 logs_title=Log-instellings
 logs_header=Log- en PID-lêeropsies
 opt_error_log=Fout loglêer
@@ -75,6 +78,7 @@ logs_ftext=Formateer string
 logs_efname=Logformaatnaam $1 kan slegs letters, syfers, punt, streep en onderstreepte letters bevat
 logs_etext=Formaatstring ontbreek vir logformaat $1 
 logs_ecannot=U mag nie loglêers opstel nie
+
 misc_title=Ander instellings
 misc_header=Gebruikers en prosesopsies
 opt_worker_processes=Aantal werkerprosesse
@@ -92,6 +96,7 @@ opt_eworker_priority=Werkersprioriteit moet 'n positiewe of negatiewe getal wees
 opt_index=Gidsindekslêers
 opt_default_type=MIME-tipe vir onbekende lêers
 opt_edefault_type=Ongeldige standaard MIME-tipe
+
 docs_title=Dokumentopsies
 sdocs_title=Dokumentopsies
 ldocs_title=Dokumentopsies
@@ -99,6 +104,7 @@ docs_header=Lêer-, bladsy- en dokumentinstellings
 docs_err=Kon nie dokumentopsies stoor nie
 opt_root=Verstek wortelgids
 opt_eroot=Die standaardwortelgids moet 'n absolute pad wees
+
 fcgi_title=FastCGI-opsies
 lfcgi_title=FastCGI-opsies
 fcgi_header=FastCGI-bediener- en protokolopsies
@@ -117,6 +123,7 @@ fcgi_epvalue=Waarde ontbreek vir parameter $1
 opt_fastcgi_buffer_size=Buffergrootte vir kopstukke
 fcgi_buffer=Grootte soos 4k
 opt_efastcgi_buffer_size=Buffergrootte moet 4k of 1M wees.
+
 ssi_title=Bedienerskant sluit instellings in
 sssi_title=Bedienerskant sluit instellings in
 lssi_title=Bedienerskant sluit instellings in
@@ -129,6 +136,7 @@ opt_ssi_value_length=Maksimum parameterlengte
 ssi_err=Kon nie instellings op die bedienerkant stoor nie
 opt_essi_types=$1 is nie 'n geldige MIME-tipe nie
 opt_essi_value_length=Die maksimum lengte van die parameter moet 'n getal wees
+
 manual_title=Wysig konfigurasielêers
 manual_file=Redigering van konfigurasielêer:
 manual_ok=skakelaar
@@ -136,6 +144,7 @@ manual_efile=Die geselekteerde lêer is nie deel van die Nginx-konfigurasie nie!
 manual_test=Toets nuwe konfigurasie voordat u dit stoor?
 manual_elink=Hangende simboliese skakel!
 manual_err=Kon nie die konfigurasielêer stoor nie
+
 server_create=Skep virtuele gasheer
 server_edit=Wysig virtuele gasheer
 server_egone=Virtuele gasheer bestaan nie meer nie!
@@ -184,10 +193,12 @@ server_settings=Instellings vir virtuele gasheer
 server_server=Definisie van virtuele gasheer
 server_eclash='N Virtuele gasheer met dieselfde naam bestaan reeds
 server_pp=Volmag na $1 
+
 slogs_title=Virtuele gasheer aanteken
 slogs_header=Opsies vir loglêers
 opt_global=Van wêreldwye instellings
 slogs_err=Kon nie die loglêeropsies stoor nie
+
 ssl_title=SSL-konfigurasie
 ssl_header=SSL-enkripsie- en sertifiseringsopsies
 opt_ssl_certificate=SSL-sertifikaatlêer
@@ -211,6 +222,7 @@ opt_ssl_protocols=SSL-protokolle om te ondersteun
 opt_essl_ciphers=Ongeldige koderingslys - moet soos <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Hier onder gekies
 ssl_clist=Genoteerde tjips
+
 gzip_title=GZip-kompressie-opsies
 sgzip_title=GZip-kompressie-opsies
 lgzip_title=GZip-kompressie-opsies
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Kompressievlak moet 'n getal tussen 1 en 9 wees
 gzip_level=1 = die minste, 9 = die beste
 opt_gzip_types=MIME tipes om saam te pers
 opt_egzip_types=$1 is nie 'n geldige MIME-tipe nie
+
 proxy_title=Instaanbediener
 sproxy_title=Instaanbediener
 lproxy_title=Instaanbediener
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 is nie 'n geldige kopnaam nie
 opt_eproxy_hide_header=$1 is nie 'n geldige kopnaam nie
 opt_proxy_pass=Volmagversoeke aan
 proxy_url=URL
+
 access_title=Toegangsbeheer
 saccess_title=Toegangsbeheer
 laccess_title=Toegangsbeheer
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Basiese verifikasielêer
 access_eabsolute=Wagwoordlêer moet 'n absolute pad wees
 access_edir=Wagwoordlêer kan nie 'n gids wees nie
 access_ecannot=Die wagwoordlêer $1 is nie onder u toegelate gids $2 nie
+
 rewrite_title=URL-herskryf
 srewrite_title=URL-herskryf
 lrewrite_title=URL-herskryf
@@ -277,6 +292,7 @@ rewrite_redirect=Terugkeer 302 herlei
 rewrite_permanent=Terugleiding 301 keer terug
 rewrite_efrom=Bronpad $1 bevat spasies
 rewrite_eto=Die bestemmings-URL $1 ontbreek of bevat spasies
+
 location_create=Skep ligging
 location_edit=Wysig ligging
 location_desc=Ligging $2 in virtuele gasheer $1 
@@ -292,6 +308,7 @@ location_rusure=Is u seker dat u die ligging $1 wil uitvee? Alle konfigurasie-in
 location_epath=URL-pad mag nie leeg wees of spasies bevat nie
 location_return=liggingsopsies
 location_ecannot=Die stamgids $1 is nie onder u toegelate gids $2 nie
+
 log_net=Verander netwerkopstelling
 log_logs=Aanmeldingsinstellings verander
 log_misc=Ander instellings verander
@@ -330,23 +347,29 @@ log_rewrite_location=URL-herskryf vir ligging $1 in $2 verander
 log_create_user=Gebruiker $1 in $2 geskep
 log_modify_user=Gewysigde gebruiker $1 in $2 
 log_delete_user=Gebruiker $1 in $2 is verwyder
+
 stop_err=Kon nie Nginx stop nie
 stop_ecannot=U mag nie die webbediener stop nie
+
 start_err=Kon nie Nginx begin nie
 start_ecannot=U mag nie die webbediener begin nie
+
 restart_err=Kon nie die Nginx-konfigurasie toepas nie
 restart_etest=Opstelling is ongeldig : $1 
+
 match_default=Sub-gids
 match_exact=Presiese gids
 match_case=Hooflettergevoelige uitdrukking
 match_nocase=Gevoelensensitiewe gereelde uitdrukking
 match_noregexp=Deaktiveer gereelde uitdrukkings
 match_named=Benoemde ligging
+
 users_title=Bestuur gebruikers
 users_none=Hierdie wagwoordlêer bevat nog geen gebruikers nie.
 users_add=Voeg 'n nuwe gebruiker by.
 users_efile=Lêerparameter ontbreek!
 users_return=gebruikerslys
+
 user_create=Skep gebruiker
 user_edit=Gebruiker wysig
 user_header=Gebruikersdetails van 'n wagwoordbeskermde gids
@@ -357,6 +380,7 @@ user_passset=Stel na
 user_enabled=Aanmelding aangeskakel?
 user_egone=Gebruiker bestaan nie meer nie!
 user_err=Kon nie gebruiker stoor nie
+
 acl_vhosts=Toelaatbare virtuele gashere
 acl_hosts1=Almal
 acl_hosts0=Hieronder gelys ..
@@ -365,6 +389,7 @@ acl_root=Gidse vir lokasies toegelaat
 acl_global=Kan globale instellings verander?
 acl_logs=Kan loglêers opgestel word?
 acl_user=Skryf wagwoordlêers as gebruiker
+
 feat_name=Nginx webwerf
 feat_losing=Die Nginx-virtuele gasheer en al sy opstellingsriglyne sal uitgevee word
 feat_disname=Nginx webwerf
@@ -433,9 +458,11 @@ feat_clonealias=.. nie nodig vir aliasdomeine nie
 feat_eclonefind=.. kon nie 'n nuwe virtuele gasheer met die naam $1 vind na kloning nie!
 feat_modifyproxy=Verander die instaanbediener se bestemming ..
 feat_module=Nginx-webbediener (vir virtuele gasheer)
+
 fcgid_ecmd=Geen PHP-opdrag gevind nie!
 fcgid_ecmdexec=PHP-opdrag $1 kon nie uitgevoer word nie : $2 
 fcgid_ecmdb=PHP-opdrag $1 ondersteun nie die -b-vlag wat benodig word om as 'n FCGId-bediener uit te voer nie. U moet waarskynlik 'n aparte PHP CGI-pakket installeer.
+
 redirect_efind=Geen virtualhost vir $1 is gevind nie
 redirect_eobj=Herleiding word nie geassosieer met 'n Nginx-konfigurasie-objek nie
 redirect_eobj2=Proxy word nie geassosieer met 'n Nginx-konfigurasie-objek nie
@@ -444,14 +471,18 @@ redirect_eurl=Nie 'n URL nie : $1
 redirect_eurlhost=Gasheernaam in URL kan nie opgelos word nie : $1 
 redirect_eclash='N Ligging vir $1 bestaan reeds
 redirect_ephd=Nginx laat slegs dat bestemmingsgidse vir aliasse onder $1 is
+
 links_anlog=Nginx-toegangslêer
 links_enlog=Nginx-foutlogboek
-links_phpini=PHP-konfigurasie
+links_phpini=PHP-FPM-konfigurasie
 links_phpini2=PHP $1 -opstelling
+
 webmin_phpini=PHP-konfigurasie vir $1 
 webmin_phpini2=PHP $2 -opstelling vir $1 
+
 monitor_missing=Nginx is nie geïnstalleer nie
 monitor_type=Nginx-webbediener
+
 tmpl_directives=Voeg Nginx-opstellingsriglyne by
 tmpl_default=Standaard (vanaf ouerpatroon)
 tmpl_none=Geen

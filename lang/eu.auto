@@ -23,6 +23,7 @@ index_startdesc=Abiarazi Nginx webgune zerbitzaria uneko konfigurazioa erabiliz.
 index_restart=Aplikatu Nginx konfigurazioa
 index_restartdesc=Aplikatu uneko konfigurazioa Nginx webgune zerbitzaria gelditu eta berriro martxan jarriz.
 index_eglobal=Ez duzu ezarpen orokorrik editatu beharrik
+
 net_title=Sarearen konfigurazioa
 net_header=Sare globalerako aukerak
 opt_missing=Ez da ezer sartu eremuan : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Konexio mantenuetarako denbora-muga segundo batzuk izan b
 opt_keepalive_requests=Eskaeraren muga konexio gordinerako
 opt_ekeepalive_requests=Konexio gordailuen eskaeraren muga hainbat eskaera izan behar da
 opt_secs=segundutan
+
 mime_title=MIME motak
 mime_search=Aurkitu MIME motak datozenak :
 mime_ok=Search
@@ -54,6 +56,7 @@ mime_eword=Fitxategiaren luzapenak karaktere baliogabeak ditu edo puntu batekin 
 mime_eold=MIME mota ez dago jada!
 mime_eclash=Izen bera duen MIME mota dago lehendik
 mime_enone=Ez da ezabatzeko MIME motarik
+
 logs_title=Ezarpenen erregistroa
 logs_header=Log eta PID fitxategiaren aukerak
 opt_error_log=Errorea erregistro fitxategia
@@ -75,6 +78,7 @@ logs_ftext=Formatu katea
 logs_efname=$1 erregistro formatuaren izenak letrak, zenbakiak, puntua eta marratxoa soilik izan ditzake
 logs_etext=Formatu-katea falta da $1 erregistrorako
 logs_ecannot=Ezin duzu erregistroko fitxategiak konfiguratu
+
 misc_title=Beste ezarpenak
 misc_header=Erabiltzaileak eta prozesatzeko aukerak
 opt_worker_processes=Langileen prozesu kopurua
@@ -92,6 +96,7 @@ opt_eworker_priority=Langileen lehentasunak kopuru positiboa edo negatiboa izan 
 opt_index=Directory index fitxategiak
 opt_default_type=MIME mota fitxategi ezezagunei
 opt_edefault_type=MIME mota lehenetsi baliogabea
+
 docs_title=Dokumentuaren aukerak
 sdocs_title=Dokumentuaren aukerak
 ldocs_title=Dokumentuaren aukerak
@@ -99,6 +104,7 @@ docs_header=Fitxategiaren, orriaren eta dokumentuaren ezarpenak
 docs_err=Huts egin du dokumentuen aukerak gordetzean
 opt_root=Errorearen direktorio lehenetsia
 opt_eroot=Erro lehenetsitako direktorioak bide absolutua izan behar du
+
 fcgi_title=FastCGI Aukerak
 lfcgi_title=FastCGI Aukerak
 fcgi_header=FastCGI zerbitzaria eta protokolo aukerak
@@ -117,6 +123,7 @@ fcgi_epvalue=$1 parametroaren balioa falta da
 opt_fastcgi_buffer_size=Goiburuetarako bufferraren tamaina
 fcgi_buffer=4k bezalako tamaina
 opt_efastcgi_buffer_size=Bufferraren tamaina 4k edo 1 M-koa izan behar du.
+
 ssi_title=Zerbitzariaren alboan ezarpenak sartu
 sssi_title=Zerbitzariaren alboan ezarpenak sartu
 lssi_title=Zerbitzariaren alboan ezarpenak sartu
@@ -129,6 +136,7 @@ opt_ssi_value_length=Gehienezko parametroen luzera
 ssi_err=Huts egin du zerbitzariaren alboan gordetzean, ezarpenak
 opt_essi_types=$1 ez da baliozko MIME mota
 opt_essi_value_length=Gehienezko parametroaren luzerak zenbaki bat izan behar du
+
 manual_title=Editatu Konfigurazio fitxategiak
 manual_file=Konfigurazio fitxategia editatzen:
 manual_ok=Aldatu
@@ -136,6 +144,7 @@ manual_efile=Aukeratutako fitxategia ez da Nginx konfigurazioaren parte!
 manual_test=Konfigurazio berria probatu aurreztu aurretik?
 manual_elink=Lotura sinbolikoa arriskuan!
 manual_err=Ezin izan da konfigurazio fitxategia gordetzean
+
 server_create=Sortu ostalari birtuala
 server_edit=Editatu ostalari birtuala
 server_egone=Ostalari birtuala ez da existitzen!
@@ -184,10 +193,12 @@ server_settings=Ostalari birtualaren ezarpenak
 server_server=Ostalari birtualaren definizioa
 server_eclash=Izen bera duen ostalari birtual bat dagoeneko
 server_pp=Proxy $1 era
+
 slogs_title=Ostalari birtuala erregistratzea
 slogs_header=Eguneratu fitxategien aukerak
 opt_global=Ezarpen globaletatik
 slogs_err=Ezin izan da erregistroko fitxategien aukerak gordetzea
+
 ssl_title=SSL konfigurazioa
 ssl_header=SSL enkriptatzea eta ziurtagiriak
 opt_ssl_certificate=SSL ziurtagiri fitxategia
@@ -211,6 +222,7 @@ opt_ssl_protocols=Onartzeko SSL protokoloak
 opt_essl_ciphers=Baliogabearen itxura duen zifratze-zerrenda <tt>HIGH:!aNULL:!MD5</tt> bezalakoa izan behar du
 opt_selected=Jarraian hautatua
 ssl_clist=Zerrendatutako enkriptazioak
+
 gzip_title=GZip konpresio aukerak
 sgzip_title=GZip konpresio aukerak
 lgzip_title=GZip konpresio aukerak
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Konpresio maila 1 eta 9 arteko kopurua izan behar da
 gzip_level=1 = gutxienez, 9 = onena
 opt_gzip_types=Konprimitzeko MIME motak
 opt_egzip_types=$1 ez da baliozko MIME mota
+
 proxy_title=Proxy-ezarpenak
 sproxy_title=Proxy-ezarpenak
 lproxy_title=Proxy-ezarpenak
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 ez da goiburu izenik
 opt_eproxy_hide_header=$1 ez da goiburu izenik
 opt_proxy_pass=Proxy eskaerak
 proxy_url=URL
+
 access_title=Sarbide-kontrola
 saccess_title=Sarbide-kontrola
 laccess_title=Sarbide-kontrola
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Oinarrizko autentikazio fitxategia
 access_eabsolute=Pasahitz fitxategiak bide absolutua izan behar du
 access_edir=Pasahitz fitxategia ezin da direktorio bat izan
 access_ecannot=Pasahitza $1 fitxategia ez dago baimendu $2 direktorioaren azpian
+
 rewrite_title=URLa berriro idaztea
 srewrite_title=URLa berriro idaztea
 lrewrite_title=URLa berriro idaztea
@@ -277,6 +292,7 @@ rewrite_redirect=Itzuli 302 birzuzenketa
 rewrite_permanent=Itzuli 301 birzuzenketa
 rewrite_efrom=$1 iturburuko bideak espazioak ditu
 rewrite_eto=Helmuga URL $1 falta da edo lekuak ditu
+
 location_create=Sortu Kokapena
 location_edit=Editatu Kokapena
 location_desc=$2 kokapena $1 ostalari birtualan
@@ -292,6 +308,7 @@ location_rusure=Ziur $1 kokalekua ezabatu nahi duzula? Bere konfigurazioko ezarp
 location_epath=URL bidea ezin da hutsik egon edo tarterik eduki
 location_return=kokapen aukerak
 location_ecannot=$1 direktorio root ez dago baimendutako $2 direktorioaren azpian
+
 log_net=Sarearen konfigurazioa aldatu da
 log_logs=Eguneratzeen ezarpen aldaketak
 log_misc=Beste ezarpen batzuk aldatu dira
@@ -330,23 +347,29 @@ log_rewrite_location=$2 ko $1 kokapenarentzako URL idazketa aldatu da
 log_create_user=Erabiltzailea sortu du $1 $2 an
 log_modify_user=Erabiltzaile aldaketa $1 $2 an
 log_delete_user=$1 erabiltzailea ezabatu da $2 -n
+
 stop_err=Ezin izan da Nginx gelditu
 stop_ecannot=Ezin duzu webgune zerbitzaria gelditu
+
 start_err=Huts egin du Nginx abiarazteak
 start_ecannot=Ez duzu baimenik webgune zerbitzaria abiarazteko
+
 restart_err=Ezin izan da Nginx konfigurazioa aplikatu
 restart_etest=Konfigurazioa baliogabea da : $1 
+
 match_default=Sub-direktorioa
 match_exact=Direktorio zehatza
 match_case=Maiuskulak adierazteko ohiko adierazpena
 match_nocase=Adierazpen erregularraren kasua
 match_noregexp=Desgaitu adierazpen erregularrak
 match_named=Kokapen izendatua
+
 users_title=Erabiltzaileak kudeatu
 users_none=Pasahitz fitxategi honek ez du erabiltzaileik oraindik.
 users_add=Gehitu erabiltzaile berria.
 users_efile=Fitxategiaren parametroa falta da!
 users_return=erabiltzaileen zerrenda
+
 user_create=Erabiltzailea Sortu
 user_edit=Erabiltzailea editatu
 user_header=Pasahitz bidez babestutako direktorioaren erabiltzailearen xehetasunak
@@ -357,6 +380,7 @@ user_passset=Ezarrita
 user_enabled=Saioa saioa gaituta?
 user_egone=Erabiltzailea jada ez dago!
 user_err=Huts egin du erabiltzailea gordetzean
+
 acl_vhosts=Onartutako ostalari birtualak
 acl_hosts1=guztiak
 acl_hosts0=Jarraian agertzen dira ..
@@ -365,6 +389,7 @@ acl_root=Kokapenetarako direktorio baimenduak
 acl_global=Ezarpen orokorrak editatu ditzakezu?
 acl_logs=Log fitxategiak konfiguratu ditzakezu?
 acl_user=Idatzi pasahitz fitxategiak erabiltzaile gisa
+
 feat_name=Nginx webgunea
 feat_losing=Nginx ostalari birtuala eta bere konfigurazio zuzentarau guztiak ezabatuko dira
 feat_disname=Nginx webgunea
@@ -433,9 +458,11 @@ feat_clonealias=.. ez da beharrezkoa alias domeinuetarako
 feat_eclonefind=.. ezin izan du $1 izeneko ostalari birtual berririk aurkitu klonatu ondoren!
 feat_modifyproxy=Proxy helmuga aldatzen ..
 feat_module=Nginx Webserver (ostalari birtualarentzat)
+
 fcgid_ecmd=Ez da PHP komandoik aurkitu!
 fcgid_ecmdexec=Ezin izan da $1 komandoa exekutatu : $2 
 fcgid_ecmdb=$1 PHP komandoak ez du onartzen FCGId zerbitzari gisa exekutatzeko beharrezkoa den -b bandera. Litekeena da PHP CGI pakete bereizi bat instalatzea.
+
 redirect_efind=Ez da $1 -eko virtualhost aurkitu
 redirect_eobj=Birzuzenketa ez dago Nginx konfigurazio objektu batekin lotuta
 redirect_eobj2=Proxy ez dago Nginx konfigurazio objektu batekin lotua
@@ -444,14 +471,18 @@ redirect_eurl=URL bat ez : $1
 redirect_eurlhost=URLko ostalariaren izena ezin da ebatzi : $1 
 redirect_eclash=$1 kokapen bat dagoeneko badago
 redirect_ephd=Nginx-ek soilik aliases helmuga direktorioen $1 baino gutxiago izatea baimentzen du
+
 links_anlog=Nginx Sarbide Erregistroa
 links_enlog=Nginx akatsen erregistroa
-links_phpini=PHP konfigurazioa
+links_phpini=PHP-FPM konfigurazioa
 links_phpini2=PHP $1 Konfigurazioa
+
 webmin_phpini=$1 PHP konfigurazioa
 webmin_phpini2=PHP $2 konfigurazioa $1 erako
+
 monitor_missing=Nginx ez dago instalatuta
 monitor_type=Nginx Webserver
+
 tmpl_directives=Nginx konfigurazio arauak gehituz
 tmpl_default=Lehenespenez (guraso txantiloia)
 tmpl_none=Bat ere ez

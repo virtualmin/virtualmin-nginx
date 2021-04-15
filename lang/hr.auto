@@ -23,6 +23,7 @@ index_startdesc=Pokrenite web-poslužitelj Nginx koristeći trenutnu konfiguraci
 index_restart=Primijeni Nginx konfiguraciju
 index_restartdesc=Primijenite trenutnu konfiguraciju zaustavljanjem i ponovnim pokretanjem Nginx web poslužitelja.
 index_eglobal=Nije vam dopušteno uređivanje globalnih postavki
+
 net_title=Konfiguracija mreže
 net_header=Opcije globalnog umrežavanja
 opt_missing=Ništa nije uneseno za polje : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Istek vremena za keepalive veze mora biti nekoliko sekund
 opt_keepalive_requests=Zahtjev za ograničenje keepalive veza
 opt_ekeepalive_requests=Ograničenje zahtjeva za keepalive veze mora biti nekoliko zahtjeva
 opt_secs=sekundi
+
 mime_title=Vrste MIME
 mime_search=Pronađite MIME tipove koji se podudaraju :
 mime_ok=traži
@@ -54,6 +56,7 @@ mime_eword=Proširenje datoteke sadrži nevažeće znakove ili započinje s toč
 mime_eold=MIME vrsta više ne postoji!
 mime_eclash=MIME vrsta s istim nazivom već postoji
 mime_enone=Nije odabrana vrsta MIME za brisanje
+
 logs_title=Postavke zapisivanja
 logs_header=Opcije zapisa i datoteke PID
 opt_error_log=Datoteka dnevnika pogreške
@@ -75,6 +78,7 @@ logs_ftext=Format niza
 logs_efname=Naziv zapisa zapisa $1 može sadržavati samo slova, brojeve, točkice, crticu i podvlaku
 logs_etext=Nedostaje string formata za format dnevnika $1 
 logs_ecannot=Nije vam dopušteno konfigurirati datoteke dnevnika
+
 misc_title=Ostale postavke
 misc_header=Korisnici i mogućnosti procesa
 opt_worker_processes=Broj radnih procesa
@@ -92,6 +96,7 @@ opt_eworker_priority=Prioritet radnika mora biti pozitivan ili negativan broj
 opt_index=Datoteke indeksa direktorija
 opt_default_type=Vrsta MIME za nepoznate datoteke
 opt_edefault_type=Nevažeća zadana vrsta MIME
+
 docs_title=Opcije dokumenta
 sdocs_title=Opcije dokumenta
 ldocs_title=Opcije dokumenta
@@ -99,6 +104,7 @@ docs_header=Postavke datoteke, stranice i dokumenta
 docs_err=Spremanje opcija dokumenta nije uspjelo
 opt_root=Zadani korijenski direktorij
 opt_eroot=Zadani korijenski direktorij mora biti apsolutni put
+
 fcgi_title=Opcije FastCGI
 lfcgi_title=Opcije FastCGI
 fcgi_header=Opcije poslužitelja i protokola FastCGI
@@ -117,6 +123,7 @@ fcgi_epvalue=Nedostaje vrijednost parametra $1
 opt_fastcgi_buffer_size=Veličina odbojnika za zaglavlja
 fcgi_buffer=Veličina poput 4k
 opt_efastcgi_buffer_size=Veličina međuspremnika mora biti poput 4k ili 1M.
+
 ssi_title=Postavke na strani poslužitelja uključuju postavke
 sssi_title=Postavke na strani poslužitelja uključuju postavke
 lssi_title=Postavke na strani poslužitelja uključuju postavke
@@ -129,6 +136,7 @@ opt_ssi_value_length=Maksimalna duljina parametra
 ssi_err=Nije uspjelo spremanje sa strane poslužitelja uključuju postavke
 opt_essi_types=$1 nije valjan MIME tip
 opt_essi_value_length=Maksimalna duljina parametra mora biti broj
+
 manual_title=Uređivanje konfiguracijskih datoteka
 manual_file=Uređivanje konfiguracijske datoteke:
 manual_ok=Sklopka
@@ -136,6 +144,7 @@ manual_efile=Odabrana datoteka nije dio Nginx konfiguracije!
 manual_test=Testirajte novu konfiguraciju prije spremanja?
 manual_elink=Simbolična poveznica koja visi!
 manual_err=Spremanje konfiguracijske datoteke nije uspjelo
+
 server_create=Stvorite virtualni domaćin
 server_edit=Uredi virtualni domaćin
 server_egone=Virtualni domaćin više ne postoji!
@@ -184,10 +193,12 @@ server_settings=Postavke virtualnog domaćina
 server_server=Definicija virtualnog domaćina
 server_eclash=Virtualni domaćin s istim imenom već postoji
 server_pp=Proxy za $1 
+
 slogs_title=Dnevnik virtualnog domaćina
 slogs_header=Opcije datoteke za zapisnik
 opt_global=Iz globalnih postavki
 slogs_err=Spremanje opcija datoteke zapisa nije uspjelo
+
 ssl_title=Konfiguracija SSL-a
 ssl_header=Opcije SSL enkripcije i certifikacije
 opt_ssl_certificate=Datoteka SSL certifikata
@@ -211,6 +222,7 @@ opt_ssl_protocols=SSL protokoli za podršku
 opt_essl_ciphers=Nevaljani popis šifra - trebao bi biti poput <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Odabrano je u nastavku
 ssl_clist=Navedene šifre
+
 gzip_title=Opcije kompresije GZip-a
 sgzip_title=Opcije kompresije GZip-a
 lgzip_title=Opcije kompresije GZip-a
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Razina kompresije mora biti broj između 1 i 9
 gzip_level=1 = najmanje, 9 = najbolje
 opt_gzip_types=MIME vrste za komprimiranje
 opt_egzip_types=$1 nije valjan MIME tip
+
 proxy_title=Postavke proxyja
 sproxy_title=Postavke proxyja
 lproxy_title=Postavke proxyja
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 nije valjano ime zaglavlja
 opt_eproxy_hide_header=$1 nije valjano ime zaglavlja
 opt_proxy_pass=Proxy zahtjeva za
 proxy_url=URL
+
 access_title=Kontrola pristupa
 saccess_title=Kontrola pristupa
 laccess_title=Kontrola pristupa
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Osnovna datoteka za autentifikaciju
 access_eabsolute=Datoteka zaporke mora biti apsolutni put
 access_edir=Datoteka zaporke ne može biti direktorij
 access_ecannot=Datoteka lozinke $1 nije ispod vaše dopuštene mape $2 
+
 rewrite_title=Prepisivanje URL-ova
 srewrite_title=Prepisivanje URL-ova
 lrewrite_title=Prepisivanje URL-ova
@@ -277,6 +292,7 @@ rewrite_redirect=Vratite 302 preusmjeravanje
 rewrite_permanent=Vratite 301 preusmjeravanje
 rewrite_efrom=Put puta $1 sadrži razmake
 rewrite_eto=Odredišni URL $1 nedostaje ili sadrži razmake
+
 location_create=Izradite lokaciju
 location_edit=Uredi lokaciju
 location_desc=Lokacija $2 u virtualnom hostu $1 
@@ -292,6 +308,7 @@ location_rusure=Jeste li sigurni da želite izbrisati lokaciju $1 ? Sve konfigur
 location_epath=Put za URL ne može biti prazan ili sadržavati razmake
 location_return=mogućnosti lokacije
 location_ecannot=Korijenski direktorij $1 nije ispod vaše dopuštene mape $2 
+
 log_net=Izmijenjena mrežna konfiguracija
 log_logs=Izmijenjene su postavke zapisivanja
 log_misc=Promijenjene su druge postavke
@@ -330,23 +347,29 @@ log_rewrite_location=Promijenjeno prepisivanje URL-a za lokaciju $1 u $2
 log_create_user=Izrađen korisnik $1 u $2 
 log_modify_user=Modificirani korisnik $1 u $2 
 log_delete_user=Izbrisani korisnik $1 u $2 
+
 stop_err=Nije uspio zaustaviti Nginx
 stop_ecannot=Zabranjeno je zaustavljanje web poslužitelja
+
 start_err=Nije uspio pokretanje Nginx-a
 start_ecannot=Nije vam dopušteno pokretanje web poslužitelja
+
 restart_err=Primjena konfiguracije Nginx nije uspjela
 restart_etest=Konfiguracija nije valjana : $1 
+
 match_default=Pod-imenik
 match_exact=Točan direktorij
 match_case=Redoviti izraz osetljiv na velika i mala slova
 match_nocase=Pravilno neosjetljiv slučaj
 match_noregexp=Onemogući regularne izraze
 match_named=Imenovano mjesto
+
 users_title=Upravljanje korisnicima
 users_none=Ova datoteka s lozinkom još ne sadrži korisnike.
 users_add=Dodajte novog korisnika.
 users_efile=Nedostaje parametar datoteke!
 users_return=popis korisnika
+
 user_create=Stvori korisnika
 user_edit=Uređivanje korisnika
 user_header=Podaci o korisniku imenika zaštićeni lozinkom
@@ -357,6 +380,7 @@ user_passset=Postavljen
 user_enabled=Omogućena prijava?
 user_egone=Korisnik više ne postoji!
 user_err=Spremanje korisnika nije uspjelo
+
 acl_vhosts=Dopušteni virtualni domaćini
 acl_hosts1=svi
 acl_hosts0=Navedeno ispod ..
@@ -365,6 +389,7 @@ acl_root=Dopuštene direktorije za lokacije
 acl_global=Možete li urediti globalne postavke?
 acl_logs=Mogu li konfigurirati datoteke dnevnika?
 acl_user=Pišite datoteke lozinke kao korisnik
+
 feat_name=Web stranica Nginx
 feat_losing=Izbrisat će se virtualni domaćin Nginx i sve njegove konfiguracijske smjernice
 feat_disname=Web stranica Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. nije neophodno za alias domene
 feat_eclonefind=.. ne mogu pronaći novi virtualni domaćin nazvan $1 nakon kloniranja!
 feat_modifyproxy=Promjena odredišta proxyja ..
 feat_module=Nginx Webserver (za virtualni domaćin)
+
 fcgid_ecmd=Nije pronađena PHP naredba!
 fcgid_ecmdexec=Nije moguće izvršiti PHP naredbu $1 : $2 
 fcgid_ecmdb=PHP naredba $1 ne podržava zastavicu -b potrebnu za pokretanje kao FCGId poslužitelj. Vjerojatno ćete trebati instalirati zasebni PHP CGI paket.
+
 redirect_efind=Nije pronađen nijedan virtualni domaćin za $1 
 redirect_eobj=Preusmjeravanje nije povezano s objektom konfiguracije Nginx
 redirect_eobj2=Proxy nije povezan s Nginx konfiguracijskim objektom
@@ -444,14 +471,18 @@ redirect_eurl=Nije URL : $1
 redirect_eurlhost=Naziv hosta u URL-u ne može se riješiti : $1 
 redirect_eclash=Lokacija za $1 već postoji
 redirect_ephd=Nginx omogućuje samo da odredišni direktoriji aliasa budu ispod $1 
+
 links_anlog=Dnevnik pristupa Nginx
 links_enlog=Nginx dnevnik grešaka
-links_phpini=Konfiguracija PHP-a
+links_phpini=Konfiguracija PHP-FPM
 links_phpini2=Konfiguracija PHP $1 
+
 webmin_phpini=PHP konfiguracija za $1 
 webmin_phpini2=PHP $2 konfiguracija za $1 
+
 monitor_missing=Nginx nije instaliran
 monitor_type=Nginx Webserver
+
 tmpl_directives=Dodavanje Nginx config direktiva
 tmpl_default=Zadano (iz matičnog predloška)
 tmpl_none=nijedan

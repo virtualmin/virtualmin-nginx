@@ -23,6 +23,7 @@ index_startdesc=Mulakan pelayan web Nginx menggunakan konfigurasi semasa.
 index_restart=Gunakan Konfigurasi Nginx
 index_restartdesc=Terapkan konfigurasi semasa dengan menghentikan dan memulakan semula pelayan web Nginx.
 index_eglobal=Anda tidak dibenarkan mengedit tetapan global
+
 net_title=Konfigurasi Rangkaian
 net_header=Pilihan rangkaian global
 opt_missing=Tidak ada yang dimasukkan untuk bidang : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Waktu tamat untuk sambungan keepalive mestilah beberapa s
 opt_keepalive_requests=Had permintaan untuk sambungan keepalive
 opt_ekeepalive_requests=Had permintaan untuk sambungan keepalive mestilah sejumlah permintaan
 opt_secs=saat
+
 mime_title=Jenis MIME
 mime_search=Cari padanan jenis MIME :
 mime_ok=Cari
@@ -54,6 +56,7 @@ mime_eword=Sambungan fail mengandungi aksara yang tidak sah atau bermula dengan 
 mime_eold=Jenis MIME tidak lagi wujud!
 mime_eclash=Jenis MIME dengan nama yang sama sudah ada
 mime_enone=Tiada jenis MIME yang dipilih untuk dihapuskan
+
 logs_title=Tetapan Pembalakan
 logs_header=Pilihan fail log dan PID
 opt_error_log=Fail log ralat
@@ -75,6 +78,7 @@ logs_ftext=Rentetan format
 logs_efname=Nama format log $1 hanya boleh mengandungi huruf, angka, titik, tanda hubung dan garis bawah
 logs_etext=String format tidak ada untuk format log $1 
 logs_ecannot=Anda tidak dibenarkan mengkonfigurasi fail log
+
 misc_title=Tetapan lain
 misc_header=Pilihan pengguna dan proses
 opt_worker_processes=Bilangan proses pekerja
@@ -92,6 +96,7 @@ opt_eworker_priority=Keutamaan pekerja mestilah nombor positif atau negatif
 opt_index=Fail indeks direktori
 opt_default_type=Jenis MIME untuk fail yang tidak diketahui
 opt_edefault_type=Jenis MIME lalai tidak sah
+
 docs_title=Pilihan Dokumen
 sdocs_title=Pilihan Dokumen
 ldocs_title=Pilihan Dokumen
@@ -99,6 +104,7 @@ docs_header=Tetapan fail, halaman dan dokumen
 docs_err=Gagal menyimpan pilihan dokumen
 opt_root=Direktori root lalai
 opt_eroot=Direktori root lalai mestilah jalan mutlak
+
 fcgi_title=Pilihan FastCGI
 lfcgi_title=Pilihan FastCGI
 fcgi_header=Pilihan pelayan dan protokol FastCGI
@@ -117,6 +123,7 @@ fcgi_epvalue=Tiada nilai untuk parameter $1
 opt_fastcgi_buffer_size=Saiz penyangga untuk tajuk
 fcgi_buffer=Saiz seperti 4k
 opt_efastcgi_buffer_size=Ukuran buffer mestilah seperti 4k atau 1M.
+
 ssi_title=Sisi Pelayan Termasuk Tetapan
 sssi_title=Sisi Pelayan Termasuk Tetapan
 lssi_title=Sisi Pelayan Termasuk Tetapan
@@ -129,6 +136,7 @@ opt_ssi_value_length=Panjang parameter maksimum
 ssi_err=Gagal menyimpan bahagian pelayan termasuk tetapan
 opt_essi_types=$1 bukan jenis MIME yang sah
 opt_essi_value_length=Panjang parameter maksimum mestilah nombor
+
 manual_title=Edit Fail Konfigurasi
 manual_file=Menyunting fail konfigurasi:
 manual_ok=Tukar
@@ -136,6 +144,7 @@ manual_efile=Fail yang dipilih bukan sebahagian daripada konfigurasi Nginx!
 manual_test=Uji konfigurasi baru sebelum menyimpan?
 manual_elink=Pautan simbolik yang menggantung!
 manual_err=Gagal menyimpan fail konfigurasi
+
 server_create=Buat Host Maya
 server_edit=Edit Host Maya
 server_egone=Host maya tidak lagi wujud!
@@ -184,10 +193,12 @@ server_settings=Tetapan Host Maya
 server_server=Definisi Host Maya
 server_eclash=Host maya dengan nama yang sama sudah ada
 server_pp=Proksi kepada $1 
+
 slogs_title=Pembalakan Host Maya
 slogs_header=Pilihan fail log
 opt_global=Dari tetapan global
 slogs_err=Gagal menyimpan pilihan fail log
+
 ssl_title=Konfigurasi SSL
 ssl_header=Pilihan penyulitan dan pensijilan SSL
 opt_ssl_certificate=Fail sijil SSL
@@ -211,6 +222,7 @@ opt_ssl_protocols=Protokol SSL untuk menyokong
 opt_essl_ciphers=Senarai cipher yang tidak sah - mestilah seperti <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Dipilih di bawah
 ssl_clist=Sifar yang tersenarai
+
 gzip_title=Pilihan Pemampatan GZip
 sgzip_title=Pilihan Pemampatan GZip
 lgzip_title=Pilihan Pemampatan GZip
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Tahap pemampatan mestilah nombor antara 1 dan 9
 gzip_level=1 = paling sedikit, 9 = terbaik
 opt_gzip_types=Jenis MIME untuk memampatkan
 opt_egzip_types=$1 bukan jenis MIME yang sah
+
 proxy_title=Tetapan Proksi
 sproxy_title=Tetapan Proksi
 lproxy_title=Tetapan Proksi
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 bukan nama tajuk yang sah
 opt_eproxy_hide_header=$1 bukan nama tajuk yang sah
 opt_proxy_pass=Permintaan proksi untuk
 proxy_url=URL
+
 access_title=Kawalan Akses
 saccess_title=Kawalan Akses
 laccess_title=Kawalan Akses
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Fail pengesahan asas
 access_eabsolute=Fail kata laluan mestilah jalan mutlak
 access_edir=Fail kata laluan tidak boleh menjadi direktori
 access_ecannot=Fail kata laluan $1 tidak berada di bawah direktori anda yang dibenarkan $2 
+
 rewrite_title=Penulisan Semula URL
 srewrite_title=Penulisan Semula URL
 lrewrite_title=Penulisan Semula URL
@@ -277,6 +292,7 @@ rewrite_redirect=Kembalikan pengalihan 302
 rewrite_permanent=Kembalikan pengalihan 301
 rewrite_efrom=Jalur sumber $1 mengandungi ruang
 rewrite_eto=URL Destinasi $1 tiada atau mengandungi ruang
+
 location_create=Buat Lokasi
 location_edit=Edit Lokasi
 location_desc=Lokasi $2 di hos maya $1 
@@ -292,6 +308,7 @@ location_rusure=Adakah anda pasti mahu memadamkan lokasi $1 ? Semua tetapan konf
 location_epath=Laluan URL tidak boleh kosong atau mengandungi ruang
 location_return=pilihan lokasi
 location_ecannot=Direktori root $1 tidak berada di bawah direktori anda yang dibenarkan $2 
+
 log_net=Konfigurasi rangkaian berubah
 log_logs=Tetapan pembalakan berubah
 log_misc=Menukar tetapan lain
@@ -330,23 +347,29 @@ log_rewrite_location=Penulisan semula URL yang diubah untuk lokasi $1 di $2
 log_create_user=Pengguna yang dibuat $1 dalam $2 
 log_modify_user=Pengguna yang diubah suai $1 dalam $2 
 log_delete_user=Pengguna $1 dalam $2 dipadamkan
+
 stop_err=Gagal menghentikan Nginx
 stop_ecannot=Anda tidak dibenarkan menghentikan pelayan laman web
+
 start_err=Gagal memulakan Nginx
 start_ecannot=Anda tidak dibenarkan memulakan pelayan laman web
+
 restart_err=Gagal menerapkan konfigurasi Nginx
 restart_etest=Konfigurasi tidak sah : $1 
+
 match_default=Sub-direktori
 match_exact=Direktori tepat
 match_case=Ungkapan biasa sensitif kes
 match_nocase=Ungkapan biasa tidak sensitif
 match_noregexp=Lumpuhkan ungkapan biasa
 match_named=Lokasi yang dinamakan
+
 users_title=Urus Pengguna
 users_none=Fail kata laluan ini belum mengandungi pengguna.
 users_add=Tambahkan pengguna baru.
 users_efile=Parameter fail tiada!
 users_return=senarai pengguna
+
 user_create=Buat Pengguna
 user_edit=Edit Pengguna
 user_header=Maklumat pengguna direktori dilindungi kata laluan
@@ -357,6 +380,7 @@ user_passset=Ditetapkan untuk
 user_enabled=Log masuk diaktifkan?
 user_egone=Pengguna tidak lagi wujud!
 user_err=Gagal menyelamatkan pengguna
+
 acl_vhosts=Host maya yang dibenarkan
 acl_hosts1=Semua
 acl_hosts0=Disenaraikan di bawah ..
@@ -365,6 +389,7 @@ acl_root=Direktori yang dibenarkan untuk lokasi
 acl_global=Boleh mengedit tetapan global?
 acl_logs=Boleh mengkonfigurasi fail log?
 acl_user=Tulis fail kata laluan sebagai pengguna
+
 feat_name=Laman web Nginx
 feat_losing=Host maya Nginx dan semua arahan konfigurasi akan dihapuskan
 feat_disname=Laman web Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. tidak perlu untuk domain alias
 feat_eclonefind=.. tidak dapat mencari hos maya baru bernama $1 setelah pengklonan!
 feat_modifyproxy=Mengubah tujuan proksi ..
 feat_module=Nginx Webserver (untuk hos maya)
+
 fcgid_ecmd=Tiada arahan PHP dijumpai!
 fcgid_ecmdexec=Perintah PHP $1 tidak dapat dilaksanakan : $2 
 fcgid_ecmdb=Perintah PHP $1 tidak menyokong bendera -b yang diperlukan untuk dijalankan sebagai pelayan FCGId. Anda mungkin perlu memasang pakej PHP CGI yang berasingan.
+
 redirect_efind=Tidak dijumpai virtualhost untuk $1 
 redirect_eobj=Pengalihan tidak dikaitkan dengan objek konfigurasi Nginx
 redirect_eobj2=Proksi tidak dikaitkan dengan objek konfigurasi Nginx
@@ -444,14 +471,18 @@ redirect_eurl=Bukan URL : $1
 redirect_eurlhost=Nama hos dalam URL tidak dapat diselesaikan : $1 
 redirect_eclash=Lokasi untuk $1 sudah ada
 redirect_ephd=Nginx hanya membenarkan direktori tujuan alias berada di bawah $1 
+
 links_anlog=Log Akses Nginx
 links_enlog=Log Ralat Nginx
-links_phpini=Konfigurasi PHP
+links_phpini=Konfigurasi PHP-FPM
 links_phpini2=Konfigurasi PHP $1 
+
 webmin_phpini=Konfigurasi PHP untuk $1 
 webmin_phpini2=Konfigurasi PHP $2 untuk $1 
+
 monitor_missing=Nginx tidak dipasang
 monitor_type=Pelayan Web Nginx
+
 tmpl_directives=Menambah arahan konfigurasi Nginx
 tmpl_default=Lalai (dari templat induk)
 tmpl_none=Tiada

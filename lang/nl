@@ -23,6 +23,7 @@ index_startdesc=Start de Nginx webserver met gebruik van de huidige configuratie
 index_restart=Nginx Configuratie Toevoegen
 index_restartdesc=Voeg de huidige configuratie toe door de Nginx webserver te stoppen en te starten.
 index_eglobal=U bent niet bevoegd om de globale instellingen te bewerken
+
 net_title=Netwerk Configuratie
 net_header=Globale netwerk opties
 opt_missing=Er is niets ingevuld voor veld : $1
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Time-out voor in leven blijvende verbindingen moet een aa
 opt_keepalive_requests=Aanvraag limiet voor instant houden van verbindingen
 opt_ekeepalive_requests=Aanvraag limiet voor instant blijvende verbindingen moet een aantal verzoeken zijn
 opt_secs=Seconden
+
 mime_title=MIME Types
 mime_search=Vind MIME types die overeenkomen met :
 mime_ok=Zoeken
@@ -54,6 +56,7 @@ mime_eword=File extensies bevatten ongeldige karakters of beginnen met een punt
 mime_eold=MIME type bestaat niet langer!
 mime_eclash=Een MIME type met dezelfde naam bestaat reeds
 mime_enone=Er zijn geen MIME types geselecteerd of verwijdert
+
 logs_title=Log Instellingen
 logs_header=Log en PID file opties
 opt_error_log=Fouten log file
@@ -75,6 +78,7 @@ logs_ftext=Formaat string
 logs_efname=Log formaat naam $1 mag alleen letters bevatten, nummers, punten, streepje en onderstrepingsteken.
 logs_etext=Ontbrekende formaat string voor log formaat $1
 logs_ecannot=U bent niet bevoegd om log files te configureren
+
 misc_title=Andere Instellingen
 misc_header=Gebruikers en proces opties
 opt_worker_processes=Aantal werker processen
@@ -92,6 +96,7 @@ opt_eworker_priority=Werker prioriteit moet een positief of negatief getal zijn
 opt_index=Directory index files
 opt_default_type=MIME type voor onbekende files
 opt_edefault_type=Ongeldige standaard MIME type
+
 docs_title=Document Opties
 sdocs_title=Document Opties
 ldocs_title=Document Opties
@@ -99,6 +104,7 @@ docs_header=File, pagina en document instellingen
 docs_err=Opslaan van document opties is mislukt
 opt_root=Standaard root directory
 opt_eroot=Standaard root directory moet een absoluut pad zijn
+
 fcgi_title=FastCGI Opties
 lfcgi_title=FastCGI Opties
 fcgi_header=FastCGI server en protocol opties
@@ -117,6 +123,7 @@ fcgi_epvalue=Ontbrekende waarde voor parameter $1
 opt_fastcgi_buffer_size=Buffer grote voor headers
 fcgi_buffer=Grote zoals 4k
 opt_efastcgi_buffer_size=Buffer grote moet lijken op 4k of 1M.
+
 ssi_title=Server Zijde Toegevoegde Instellingen
 sssi_title=Server zijde Toegevoegde Instellingen
 lssi_title=Server Zijde Toegevoegde Instellingen
@@ -129,6 +136,7 @@ opt_ssi_value_length=Maximum parameter lengte
 ssi_err=Mislukt om server zijde toegevoegde instellingen
 opt_essi_types=$1 is geen geldige MIME type
 opt_essi_value_length=Maximum parameter lengte moet een getal zijn
+
 manual_title=Bewerk Configuratie Files
 manual_file=Bewerken van configuratie file:
 manual_ok=Overschakelen
@@ -136,6 +144,7 @@ manual_efile=De geselecteerde file is geen onderdeel van de Nginx configuratie!
 manual_test=De nieuwe configuratie testen voordat hij word opgeslagen?
 manual_elink=Loshangende symbolische koppeling!
 manual_err=Configuratie file opslaan mislukte
+
 server_create=Virtuele Host Aanmaken
 server_edit=Bewerk Virtuele Host
 server_egone=Virtuele host bestaat niet langer!
@@ -184,10 +193,12 @@ server_settings=Virtuele Host Instellingen
 server_server=Virtuele Host Definitie
 server_eclash=Een virtuele host met dezelfde naam bestaat reeds
 server_pp=Proxy naar $1
+
 slogs_title=Virtuele Host Loggen
 slogs_header=Log file opties
 opt_global=Van globale instellingen
 slogs_err=Mislukt om log file opties op te slaan
+
 ssl_title=SSL Configuratie
 ssl_header=SSL encryptie en certificaat opties
 opt_ssl_certificate=SSL certificaten file
@@ -211,6 +222,7 @@ opt_ssl_protocols=SSL protocols voor ondersteuning
 opt_essl_ciphers=Ongeldig lijkende codering lijst - dit lijken op <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Hieronder geselecteerd
 ssl_clist=Cijfers in lijst
+
 gzip_title=GZip Compressie Opties
 sgzip_title=GZip Compressie Opties
 lgzip_title=GZip Compressie Opties
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Compressie niveau moet een getal zijn tussen de 1 en 9
 gzip_level=1=minst, 9=beste
 opt_gzip_types=MIME types om te comprimeren
 opt_egzip_types=$1 is geen geldige MIME type
+
 proxy_title=Proxy Instellingen
 sproxy_title=Proxy Instellingen
 lproxy_title=Proxy Instellingen
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 is geen geldige header naam
 opt_eproxy_hide_header=$1 is geen geldige header naam
 opt_proxy_pass=Proxy aanvraag naar
 proxy_url=URL
+
 access_title=Toegang Controle
 saccess_title=Toegang Controle
 laccess_title=Toegang Controle
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Basis authenticatie file
 access_eabsolute=Wachtwoord file moet een absolute pad zijn
 access_edir=Wachtwoord file kan geen directory zijn
 access_ecannot=De wachtwoord file $1 is niet onder uw toegestane directory $2
+
 rewrite_title=URL Herschrijven
 srewrite_title=URL Herschrijving
 lrewrite_title=URL Herschrijven
@@ -277,6 +292,7 @@ rewrite_redirect=Geef een 302 omleiding terug
 rewrite_permanent=Geef een 301 omleiding terug
 rewrite_efrom=Bron pad $1 bevat spaties
 rewrite_eto=Bestemming URL $1 ontbreekt of bevat spaties
+
 location_create=Locatie Aanmaken
 location_edit=Bewerk Locatie
 location_desc=Locatie $1 in de virtuele host $1
@@ -292,6 +308,7 @@ location_rusure=Weet u zeker dat u de locatie $1 wilt verwijderen? Alle configur
 location_epath=URL pad mag niet leeg zijn of spaties bevatten
 location_return=locatie opties
 location_ecannot=De root directory $1 zit niet onder uw toegestane directory $2
+
 log_net=Gewijzigde netwerk configuratie
 log_logs=Gewijzigde log instellingen
 log_misc=Gewijzigde andere instellingen
@@ -330,23 +347,29 @@ log_rewrite_location=Gewijzigde URL herschrijving voor locatie $1 in $2
 log_create_user=Aangemaakte gebruiker $1 in $2
 log_modify_user=Gemodificeerde gebruiker $1 in $2
 log_delete_user=Verwijderde gebruiker $1 in $2
+
 stop_err=Nginx stoppen mislukte
 stop_ecannot=U bent niet bevoegd om de webserver te stoppen
+
 start_err=Nginx starten mislukte
 start_ecannot=U bent niet bevoegd om de webserver te starten
+
 restart_err=Mislukt om de Nginx configuratie toe te voegen
 restart_etest=Configuratie is ongeldig : $1
+
 match_default=Sub-directory
 match_exact=Precieze directory
 match_case=Hoofdletter gevoelige reguliere expressie
 match_nocase=Kleine letters en hoofdletters reguliere expressie
 match_noregexp=Reguliere expressie uitschakelen
 match_named=Benoemde locatie
+
 users_title=Beheerde Gebruikers
 users_none=Deze wachtwoord file bevat nog geen enkele gebruiker.
 users_add=Nieuwe gebruiker toevoegen.
 users_efile=Ontbrekende file parameter!
 users_return=gebruiker lijst
+
 user_create=Gebruiker Aanmaken
 user_edit=Bewerk Gebruiker
 user_header=Wachtwoord beschermde directory gebruiker details
@@ -357,6 +380,7 @@ user_passset=Ingesteld naar
 user_enabled=Inloggen aangezet?
 user_egone=Gebruiker bestaat niet langer!
 user_err=Gebruiker opslaan mislukte
+
 acl_vhosts=Toegestane virtuele hosts
 acl_hosts1=Alles
 acl_hosts0=In de lijst hieronder ..
@@ -365,6 +389,7 @@ acl_root=Toegestane directory's voor locaties
 acl_global=Mag globale instellingen bewerken?
 acl_logs=Mag log files configureren?
 acl_user=Schrijf wachtwoord files als gebruiker
+
 feat_name=Nginx website
 feat_losing=De Nginx virtuele host en al zijn configuratie richtlijnen zullen worden verwijdert
 feat_disname=Nginx website
@@ -430,7 +455,9 @@ feat_clone=Nginx virtuele host aan het klonen ..
 feat_clonealias=.. niet nodig voor alias domeinen
 feat_eclonefind=.. kon de nieuwe virtuele host met de naam $1 niet vinden na het klonen!
 feat_modifyproxy=Proxy bestemmingen modificeren ..
+
 fcgid_ecmd=Geen PHP opdracht gevonden!
+
 redirect_efind=Er is geen virtuele host voor $1 gevonden
 redirect_eobj=Omleiding word niet geassocieerd met een Nginx configuratie object
 redirect_eobj2=Proxy word niet geassocieerd met een Nginx configuratie object

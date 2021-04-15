@@ -23,6 +23,7 @@ index_startdesc=Inicie o servidor da web Nginx usando a configuração atual.
 index_restart=Aplicar configuração Nginx
 index_restartdesc=Aplique a configuração atual parando e reiniciando o servidor da web Nginx.
 index_eglobal=Você não tem permissão para editar configurações globais
+
 net_title=configuração de rede
 net_header=Opções de rede global
 opt_missing=Nada inserido no campo : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=O tempo limite para conexões de manutenção vital deve 
 opt_keepalive_requests=Limite de solicitação para conexões keepalive
 opt_ekeepalive_requests=O limite de solicitações para conexões de manutenção de atividade deve ser um número de solicitações
 opt_secs=segundos
+
 mime_title=Tipos MIME
 mime_search=Encontre tipos MIME correspondentes :
 mime_ok=Procurar
@@ -54,6 +56,7 @@ mime_eword=A extensão do arquivo contém caracteres inválidos ou começa com u
 mime_eold=O tipo MIME não existe mais!
 mime_eclash=Um tipo MIME com o mesmo nome já existe
 mime_enone=Nenhum tipo MIME selecionado para excluir
+
 logs_title=Configurações de log
 logs_header=Opções de arquivo de log e PID
 opt_error_log=Arquivo de log de erro
@@ -75,6 +78,7 @@ logs_ftext=Formatar sequência
 logs_efname=O nome do formato de log $1 pode conter apenas letras, números, ponto, traço e sublinhado
 logs_etext=Cadeia de formato ausente para o formato de log $1 
 logs_ecannot=Você não tem permissão para configurar arquivos de log
+
 misc_title=Outros ajustes
 misc_header=Usuários e opções de processo
 opt_worker_processes=Número de processos de trabalho
@@ -92,6 +96,7 @@ opt_eworker_priority=A prioridade do trabalhador deve ser um número positivo ou
 opt_index=Arquivos de índice de diretório
 opt_default_type=Tipo MIME para arquivos desconhecidos
 opt_edefault_type=Tipo MIME padrão inválido
+
 docs_title=Opções de documento
 sdocs_title=Opções de documento
 ldocs_title=Opções de documento
@@ -99,6 +104,7 @@ docs_header=Configurações de arquivo, página e documento
 docs_err=Falha ao salvar as opções do documento
 opt_root=Diretório raiz padrão
 opt_eroot=O diretório raiz padrão deve ser um caminho absoluto
+
 fcgi_title=Opções do FastCGI
 lfcgi_title=Opções do FastCGI
 fcgi_header=Opções de servidor e protocolo FastCGI
@@ -117,6 +123,7 @@ fcgi_epvalue=Valor ausente para o parâmetro $1
 opt_fastcgi_buffer_size=Tamanho do buffer para cabeçalhos
 fcgi_buffer=Tamanho como 4k
 opt_efastcgi_buffer_size=O tamanho do buffer deve ser de 4k ou 1M.
+
 ssi_title=Configurações de inclusão do servidor
 sssi_title=Configurações de inclusão do servidor
 lssi_title=Configurações de inclusão do servidor
@@ -129,6 +136,7 @@ opt_ssi_value_length=Comprimento máximo do parâmetro
 ssi_err=Falha ao salvar as configurações de inclusão do servidor
 opt_essi_types=$1 não é um tipo MIME válido
 opt_essi_value_length=O comprimento máximo do parâmetro deve ser um número
+
 manual_title=Editar arquivos de configuração
 manual_file=Editando arquivo de configuração:
 manual_ok=Interruptor
@@ -136,6 +144,7 @@ manual_efile=O arquivo selecionado não faz parte da configuração do Nginx!
 manual_test=Testar nova configuração antes de salvar?
 manual_elink=Dangling link simbólico!
 manual_err=Falha ao salvar o arquivo de configuração
+
 server_create=Criar host virtual
 server_edit=Editar host virtual
 server_egone=O host virtual não existe mais!
@@ -184,10 +193,12 @@ server_settings=Configurações de host virtual
 server_server=Definição de host virtual
 server_eclash=Já existe um host virtual com o mesmo nome
 server_pp=Proxy para $1 
+
 slogs_title=Registro de Host Virtual
 slogs_header=Opções de arquivo de log
 opt_global=Nas configurações globais
 slogs_err=Falha ao salvar as opções do arquivo de log
+
 ssl_title=Configuração SSL
 ssl_header=Opções de criptografia e certificação SSL
 opt_ssl_certificate=Arquivo de certificado SSL
@@ -211,6 +222,7 @@ opt_ssl_protocols=Protocolos SSL para suportar
 opt_essl_ciphers=Lista de cifras com aparência inválida - deve ser como <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Selecionado abaixo
 ssl_clist=Cifras listadas
+
 gzip_title=Opções de compactação GZip
 sgzip_title=Opções de compactação GZip
 lgzip_title=Opções de compactação GZip
@@ -220,6 +232,7 @@ opt_egzip_comp_level=O nível de compressão deve ser um número entre 1 e 9
 gzip_level=1 = mínimo, 9 = melhor
 opt_gzip_types=Tipos MIME para compactar
 opt_egzip_types=$1 não é um tipo MIME válido
+
 proxy_title=Configurações de proxy
 sproxy_title=Configurações de proxy
 lproxy_title=Configurações de proxy
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 não é um nome de cabeçalho válido
 opt_eproxy_hide_header=$1 não é um nome de cabeçalho válido
 opt_proxy_pass=Solicitações de proxy para
 proxy_url=URL
+
 access_title=Controle de acesso
 saccess_title=Controle de acesso
 laccess_title=Controle de acesso
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Arquivo de autenticação básica
 access_eabsolute=O arquivo de senha deve ser um caminho absoluto
 access_edir=O arquivo de senha não pode ser um diretório
 access_ecannot=O arquivo de senha $1 não está no diretório permitido $2 
+
 rewrite_title=Reescrita de URL
 srewrite_title=Reescrita de URL
 lrewrite_title=Reescrita de URL
@@ -277,6 +292,7 @@ rewrite_redirect=Retorno 302 de retorno
 rewrite_permanent=Retorno 301 redirecionado
 rewrite_efrom=O caminho de origem $1 contém espaços
 rewrite_eto=O URL de destino $1 está ausente ou contém espaços
+
 location_create=Criar local
 location_edit=Editar localização
 location_desc=Local $2 no host virtual $1 
@@ -292,6 +308,7 @@ location_rusure=Tem certeza de que deseja excluir o local $1 ? Todas as definiç
 location_epath=O caminho da URL não pode estar vazio ou conter espaços
 location_return=opções de localização
 location_ecannot=O diretório raiz $1 não está no diretório permitido $2 
+
 log_net=Configuração de rede alterada
 log_logs=Configurações de log alteradas
 log_misc=Outras configurações alteradas
@@ -330,23 +347,29 @@ log_rewrite_location=Reescrita de URL alterada para o local $1 em $2
 log_create_user=Usuário criado $1 em $2 
 log_modify_user=Usuário modificado $1 em $2 
 log_delete_user=Usuário excluído $1 em $2 
+
 stop_err=Falha ao parar o Nginx
 stop_ecannot=Você não tem permissão para parar o servidor da web
+
 start_err=Falha ao iniciar o Nginx
 start_ecannot=Você não tem permissão para iniciar o servidor da web
+
 restart_err=Falha ao aplicar a configuração do Nginx
 restart_etest=A configuração é inválida : $1 
+
 match_default=Subdiretório
 match_exact=Diretório exato
 match_case=Expressão regular sensível a maiúsculas e minúsculas
 match_nocase=Expressão regular sem distinção entre maiúsculas e minúsculas
 match_noregexp=Desativar expressões regulares
 match_named=Local nomeado
+
 users_title=Gerenciar usuários
 users_none=Este arquivo de senha ainda não contém usuários.
 users_add=Adicione um novo usuário.
 users_efile=Parâmetro de arquivo ausente!
 users_return=Lista de usuários
+
 user_create=Criar usuário
 user_edit=Editar usuário
 user_header=Detalhes do usuário do diretório protegido por senha
@@ -357,6 +380,7 @@ user_passset=Definido como
 user_enabled=Login ativado?
 user_egone=O usuário não existe mais!
 user_err=Falha ao salvar o usuário
+
 acl_vhosts=Hosts virtuais permitidos
 acl_hosts1=Todos
 acl_hosts0=Listado abaixo ..
@@ -365,6 +389,7 @@ acl_root=Diretórios permitidos para locais
 acl_global=Pode editar configurações globais?
 acl_logs=Pode configurar arquivos de log?
 acl_user=Escreva arquivos de senha como usuário
+
 feat_name=Site Nginx
 feat_losing=O host virtual Nginx e todas as suas diretivas de configuração serão excluídos
 feat_disname=Site Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. não é necessário para domínios de alias
 feat_eclonefind=.. não foi possível encontrar o novo host virtual chamado $1 após a clonagem!
 feat_modifyproxy=Modificando o destino do proxy.
 feat_module=Nginx Webserver (para host virtual)
+
 fcgid_ecmd=Nenhum comando PHP encontrado!
 fcgid_ecmdexec=O comando PHP $1 não pôde ser executado : $2 
 fcgid_ecmdb=O comando PHP $1 não suporta o sinalizador -b necessário para rodar como um servidor FCGId. Você provavelmente precisará instalar um pacote PHP CGI separado.
+
 redirect_efind=Nenhum host virtual para $1 foi encontrado
 redirect_eobj=O redirecionamento não está associado a um objeto de configuração do Nginx
 redirect_eobj2=O proxy não está associado a um objeto de configuração do Nginx
@@ -444,14 +471,18 @@ redirect_eurl=Não é um URL : $1
 redirect_eurlhost=O nome do host no URL não pode ser resolvido : $1 
 redirect_eclash=Um local para $1 já existe
 redirect_ephd=O Nginx permite apenas que os diretórios de destino dos aliases estejam abaixo de $1 
+
 links_anlog=Registro de acesso ao Nginx
 links_enlog=Registro de erro do Nginx
-links_phpini=Configuração PHP
+links_phpini=Configuração PHP-FPM
 links_phpini2=Configuração do PHP $1 
+
 webmin_phpini=Configuração do PHP para $1 
 webmin_phpini2=Configuração do PHP $2 para $1 
+
 monitor_missing=Nginx não está instalado
 monitor_type=Nginx Webserver
+
 tmpl_directives=Adicionando diretivas de configuração do Nginx
 tmpl_default=Padrão (do modelo pai)
 tmpl_none=Nenhum
