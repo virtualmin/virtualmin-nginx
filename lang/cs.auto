@@ -23,6 +23,7 @@ index_startdesc=Spusťte webový server Nginx pomocí aktuální konfigurace.
 index_restart=Použít konfiguraci Nginx
 index_restartdesc=Použijte aktuální konfiguraci zastavením a opětovným spuštěním webového serveru Nginx.
 index_eglobal=Není dovoleno upravovat globální nastavení
+
 net_title=Konfigurace sítě
 net_header=Možnosti globální sítě
 opt_missing=Do pole nebylo zadáno nic : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Časový limit pro udržovací spojení musí být někol
 opt_keepalive_requests=Limit požadavku na udržovací spojení
 opt_ekeepalive_requests=Limit požadavků na udržovací spojení musí být počet žádostí
 opt_secs=sekundy
+
 mime_title=Typy MIME
 mime_search=Najít odpovídající typy MIME :
 mime_ok=Vyhledávání
@@ -54,6 +56,7 @@ mime_eword=Přípona souboru obsahuje neplatné znaky nebo začíná tečkou
 mime_eold=Typ MIME již neexistuje!
 mime_eclash=Typ MIME se stejným názvem již existuje
 mime_enone=Nebyly vybrány žádné typy MIME k odstranění
+
 logs_title=Nastavení protokolování
 logs_header=Možnosti protokolu a souboru PID
 opt_error_log=Soubor protokolu chyb
@@ -75,6 +78,7 @@ logs_ftext=Formátování řetězce
 logs_efname=Název formátu protokolu $1 může obsahovat pouze písmena, čísla, tečku, pomlčku a podtržítko
 logs_etext=Chybí řetězec formátu pro formát protokolu $1 
 logs_ecannot=Není dovoleno konfigurovat soubory protokolu
+
 misc_title=Další nastavení
 misc_header=Uživatelé a možnosti procesu
 opt_worker_processes=Počet pracovních procesů
@@ -92,6 +96,7 @@ opt_eworker_priority=Prioritou pracovníka musí být kladné nebo záporné č�
 opt_index=Soubory indexového adresáře
 opt_default_type=Typ MIME pro neznámé soubory
 opt_edefault_type=Neplatný výchozí typ MIME
+
 docs_title=Možnosti dokumentu
 sdocs_title=Možnosti dokumentu
 ldocs_title=Možnosti dokumentu
@@ -99,6 +104,7 @@ docs_header=Nastavení souboru, stránky a dokumentu
 docs_err=Možnosti dokumentu se nepodařilo uložit
 opt_root=Výchozí kořenový adresář
 opt_eroot=Výchozí kořenový adresář musí být absolutní cestou
+
 fcgi_title=Možnosti FastCGI
 lfcgi_title=Možnosti FastCGI
 fcgi_header=Možnosti serveru FastCGI a protokolu
@@ -117,6 +123,7 @@ fcgi_epvalue=Chybí hodnota parametru $1
 opt_fastcgi_buffer_size=Velikost vyrovnávací paměti pro záhlaví
 fcgi_buffer=Velikost jako 4k
 opt_efastcgi_buffer_size=Velikost vyrovnávací paměti musí být 4k nebo 1M.
+
 ssi_title=Nastavení na straně serveru
 sssi_title=Nastavení na straně serveru
 lssi_title=Nastavení na straně serveru
@@ -129,6 +136,7 @@ opt_ssi_value_length=Maximální délka parametru
 ssi_err=Uložení nastavení na straně serveru se nezdařilo
 opt_essi_types=$1 není platný typ MIME
 opt_essi_value_length=Maximální délka parametru musí být číslo
+
 manual_title=Upravit konfigurační soubory
 manual_file=Úpravy konfiguračního souboru:
 manual_ok=Přepínač
@@ -136,6 +144,7 @@ manual_efile=Vybraný soubor není součástí konfigurace Nginx!
 manual_test=Vyzkoušejte novou konfiguraci před uložením?
 manual_elink=Visící symbolický odkaz!
 manual_err=Uložení konfiguračního souboru se nezdařilo
+
 server_create=Vytvořte virtuální hostitele
 server_edit=Upravit virtuální host
 server_egone=Virtuální hostitel již neexistuje!
@@ -184,10 +193,12 @@ server_settings=Nastavení virtuálního hostitele
 server_server=Definice virtuálního hostitele
 server_eclash=Virtuální hostitel se stejným názvem již existuje
 server_pp=Proxy na $1 
+
 slogs_title=Protokolování virtuálního hostitele
 slogs_header=Možnosti souboru protokolu
 opt_global=Z globálního nastavení
 slogs_err=Možnosti souboru protokolu se nepodařilo uložit
+
 ssl_title=Konfigurace SSL
 ssl_header=Možnosti šifrování a certifikace SSL
 opt_ssl_certificate=Soubor certifikátu SSL
@@ -211,6 +222,7 @@ opt_ssl_protocols=Protokoly SSL na podporu
 opt_essl_ciphers=Neplatný seznam šifry - měl by být jako <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Vybráno níže
 ssl_clist=Uvedené šifry
+
 gzip_title=Možnosti komprese GZip
 sgzip_title=Možnosti komprese GZip
 lgzip_title=Možnosti komprese GZip
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Úroveň komprese musí být číslo mezi 1 a 9
 gzip_level=1 = nejméně, 9 = nejlepší
 opt_gzip_types=Typy MIME ke komprimaci
 opt_egzip_types=$1 není platný typ MIME
+
 proxy_title=Nastavení proxy
 sproxy_title=Nastavení proxy
 lproxy_title=Nastavení proxy
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 není platný název záhlaví
 opt_eproxy_hide_header=$1 není platný název záhlaví
 opt_proxy_pass=Žádosti proxy serveru
 proxy_url=URL
+
 access_title=Řízení přístupu
 saccess_title=Řízení přístupu
 laccess_title=Řízení přístupu
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Základní ověřovací soubor
 access_eabsolute=Soubor hesel musí být absolutní cestou
 access_edir=Soubor hesel nemůže být adresář
 access_ecannot=Soubor s heslem $1 není ve vašem povoleném adresáři $2 
+
 rewrite_title=Přepisování URL
 srewrite_title=Přepisování URL
 lrewrite_title=Přepisování URL
@@ -277,6 +292,7 @@ rewrite_redirect=Návrat přesměrování 302
 rewrite_permanent=Návrat přesměrování 301
 rewrite_efrom=Zdrojová cesta $1 obsahuje mezery
 rewrite_eto=Cílová adresa URL $1 chybí nebo obsahuje mezery
+
 location_create=Vytvořit umístění
 location_edit=Upravit umístění
 location_desc=Umístění $2 ve virtuálním hostiteli $1 
@@ -292,6 +308,7 @@ location_rusure=Opravdu chcete odstranit umístění $1 ? Všechna nastavení ko
 location_epath=Cesta URL nesmí být prázdná nebo obsahovat mezery
 location_return=možnosti umístění
 location_ecannot=Kořenový adresář $1 není pod vaším povoleným adresářem $2 
+
 log_net=Změněna konfigurace sítě
 log_logs=Změněno nastavení protokolování
 log_misc=Změněno další nastavení
@@ -330,23 +347,29 @@ log_rewrite_location=Změněno přepsání adresy URL pro umístění $1 v $2
 log_create_user=Vytvořen uživatel $1 v $2 
 log_modify_user=Upravený uživatel $1 v $2 
 log_delete_user=Smazaný uživatel $1 v $2 
+
 stop_err=Nginx se nepodařilo zastavit
 stop_ecannot=Není dovoleno zastavit webový server
+
 start_err=Nginx se nepodařilo spustit
 start_ecannot=Není dovoleno spustit webový server
+
 restart_err=Nepodařilo se použít konfiguraci Nginx
 restart_etest=Konfigurace je neplatná : $1 
+
 match_default=Podadresář
 match_exact=Přesný adresář
 match_case=Regulární výraz citlivý na velikost písmen
 match_nocase=Regulární výraz necitlivý na velikost písmen
 match_noregexp=Zakázat regulární výrazy
 match_named=Pojmenované umístění
+
 users_title=Správa uživatelů
 users_none=Tento soubor hesel zatím neobsahuje žádné uživatele.
 users_add=Přidejte nového uživatele.
 users_efile=Chybí parametr souboru!
 users_return=seznam uživatelů
+
 user_create=Vytvořit uživatele
 user_edit=Upravit uživatele
 user_header=Detaily uživatele adresáře chráněného heslem
@@ -357,6 +380,7 @@ user_passset=Nastaven na
 user_enabled=Přihlášení povoleno?
 user_egone=Uživatel již neexistuje!
 user_err=Uložení uživatele se nezdařilo
+
 acl_vhosts=Povolení virtuální hostitelé
 acl_hosts1=Všechno
 acl_hosts0=Vypsáno níže ..
@@ -365,6 +389,7 @@ acl_root=Povolené adresáře pro místa
 acl_global=Lze upravit globální nastavení?
 acl_logs=Lze konfigurovat soubory protokolu?
 acl_user=Zapište soubory hesel jako uživatel
+
 feat_name=Web Nginx
 feat_losing=Virtuální hostitel Nginx a všechny jeho konfigurační směrnice budou odstraněny
 feat_disname=Web Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. není nutné pro aliasové domény
 feat_eclonefind=.. po klonování nebyl nalezen nový virtuální hostitel s názvem $1 !
 feat_modifyproxy=Změna cíle proxy serveru ..
 feat_module=Webový server Nginx (pro virtuální hostitele)
+
 fcgid_ecmd=Nebyl nalezen žádný příkaz PHP!
 fcgid_ecmdexec=Příkaz PHP $1 nelze provést : $2 
 fcgid_ecmdb=Příkaz PHP $1 nepodporuje příznak -b potřebný ke spuštění jako server FCGId. Pravděpodobně budete muset nainstalovat samostatný balíček PHP CGI.
+
 redirect_efind=Nebyl nalezen žádný virtuálníhost pro $1 
 redirect_eobj=Přesměrování není spojeno s konfiguračním objektem Nginx
 redirect_eobj2=Proxy není přidružen k konfiguračnímu objektu Nginx
@@ -444,14 +471,18 @@ redirect_eurl=Nejedná se o URL : $1
 redirect_eurlhost=Název hostitele v adrese URL nelze přeložit : $1 
 redirect_eclash=Místo pro $1 již existuje
 redirect_ephd=Nginx umožňuje pouze, aby cílové adresáře aliasu byly pod $1 
+
 links_anlog=Protokol přístupu Nginx
 links_enlog=Protokol chyb Nginx
-links_phpini=PHP konfigurace
+links_phpini=Konfigurace PHP-FPM
 links_phpini2=Konfigurace PHP $1 
+
 webmin_phpini=Konfigurace PHP pro $1 
 webmin_phpini2=Konfigurace PHP $2 pro $1 
+
 monitor_missing=Nginx není nainstalován
 monitor_type=Webový server Nginx
+
 tmpl_directives=Přidání konfiguračních směrnic Nginx
 tmpl_default=Výchozí (z nadřazené šablony)
 tmpl_none=Žádný

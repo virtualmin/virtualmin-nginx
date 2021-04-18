@@ -23,6 +23,7 @@ index_startdesc=Uruchom serwer sieciowy Nginx przy użyciu bieżącej konfigurac
 index_restart=Zastosuj konfigurację Nginx
 index_restartdesc=Zastosuj bieżącą konfigurację, zatrzymując i ponownie uruchamiając serwer Nginx.
 index_eglobal=Nie możesz edytować ustawień globalnych
+
 net_title=konfiguracja sieci
 net_header=Opcje globalnej sieci
 opt_missing=Nic nie wprowadzono dla pola : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Limit czasu dla połączeń podtrzymujących musi wynosi�
 opt_keepalive_requests=Żądaj limitu połączeń utrzymujących połączenie
 opt_ekeepalive_requests=Limit żądań dla połączeń podtrzymujących musi być liczbą żądań
 opt_secs=sekundy
+
 mime_title=Rodzaje MIME
 mime_search=Znajdź pasujące typy MIME :
 mime_ok=Szukaj
@@ -54,6 +56,7 @@ mime_eword=Rozszerzenie pliku zawiera nieprawidłowe znaki lub zaczyna się od k
 mime_eold=Typ MIME już nie istnieje!
 mime_eclash=Typ MIME o tej samej nazwie już istnieje
 mime_enone=Nie wybrano typów MIME do usunięcia
+
 logs_title=Ustawienia rejestrowania
 logs_header=Opcje pliku dziennika i PID
 opt_error_log=Plik dziennika błędów
@@ -75,6 +78,7 @@ logs_ftext=Formatuj ciąg
 logs_efname=Nazwa formatu dziennika $1 może zawierać tylko litery, cyfry, kropkę, myślnik i podkreślnik
 logs_etext=Brak ciągu formatu dla formatu dziennika $1 
 logs_ecannot=Nie możesz konfigurować plików dziennika
+
 misc_title=Inne ustawienia
 misc_header=Użytkownicy i opcje procesu
 opt_worker_processes=Liczba procesów roboczych
@@ -92,6 +96,7 @@ opt_eworker_priority=Priorytet pracownika musi być liczbą dodatnią lub ujemn�
 opt_index=Pliki indeksu katalogów
 opt_default_type=Typ MIME dla nieznanych plików
 opt_edefault_type=Nieprawidłowy domyślny typ MIME
+
 docs_title=Opcje dokumentu
 sdocs_title=Opcje dokumentu
 ldocs_title=Opcje dokumentu
@@ -99,6 +104,7 @@ docs_header=Ustawienia plików, stron i dokumentów
 docs_err=Nie udało się zapisać opcji dokumentu
 opt_root=Domyślny katalog główny
 opt_eroot=Domyślny katalog główny musi być ścieżką bezwzględną
+
 fcgi_title=Opcje FastCGI
 lfcgi_title=Opcje FastCGI
 fcgi_header=Opcje serwera i protokołu FastCGI
@@ -117,6 +123,7 @@ fcgi_epvalue=Brak wartości parametru $1
 opt_fastcgi_buffer_size=Rozmiar bufora dla nagłówków
 fcgi_buffer=Rozmiar jak 4k
 opt_efastcgi_buffer_size=Rozmiar bufora musi wynosić 4k lub 1M.
+
 ssi_title=Ustawienia dołączania po stronie serwera
 sssi_title=Ustawienia dołączania po stronie serwera
 lssi_title=Ustawienia dołączania po stronie serwera
@@ -129,6 +136,7 @@ opt_ssi_value_length=Maksymalna długość parametru
 ssi_err=Nie udało się zapisać ustawień dołączania po stronie serwera
 opt_essi_types=$1 nie jest prawidłowym typem MIME
 opt_essi_value_length=Maksymalna długość parametru musi być liczbą
+
 manual_title=Edytuj pliki konfiguracyjne
 manual_file=Edycja pliku konfiguracyjnego:
 manual_ok=Przełącznik
@@ -136,6 +144,7 @@ manual_efile=Wybrany plik nie jest częścią konfiguracji Nginx!
 manual_test=Przetestować nową konfigurację przed zapisaniem?
 manual_elink=Zwisające dowiązanie symboliczne!
 manual_err=Nie udało się zapisać pliku konfiguracyjnego
+
 server_create=Utwórz wirtualny host
 server_edit=Edytuj wirtualny host
 server_egone=Host wirtualny już nie istnieje!
@@ -184,10 +193,12 @@ server_settings=Ustawienia hosta wirtualnego
 server_server=Definicja hosta wirtualnego
 server_eclash=Wirtualny host o tej samej nazwie już istnieje
 server_pp=Serwer proxy do $1 
+
 slogs_title=Rejestrowanie hosta wirtualnego
 slogs_header=Opcje pliku dziennika
 opt_global=Z ustawień globalnych
 slogs_err=Nie udało się zapisać opcji pliku dziennika
+
 ssl_title=Konfiguracja SSL
 ssl_header=Opcje szyfrowania i certyfikacji SSL
 opt_ssl_certificate=Plik certyfikatu SSL
@@ -211,6 +222,7 @@ opt_ssl_protocols=Protokoły SSL do obsługi
 opt_essl_ciphers=Niepoprawnie wyglądająca lista szyfrów - powinna być jak <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Wybrane poniżej
 ssl_clist=Wymienione szyfry
+
 gzip_title=Opcje kompresji GZip
 sgzip_title=Opcje kompresji GZip
 lgzip_title=Opcje kompresji GZip
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Poziom kompresji musi być liczbą od 1 do 9
 gzip_level=1 = najmniej, 9 = najlepiej
 opt_gzip_types=Typy MIME do kompresji
 opt_egzip_types=$1 nie jest prawidłowym typem MIME
+
 proxy_title=Ustawienia proxy
 sproxy_title=Ustawienia proxy
 lproxy_title=Ustawienia proxy
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 nie jest prawidłową nazwą nagłówka
 opt_eproxy_hide_header=$1 nie jest prawidłową nazwą nagłówka
 opt_proxy_pass=Prośby proxy do
 proxy_url=URL
+
 access_title=Kontrola dostępu
 saccess_title=Kontrola dostępu
 laccess_title=Kontrola dostępu
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Podstawowy plik uwierzytelniający
 access_eabsolute=Plik hasła musi być ścieżką bezwzględną
 access_edir=Plik hasła nie może być katalogiem
 access_ecannot=Plik haseł $1 nie znajduje się w dozwolonym katalogu $2 
+
 rewrite_title=Ponowne pisanie adresów URL
 srewrite_title=Ponowne pisanie adresów URL
 lrewrite_title=Ponowne pisanie adresów URL
@@ -277,6 +292,7 @@ rewrite_redirect=Zwraca przekierowanie 302
 rewrite_permanent=Zwraca przekierowanie 301
 rewrite_efrom=Ścieżka źródłowa $1 zawiera spacje
 rewrite_eto=Brak docelowego adresu URL $1 lub zawiera spacje
+
 location_create=Utwórz lokalizację
 location_edit=Edytuj lokalizację
 location_desc=Lokalizacja $2 na hoście wirtualnym $1 
@@ -292,6 +308,7 @@ location_rusure=Czy na pewno chcesz usunąć lokalizację $1 ? Wszystkie ustawie
 location_epath=Ścieżka URL nie może być pusta ani zawierać spacji
 location_return=opcje lokalizacji
 location_ecannot=Katalog główny $1 nie znajduje się w dozwolonym katalogu $2 
+
 log_net=Zmieniono konfigurację sieci
 log_logs=Zmieniono ustawienia rejestrowania
 log_misc=Zmieniono inne ustawienia
@@ -330,23 +347,29 @@ log_rewrite_location=Zmieniono przepisywanie adresów URL dla lokalizacji $1 w $
 log_create_user=Utworzono użytkownika $1 w $2 
 log_modify_user=Zmodyfikowany użytkownik $1 w $2 
 log_delete_user=Usunięto użytkownika $1 w $2 
+
 stop_err=Nie udało się zatrzymać Nginx
 stop_ecannot=Nie możesz zatrzymać serwera
+
 start_err=Nie udało się uruchomić Nginx
 start_ecannot=Nie możesz uruchomić serwera
+
 restart_err=Nie udało się zastosować konfiguracji Nginx
 restart_etest=Konfiguracja jest nieprawidłowa : $1 
+
 match_default=Podkatalog
 match_exact=Dokładny katalog
 match_case=Wyrażenie regularne rozróżnia małe i wielkie litery
 match_nocase=Wyrażenie regularne bez rozróżniania wielkości liter
 match_noregexp=Wyłącz wyrażenia regularne
 match_named=Nazwana lokalizacja
+
 users_title=Zarządzaj użytkownikami
 users_none=Ten plik hasła nie zawiera jeszcze żadnych użytkowników.
 users_add=Dodaj nowego użytkownika.
 users_efile=Brak parametru pliku!
 users_return=Lista użytkowników
+
 user_create=Stwórz użytkownika
 user_edit=Edytuj użytkownika
 user_header=Dane użytkownika katalogu chronionego hasłem
@@ -357,6 +380,7 @@ user_passset=Ustawić
 user_enabled=Logowanie włączone?
 user_egone=Użytkownik już nie istnieje!
 user_err=Nie udało się zapisać użytkownika
+
 acl_vhosts=Dozwolone hosty wirtualne
 acl_hosts1=Wszystko
 acl_hosts0=Wymienione poniżej ..
@@ -365,6 +389,7 @@ acl_root=Dozwolone katalogi dla lokalizacji
 acl_global=Czy można edytować ustawienia globalne?
 acl_logs=Czy można skonfigurować pliki dziennika?
 acl_user=Napisz pliki haseł jako użytkownik
+
 feat_name=Strona internetowa Nginx
 feat_losing=Wirtualny host Nginx i wszystkie jego dyrektywy konfiguracyjne zostaną usunięte
 feat_disname=Strona internetowa Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. nie jest konieczne w przypadku domen aliasowych
 feat_eclonefind=.. nie udało się znaleźć nowego wirtualnego hosta o nazwie $1 po klonowaniu!
 feat_modifyproxy=Modyfikowanie miejsca docelowego proxy
 feat_module=Nginx Webserver (dla wirtualnego hosta)
+
 fcgid_ecmd=Nie znaleziono polecenia PHP!
 fcgid_ecmdexec=Nie można wykonać polecenia PHP $1 : $2 
 fcgid_ecmdb=Polecenie PHP $1 nie obsługuje flagi -b wymaganej do działania jako serwer FCGId. Prawdopodobnie będziesz musiał zainstalować oddzielny pakiet PHP CGI.
+
 redirect_efind=Nie znaleziono hosta wirtualnego dla $1 
 redirect_eobj=Przekierowanie nie jest powiązane z obiektem konfiguracyjnym Nginx
 redirect_eobj2=Serwer proxy nie jest powiązany z obiektem konfiguracji Nginx
@@ -444,14 +471,18 @@ redirect_eurl=To nie jest adres URL : $1
 redirect_eurlhost=Nie można rozwiązać nazwy hosta w adresie URL : $1 
 redirect_eclash=Lokalizacja dla $1 już istnieje
 redirect_ephd=Nginx pozwala, aby katalogi docelowe aliasów znajdowały się poniżej $1 
+
 links_anlog=Dziennik dostępu Nginx
 links_enlog=Dziennik błędów Nginx
-links_phpini=Konfiguracja PHP
+links_phpini=Konfiguracja PHP-FPM
 links_phpini2=Konfiguracja PHP $1 
+
 webmin_phpini=Konfiguracja PHP dla $1 
 webmin_phpini2=Konfiguracja PHP $2 dla $1 
+
 monitor_missing=Nginx nie jest zainstalowany
 monitor_type=Nginx Webserver
+
 tmpl_directives=Dodanie dyrektyw konfiguracyjnych Nginx
 tmpl_default=Domyślnie (z szablonu nadrzędnego)
 tmpl_none=Żaden

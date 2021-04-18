@@ -23,6 +23,7 @@ index_startdesc=現在の構成を使用してNginxウェブサーバーを起�
 index_restart=Nginx構成を適用
 index_restartdesc=Nginxウェブサーバーを停止して再起動し、現在の構成を適用します。
 index_eglobal=グローバル設定の編集は許可されていません
+
 net_title=ネットワーク設定
 net_header=グローバルネットワークオプション
 opt_missing=フィールドに何も入力されていません： $1
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=キープアライブ接続のタイムアウトは秒数
 opt_keepalive_requests=キープアライブ接続のリクエスト制限
 opt_ekeepalive_requests=キープアライブ接続の要求制限は、要求の数でなければなりません
 opt_secs=秒
+
 mime_title=MIMEタイプ
 mime_search=次と一致するMIMEタイプを検索：
 mime_ok=探す
@@ -54,6 +56,7 @@ mime_eword=ファイル拡張子に無効な文字が含まれているか、ド
 mime_eold=MIMEタイプはもう存在しません！
 mime_eclash=同じ名前のMIMEタイプがすでに存在します
 mime_enone=削除するMIMEタイプが選択されていません
+
 logs_title=ロギング設定
 logs_header=ログとPIDファイルのオプション
 opt_error_log=エラーログファイル
@@ -75,6 +78,7 @@ logs_ftext=フォーマット文字列
 logs_efname=ログ形式名 $1には、文字、数字、ドット、ダッシュ、アンダースコアのみを含めることができます
 logs_etext=ログ形式 $1の形式文字列がありません
 logs_ecannot=ログファイルの構成は許可されていません
+
 misc_title=その他の設定
 misc_header=ユーザーとプロセスオプション
 opt_worker_processes=ワーカープロセスの数
@@ -92,6 +96,7 @@ opt_eworker_priority=ワーカーの優先順位は正または負の数値で�
 opt_index=ディレクトリインデックスファイル
 opt_default_type=不明なファイルのMIMEタイプ
 opt_edefault_type=無効なデフォルトMIMEタイプ
+
 docs_title=ドキュメントオプション
 sdocs_title=ドキュメントオプション
 ldocs_title=ドキュメントオプション
@@ -99,6 +104,7 @@ docs_header=ファイル、ページ、ドキュメントの設定
 docs_err=ドキュメントオプションを保存できませんでした
 opt_root=デフォルトのルートディレクトリ
 opt_eroot=デフォルトのルートディレクトリは絶対パスである必要があります
+
 fcgi_title=FastCGIオプション
 lfcgi_title=FastCGIオプション
 fcgi_header=FastCGIサーバーとプロトコルのオプション
@@ -117,6 +123,7 @@ fcgi_epvalue=パラメータ $1の値がありません
 opt_fastcgi_buffer_size=ヘッダーのバッファサイズ
 fcgi_buffer=4kのようなサイズ
 opt_efastcgi_buffer_size=バッファサイズは4kまたは1Mのようにする必要があります。
+
 ssi_title=サーバー側インクルード設定
 sssi_title=サーバー側インクルード設定
 lssi_title=サーバー側インクルード設定
@@ -129,6 +136,7 @@ opt_ssi_value_length=最大パラメーター長
 ssi_err=サーバー側インクルード設定を保存できませんでした
 opt_essi_types=$1は有効なMIMEタイプではありません
 opt_essi_value_length=パラメータの最大長は数値でなければなりません
+
 manual_title=構成ファイルの編集
 manual_file=構成ファイルの編集：
 manual_ok=スイッチ
@@ -136,6 +144,7 @@ manual_efile=選択したファイルはNginx構成の一部ではありませ�
 manual_test=保存する前に新しい構成をテストしますか？
 manual_elink=ぶら下がりシンボリックリンク！
 manual_err=構成ファイルを保存できませんでした
+
 server_create=仮想ホストを作成
 server_edit=仮想ホストを編集
 server_egone=仮想ホストはもう存在しません！
@@ -184,10 +193,12 @@ server_settings=仮想ホストの設定
 server_server=仮想ホストの定義
 server_eclash=同じ名前の仮想ホストがすでに存在します
 server_pp=$1へのプロキシ
+
 slogs_title=仮想ホストのロギング
 slogs_header=ログファイルオプション
 opt_global=グローバル設定から
 slogs_err=ログファイルオプションの保存に失敗しました
+
 ssl_title=SSL構成
 ssl_header=SSL暗号化および認証オプション
 opt_ssl_certificate=SSL証明書ファイル
@@ -211,6 +222,7 @@ opt_ssl_protocols=サポートするSSLプロトコル
 opt_essl_ciphers=無効に見える暗号リスト<tt>HIGH:!aNULL:!MD5</tt>ようにする必要があり<tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=以下で選択
 ssl_clist=リストされた暗号
+
 gzip_title=GZip圧縮オプション
 sgzip_title=GZip圧縮オプション
 lgzip_title=GZip圧縮オプション
@@ -220,6 +232,7 @@ opt_egzip_comp_level=圧縮レベルは1から9までの数値でなければな
 gzip_level=1 =最低、9 =最高
 opt_gzip_types=圧縮するMIMEタイプ
 opt_egzip_types=$1は有効なMIMEタイプではありません
+
 proxy_title=プロキシ設定
 sproxy_title=プロキシ設定
 lproxy_title=プロキシ設定
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1は有効なヘッダー名ではありません
 opt_eproxy_hide_header=$1は有効なヘッダー名ではありません
 opt_proxy_pass=へのプロキシ要求
 proxy_url=URL
+
 access_title=アクセス制御
 saccess_title=アクセス制御
 laccess_title=アクセス制御
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=基本認証ファイル
 access_eabsolute=パスワードファイルは絶対パスである必要があります
 access_edir=パスワードファイルをディレクトリにすることはできません
 access_ecannot=パスワードファイル $1は許可されたディレクトリ $2にありません
+
 rewrite_title=URLの書き換え
 srewrite_title=URLの書き換え
 lrewrite_title=URLの書き換え
@@ -277,6 +292,7 @@ rewrite_redirect=302リダイレクトを返す
 rewrite_permanent=301リダイレクトを返す
 rewrite_efrom=ソースパス $1にはスペースが含まれています
 rewrite_eto=リンク先URL $1がないか、スペースが含まれています
+
 location_create=場所を作成
 location_edit=場所を編集
 location_desc=仮想ホスト $1の場所 $2
@@ -292,6 +308,7 @@ location_rusure=場所 $1を削除してもよろしいですか？その中の�
 location_epath=URLパスを空にしたり、スペースを含めることはできません
 location_return=ロケーションオプション
 location_ecannot=ルートディレクトリ $1は許可されたディレクトリ $2の下にありません
+
 log_net=変更されたネットワーク構成
 log_logs=ログ設定の変更
 log_misc=その他の設定を変更
@@ -330,23 +347,29 @@ log_rewrite_location=$2の場所 $1のURL書き換えを変更しました
 log_create_user=$2にユーザー $1を作成しました
 log_modify_user=$2のユーザー $1を変更しました
 log_delete_user=$2のユーザー $1を削除しました
+
 stop_err=Nginxを停止できませんでした
 stop_ecannot=ウェブサーバーを停止することはできません
+
 start_err=Nginxを起動できませんでした
 start_ecannot=ウェブサーバーの起動は許可されていません
+
 restart_err=Nginx構成の適用に失敗しました
 restart_etest=構成が無効です： $1
+
 match_default=サブディレクトリ
 match_exact=正確なディレクトリ
 match_case=大文字と小文字を区別する正規表現
 match_nocase=大文字と小文字を区別しない正規表現
 match_noregexp=正規表現を無効にする
 match_named=名前付きの場所
+
 users_title=ユーザーを管理する
 users_none=このパスワードファイルにはまだユーザーが含まれていません。
 users_add=新しいユーザーを追加します。
 users_efile=ファイルパラメータがありません！
 users_return=ユーザーリスト
+
 user_create=ユーザーを作成
 user_edit=ユーザーを編集
 user_header=パスワードで保護されたディレクトリユーザーの詳細
@@ -357,6 +380,7 @@ user_passset=に設定
 user_enabled=ログインは有効ですか？
 user_egone=ユーザーは存在しません！
 user_err=ユーザーを保存できませんでした
+
 acl_vhosts=許可された仮想ホスト
 acl_hosts1=すべて
 acl_hosts0=以下通り ..
@@ -365,6 +389,7 @@ acl_root=ロケーションに許可されたディレクトリ
 acl_global=グローバル設定を編集できますか？
 acl_logs=ログファイルを構成できますか？
 acl_user=ユーザーとしてパスワードファイルを書き込む
+
 feat_name=Nginxウェブサイト
 feat_losing=Nginx仮想ホストとそのすべての構成ディレクティブが削除されます
 feat_disname=Nginxウェブサイト
@@ -433,9 +458,11 @@ feat_clonealias=..エイリアスドメインには不要
 feat_eclonefind=..クローン作成後に $1という名前の新しい仮想ホストが見つかりませんでした！
 feat_modifyproxy=プロキシ宛先の変更 ..
 feat_module=Nginxウェブサーバー（仮想ホスト用）
+
 fcgid_ecmd=PHPコマンドが見つかりません！
 fcgid_ecmdexec=PHPコマンド $1を実行できませんでした： $2
 fcgid_ecmdb=PHPコマンド $1は、FCGIdサーバーとして実行するために必要な-bフラグをサポートしていません。おそらく、別のPHP CGIパッケージをインストールする必要があります。
+
 redirect_efind=$1の仮想ホストが見つかりませんでした
 redirect_eobj=リダイレクトはNginx構成オブジェクトに関連付けられていません
 redirect_eobj2=プロキシはNginx構成オブジェクトに関連付けられていません
@@ -444,14 +471,18 @@ redirect_eurl=URLではありません： $1
 redirect_eurlhost=URLのホスト名を解決できません： $1
 redirect_eclash=$1の場所は既に存在します
 redirect_ephd=Nginxでは、エイリアスの宛先ディレクトリは $1以下にのみ許可されます
+
 links_anlog=Nginxアクセスログ
 links_enlog=Nginxエラーログ
-links_phpini=PHPの設定
+links_phpini=PHP-FPM構成
 links_phpini2=PHP $1の設定
+
 webmin_phpini=$1のPHP構成
 webmin_phpini2=$1のPHP $2構成
+
 monitor_missing=Nginxがインストールされていません
 monitor_type=Nginxウェブサーバー
+
 tmpl_directives=Nginx構成ディレクティブの追加
 tmpl_default=デフォルト（親テンプレートから）
 tmpl_none=無し

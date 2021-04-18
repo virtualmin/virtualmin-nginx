@@ -23,6 +23,7 @@ index_startdesc=Paleiskite „Nginx“ žiniatinklio serverį naudodami dabartin
 index_restart=Taikykite „Nginx“ konfigūraciją
 index_restartdesc=Taikykite dabartinę konfigūraciją sustabdydami ir iš naujo paleisdami „Nginx“ serverį.
 index_eglobal=Jums neleidžiama redaguoti bendrųjų nustatymų
+
 net_title=Tinklo konfigūracija
 net_header=Visuotinės tinklo galimybės
 opt_missing=Lauke nieko neįvesta : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Nuolatinių ryšių laikas turi būti sekundžių skaiči
 opt_keepalive_requests=Prašymas išlaikyti nuolatinius ryšius
 opt_ekeepalive_requests=Nuolatinių ryšių užklausų riba turi būti užklausų skaičius
 opt_secs=sekundžių
+
 mime_title=MIME tipai
 mime_search=Rasti MIME tipus, atitinkančius :
 mime_ok=Paieška
@@ -54,6 +56,7 @@ mime_eword=Failo plėtinyje yra netinkamų simbolių arba jis prasideda tašku
 mime_eold=MIME tipas nebeegzistuoja!
 mime_eclash=MIME tipas tuo pačiu pavadinimu jau egzistuoja
 mime_enone=Ištrinti MIME tipų nepasirinkta
+
 logs_title=Registravimo nustatymai
 logs_header=Žurnalo ir PID failų parinktys
 opt_error_log=Klaidų žurnalo failas
@@ -75,6 +78,7 @@ logs_ftext=Formatuoti eilutę
 logs_efname=Žurnalo formato pavadinime $1 gali būti tik raidės, skaičiai, taškas, brūkšnys ir pabraukimas
 logs_etext=Trūksta žurnalo formato formato eilutės $1 
 logs_ecannot=Jums neleidžiama konfigūruoti žurnalo failų
+
 misc_title=Kiti nustatymai
 misc_header=Vartotojai ir proceso parinktys
 opt_worker_processes=Darbuotojų procesų skaičius
@@ -92,6 +96,7 @@ opt_eworker_priority=Darbuotojo prioritetas turi būti teigiamas arba neigiamas 
 opt_index=Katalogų rodyklės failai
 opt_default_type=MIME tipas nežinomiems failams
 opt_edefault_type=Netinkamas numatytasis MIME tipas
+
 docs_title=Dokumento parinktys
 sdocs_title=Dokumento parinktys
 ldocs_title=Dokumento parinktys
@@ -99,6 +104,7 @@ docs_header=Failo, puslapio ir dokumento nustatymai
 docs_err=Nepavyko išsaugoti dokumento parinkčių
 opt_root=Numatytasis šakninis katalogas
 opt_eroot=Numatytasis šakninis katalogas turi būti absoliutus kelias
+
 fcgi_title=„FastCGI“ parinktys
 lfcgi_title=„FastCGI“ parinktys
 fcgi_header=„FastCGI“ serverio ir protokolo parinktys
@@ -117,6 +123,7 @@ fcgi_epvalue=Trūksta $1 parametro vertės
 opt_fastcgi_buffer_size=Antraštės buferio dydis
 fcgi_buffer=Dydis kaip 4k
 opt_efastcgi_buffer_size=Buferio dydis turi būti 4k arba 1M.
+
 ssi_title=Į serverio pusės parametrus
 sssi_title=Į serverio pusės parametrus
 lssi_title=Į serverio pusės parametrus
@@ -129,6 +136,7 @@ opt_ssi_value_length=Maksimalus parametro ilgis
 ssi_err=Nepavyko išsaugoti serverio pusės įtraukimo nustatymų
 opt_essi_types=„ $1 “ nėra teisingas MIME tipas
 opt_essi_value_length=Maksimalus parametro ilgis turi būti skaičius
+
 manual_title=Redaguoti konfigūracijos failus
 manual_file=Redaguoti konfigūracijos failą:
 manual_ok=Perjungti
@@ -136,6 +144,7 @@ manual_efile=Pasirinktas failas nėra „Nginx“ konfigūracijos dalis!
 manual_test=Prieš išsaugodami išbandyti naują konfigūraciją?
 manual_elink=Dangling simbolinis saitas!
 manual_err=Nepavyko išsaugoti konfigūracijos failo
+
 server_create=Sukurkite virtualųjį kompiuterį
 server_edit=Redaguoti virtualųjį kompiuterį
 server_egone=Virtualiojo kompiuterio nebeegzistuoja!
@@ -184,10 +193,12 @@ server_settings=Virtualiojo kompiuterio nustatymai
 server_server=Virtualiojo kompiuterio apibrėžimas
 server_eclash=Virtualus kompiuteris tuo pačiu pavadinimu jau yra
 server_pp=Proxy į $1 
+
 slogs_title=Virtualiojo kompiuterio registravimas
 slogs_header=Žurnalo failo parinktys
 opt_global=Iš globalių parametrų
 slogs_err=Nepavyko išsaugoti žurnalo failo parinkčių
+
 ssl_title=SSL konfigūracija
 ssl_header=SSL šifravimo ir sertifikavimo parinktys
 opt_ssl_certificate=SSL sertifikato failas
@@ -211,6 +222,7 @@ opt_ssl_protocols=Palaikomi SSL protokolai
 opt_essl_ciphers=Netinkamai atrodantis šifrų sąrašas - turėtų būti kaip <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Pasirinkta žemiau
 ssl_clist=Išvardytos šifrai
+
 gzip_title=„GZip“ suspaudimo parinktys
 sgzip_title=„GZip“ suspaudimo parinktys
 lgzip_title=„GZip“ suspaudimo parinktys
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Suspaudimo lygis turi būti nuo 1 iki 9
 gzip_level=1 = mažiausia, 9 = geriausia
 opt_gzip_types=MIME tipai suspausti
 opt_egzip_types=„ $1 “ nėra teisingas MIME tipas
+
 proxy_title=Tarpinio serverio nustatymai
 sproxy_title=Tarpinio serverio nustatymai
 lproxy_title=Tarpinio serverio nustatymai
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=„ $1 “ nėra teisingas antraštės pavadinimas
 opt_eproxy_hide_header=„ $1 “ nėra teisingas antraštės pavadinimas
 opt_proxy_pass=Įgaliotojo prašymai
 proxy_url=URL
+
 access_title=Prieigos kontrolė
 saccess_title=Prieigos kontrolė
 laccess_title=Prieigos kontrolė
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Pagrindinis autentifikacijos failas
 access_eabsolute=Slaptažodžio failas turi būti absoliutus kelias
 access_edir=Slaptažodžio failas negali būti katalogas
 access_ecannot=Slaptažodžio failas $1 nėra jūsų leidžiamame kataloge $2 
+
 rewrite_title=URL perrašymas
 srewrite_title=URL perrašymas
 lrewrite_title=URL perrašymas
@@ -277,6 +292,7 @@ rewrite_redirect=Grąžinti 302 peradresavimą
 rewrite_permanent=Grąžinti 301 peradresavimą
 rewrite_efrom=Šaltinio kelyje $1 yra tarpų
 rewrite_eto=Trūksta paskirties URL $1 arba jame yra tarpų
+
 location_create=Sukurti vietą
 location_edit=Redaguoti vietą
 location_desc=Vieta $2 virtualiame pagrindiniame kompiuteryje $1 
@@ -292,6 +308,7 @@ location_rusure=Ar tikrai norite ištrinti vietą $1 ? Taip pat bus pašalinti v
 location_epath=URL kelias negali būti tuščias ar jame gali būti tarpų
 location_return=vietos parinktys
 location_ecannot=Šakninis katalogas $1 nėra jūsų leidžiamame kataloge $2 
+
 log_net=Pakeista tinklo konfigūracija
 log_logs=Pakeisti registravimo nustatymai
 log_misc=Pakeitė kitus parametrus
@@ -330,23 +347,29 @@ log_rewrite_location=Pakeistas $1 vietos URL perrašymas $2
 log_create_user=Sukurtas vartotojas $1 $2 
 log_modify_user=Modifikuotas vartotojas $1 $2 
 log_delete_user=Ištrintas vartotojas $1 iš $2 
+
 stop_err=Nepavyko sustabdyti „Nginx“
 stop_ecannot=Jums neleidžiama sustabdyti žiniatinklio serverio
+
 start_err=Nepavyko paleisti „Nginx“
 start_ecannot=Jums neleidžiama paleisti žiniatinklio serverio
+
 restart_err=Nepavyko pritaikyti „Nginx“ konfigūracijos
 restart_etest=Konfigūracija netinkama : $1 
+
 match_default=Pakatalogis
 match_exact=Tikslus katalogas
 match_case=Didžiosios ir mažosios raidės
 match_nocase=Didelė ir maža raidžių taisyklinga išraiška
 match_noregexp=Išjungti įprastas išraiškas
 match_named=Pavadinta vieta
+
 users_title=Tvarkyti vartotojus
 users_none=Šiame slaptažodžio faile dar nėra jokių vartotojų.
 users_add=Pridėti naują vartotoją.
 users_efile=Trūksta failo parametro!
 users_return=vartotojų sąrašas
+
 user_create=Sukurti vartotoją
 user_edit=Redaguoti vartotoją
 user_header=Slaptažodžiu apsaugoto katalogo vartotojo informacija
@@ -357,6 +380,7 @@ user_passset=Nustatytas į
 user_enabled=Prisijungimas įjungtas?
 user_egone=Vartotojo nebeegzistuoja!
 user_err=Nepavyko išsaugoti vartotojo
+
 acl_vhosts=Leidžiami virtualūs kompiuteriai
 acl_hosts1=Visi
 acl_hosts0=Išvardytos žemiau ..
@@ -365,6 +389,7 @@ acl_root=Leidžiami vietų katalogai
 acl_global=Ar galite redaguoti globalius nustatymus?
 acl_logs=Ar galima sukonfigūruoti žurnalo failus?
 acl_user=Parašykite slaptažodžio failus kaip vartotojas
+
 feat_name=„Nginx“ svetainė
 feat_losing=„Nginx“ virtualusis kompiuteris ir visos jo konfigūravimo direktyvos bus ištrintos
 feat_disname=„Nginx“ svetainė
@@ -433,9 +458,11 @@ feat_clonealias=.. nebūtini slapyvardžių domenams
 feat_eclonefind=.. po klonavimo nepavyko rasti naujo virtualiojo kompiuterio pavadinimu $1 !
 feat_modifyproxy=Įgaliotojo serverio paskirties keitimas
 feat_module=„Nginx“ interneto serveris (virtualiam pagrindiniam kompiuteriui)
+
 fcgid_ecmd=Nerasta PHP komandos!
 fcgid_ecmdexec=Nepavyko įvykdyti PHP komandos $1 : $2 
 fcgid_ecmdb=PHP komanda $1 nepalaiko -b žymos, reikalingos paleisti kaip FCGId serverį. Tikriausiai turėsite įdiegti atskirą PHP CGI paketą.
+
 redirect_efind=Nerasta jokio $1 virtualiojo serverio
 redirect_eobj=Peradresavimas nėra susijęs su „Nginx“ konfigūracijos objektu
 redirect_eobj2=Tarpinis serveris nėra susijęs su „Nginx“ konfigūracijos objektu
@@ -444,14 +471,18 @@ redirect_eurl=Ne URL : $1
 redirect_eurlhost=Pagrindinio kompiuterio vardo URL negalima išspręsti : $1 
 redirect_eclash=$1 vieta jau yra
 redirect_ephd=„Nginx“ leidžia slapyvardžių, esančių tiksliniuose kataloguose, mažesnį nei $1 
+
 links_anlog=„Nginx“ prieigos žurnalas
 links_enlog=„Nginx“ klaidų žurnalas
-links_phpini=PHP konfigūracija
+links_phpini=PHP-FPM konfigūracija
 links_phpini2=$1 PHP konfigūracija
+
 webmin_phpini=$1 PHP konfigūracija
 webmin_phpini2=$1 PHP konfigūracija
+
 monitor_missing=„Nginx“ neįdiegta
 monitor_type=„Nginx“ internetinis serveris
+
 tmpl_directives=Pridedami „Nginx“ konfigūravimo nurodymai
 tmpl_default=Numatytasis (iš pagrindinio šablono)
 tmpl_none=Nė vienas

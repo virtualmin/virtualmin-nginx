@@ -23,6 +23,7 @@ index_startdesc=Indítsa el az Nginx webszervert az aktuális konfigurációval.
 index_restart=Alkalmazza az Nginx konfigurációt
 index_restartdesc=Alkalmazza az aktuális konfigurációt az Nginx webszerver leállításával és újraindításával.
 index_eglobal=Nem engedélyezi a globális beállítások szerkesztését
+
 net_title=Hálózati konfiguráció
 net_header=Globális hálózati lehetőségek
 opt_missing=Nincs megadva mező : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=A tartós kapcsolatok időtartamának másodpercnek kell 
 opt_keepalive_requests=Kérjen korlátozást a tartós kapcsolatokra
 opt_ekeepalive_requests=A tartós kapcsolatokra vonatkozó kérelmek korlátozásának számos kérésnek kell lennie
 opt_secs=másodperc
+
 mime_title=MIME típusok
 mime_search=Keresse meg a megfelelő MIME típusokat :
 mime_ok=Keresés
@@ -54,6 +56,7 @@ mime_eword=A fájlkiterjesztés érvénytelen karaktereket tartalmaz, vagy pontt
 mime_eold=A MIME típus már nem létezik!
 mime_eclash=Az azonos nevű MIME típus már létezik
 mime_enone=Nincs törölve a kiválasztott MIME típus
+
 logs_title=Naplózási beállítások
 logs_header=Napló- és PID-fájlbeállítások
 opt_error_log=Hiba naplófájl
@@ -75,6 +78,7 @@ logs_ftext=Formátum karakterlánc
 logs_efname=A (z) $1 naplóformátum név csak betűket, számokat, pontokat, kötőjelet és aláhúzást tartalmazhat
 logs_etext=Hiányzó formátum karakterlánc a $1 napló formátumhoz
 logs_ecannot=A naplófájlok nem konfigurálhatók
+
 misc_title=Egyéb beállitások
 misc_header=Felhasználók és a folyamat lehetőségei
 opt_worker_processes=Munkavállalói folyamatok száma
@@ -92,6 +96,7 @@ opt_eworker_priority=A munkavállalói prioritásnak pozitív vagy negatív szá
 opt_index=Directory index fájlok
 opt_default_type=MIME típus ismeretlen fájlok esetén
 opt_edefault_type=Érvénytelen alapértelmezett MIME típus
+
 docs_title=Dokumentumbeállítások
 sdocs_title=Dokumentumbeállítások
 ldocs_title=Dokumentumbeállítások
@@ -99,6 +104,7 @@ docs_header=Fájl-, oldal- és dokumentumbeállítások
 docs_err=A dokumentumbeállítások mentése nem sikerült
 opt_root=Alapértelmezett gyökérkönyvtár
 opt_eroot=Az alapértelmezett gyökérkönyvtárnak abszolút útvonalnak kell lennie
+
 fcgi_title=FastCGI beállítások
 lfcgi_title=FastCGI beállítások
 fcgi_header=FastCGI szerver és protokoll opciók
@@ -117,6 +123,7 @@ fcgi_epvalue=Hiányzik a (z) $1 paraméter értéke
 opt_fastcgi_buffer_size=A fejlécek puffermérete
 fcgi_buffer=Méret, mint 4k
 opt_efastcgi_buffer_size=A pufferméretnek 4k vagy 1M-nek kell lennie.
+
 ssi_title=Szerveroldali beállítások
 sssi_title=Szerveroldali beállítások
 lssi_title=Szerveroldali beállítások
@@ -129,6 +136,7 @@ opt_ssi_value_length=A paraméter maximális hossza
 ssi_err=A kiszolgálóoldali beállítások mentése nem sikerült
 opt_essi_types=A (z) $1 nem érvényes MIME típus
 opt_essi_value_length=A paraméter maximális hosszának számnak kell lennie
+
 manual_title=Konfigurációs fájlok szerkesztése
 manual_file=A konfigurációs fájl szerkesztése:
 manual_ok=Kapcsoló
@@ -136,6 +144,7 @@ manual_efile=A kiválasztott fájl nem része az Nginx konfigurációnak!
 manual_test=Teszteljen új konfigurációt mentés előtt?
 manual_elink=Dangling szimbolikus link!
 manual_err=A konfigurációs fájl mentése nem sikerült
+
 server_create=Hozzon létre virtuális gazdagépet
 server_edit=A virtuális host szerkesztése
 server_egone=A virtuális gazdagép már nem létezik!
@@ -184,10 +193,12 @@ server_settings=Virtuális állomás beállításai
 server_server=Virtuális gazdagép meghatározása
 server_eclash=Az azonos nevű virtuális gazdagép már létezik
 server_pp=Proxy a $1 -hez
+
 slogs_title=Virtuális gazdagép naplózása
 slogs_header=Naplófájl-beállítások
 opt_global=A globális beállításokból
 slogs_err=A naplófájl-beállítások mentése nem sikerült
+
 ssl_title=SSL konfiguráció
 ssl_header=SSL titkosítási és tanúsítási lehetőségek
 opt_ssl_certificate=SSL tanúsítvány fájl
@@ -211,6 +222,7 @@ opt_ssl_protocols=A támogatandó SSL protokollok
 opt_essl_ciphers=Érvénytelen kinézetű titkosítási lista - olyannak kell lennie, mint <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Az alábbiak szerint választható
 ssl_clist=Felsorolt rejtjelek
+
 gzip_title=GZip tömörítési lehetőségek
 sgzip_title=GZip tömörítési lehetőségek
 lgzip_title=GZip tömörítési lehetőségek
@@ -220,6 +232,7 @@ opt_egzip_comp_level=A tömörítési szintnek 1 és 9 közötti számnak kell l
 gzip_level=1 = legkevesebb, 9 = legjobb
 opt_gzip_types=MIME típusok a tömörítéshez
 opt_egzip_types=A (z) $1 nem érvényes MIME típus
+
 proxy_title=Proxy beállítások
 sproxy_title=Proxy beállítások
 lproxy_title=Proxy beállítások
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=A (z) $1 nem érvényes fejlécnév
 opt_eproxy_hide_header=A (z) $1 nem érvényes fejlécnév
 opt_proxy_pass=Proxy kéréseket küld a
 proxy_url=URL
+
 access_title=Hozzáférés-szabályozás
 saccess_title=Hozzáférés-szabályozás
 laccess_title=Hozzáférés-szabályozás
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Alapvető hitelesítési fájl
 access_eabsolute=A jelszó fájlnak abszolút útvonalnak kell lennie
 access_edir=A jelszófájl nem lehet könyvtár
 access_ecannot=A $1 jelszófájl nem található a (z) $2 engedélyezett könyvtárban
+
 rewrite_title=URL újraírás
 srewrite_title=URL újraírás
 lrewrite_title=URL újraírás
@@ -277,6 +292,7 @@ rewrite_redirect=Vissza a 302 átirányítást
 rewrite_permanent=Vissza a 301 átirányítást
 rewrite_efrom=A (z) $1 forrásút szóközt tartalmaz
 rewrite_eto=A (z) $1 cél URL hiányzik, vagy szóközöket tartalmaz
+
 location_create=Hely létrehozása
 location_edit=Hely szerkesztése
 location_desc=$2 helye a $1 virtuális gazdagépen
@@ -292,6 +308,7 @@ location_rusure=Biztosan törli a (z) $1 helyet? A benne lévő összes konfigur
 location_epath=Az URL elérési útja nem lehet üres, és nem tartalmazhat szóközt
 location_return=helymeghatározási lehetőségek
 location_ecannot=A $1 gyökérkönyvtár nem található a megengedett $2 könyvtár alatt
+
 log_net=Megváltozott a hálózati konfiguráció
 log_logs=Megváltoztak a naplózási beállítások
 log_misc=Megváltoztatta a többi beállítást
@@ -330,23 +347,29 @@ log_rewrite_location=Megváltozott a (z) $1 hely URL-jének átírása a (z) $2 
 log_create_user=Létrehozta a (z) $1 felhasználót a $2 -ben
 log_modify_user=$1 módosított felhasználó a $2 -ben
 log_delete_user=$1 felhasználó törölve a (z) $2 -ből
+
 stop_err=Az Nginx megállítása nem sikerült
 stop_ecannot=Nem szabad megállítani a webszervert
+
 start_err=Az Nginx indítása nem sikerült
 start_ecannot=Nem indíthatja el a webszervert
+
 restart_err=Nem sikerült alkalmazni az Nginx konfigurációt
 restart_etest=A konfiguráció érvénytelen : $1 
+
 match_default=Alkönyvtár
 match_exact=Pontos könyvtár
 match_case=A kis- és nagybetűket érintő szabályos kifejezés
 match_nocase=A kis- és nagybetűket érzékeny szabályos kifejezés
 match_noregexp=Letiltja a reguláris kifejezéseket
 match_named=Nevezett hely
+
 users_title=Felhasználók kezelése
 users_none=Ez a jelszófájl még nem tartalmaz felhasználókat.
 users_add=Új felhasználó hozzáadása.
 users_efile=Hiányzik a fájlparaméter!
 users_return=felhasználói lista
+
 user_create=Felhasználó létrehozása
 user_edit=Felhasználó szerkesztése
 user_header=Jelszóval védett könyvtár felhasználói adatok
@@ -357,6 +380,7 @@ user_passset=Állítva
 user_enabled=A bejelentkezés engedélyezve van?
 user_egone=A felhasználó már nem létezik!
 user_err=Nem sikerült menteni a felhasználót
+
 acl_vhosts=Engedélyezett virtuális gépek
 acl_hosts1=Minden
 acl_hosts0=Alább listázva ..
@@ -365,6 +389,7 @@ acl_root=Megengedett könyvtárak a helyekhez
 acl_global=Szerkesztheti a globális beállításokat?
 acl_logs=Be lehet állítani a naplófájlokat?
 acl_user=Írjon felhasználóként jelszófájlokat
+
 feat_name=Nginx webhely
 feat_losing=Az Nginx virtuális gazdagépe és annak összes konfigurációs irányelve törlődik
 feat_disname=Nginx webhely
@@ -433,9 +458,11 @@ feat_clonealias=.. az álnevekhez nem szükséges
 feat_eclonefind=.. a klónozás után nem található az új $1 nevű virtuális gazdagép!
 feat_modifyproxy=Proxy célállomás módosítása ..
 feat_module=Nginx Webserver (virtuális host számára)
+
 fcgid_ecmd=Nem található PHP parancs!
 fcgid_ecmdexec=A (z) $1 PHP parancs nem hajtható végre : $2 
 fcgid_ecmdb=A (z) $1 PHP parancs nem támogatja az FCGId szerverként való futtatáshoz szükséges -b jelzőt. Valószínűleg külön PHP CGI csomagot kell telepítenie.
+
 redirect_efind=Nem található a (z) $1 virtuális tárolója
 redirect_eobj=Az átirányítás nincs társítva egy Nginx konfigurációs objektumhoz
 redirect_eobj2=A proxy nincs társítva egy Nginx konfigurációs objektumhoz
@@ -444,14 +471,18 @@ redirect_eurl=Nem URL : $1
 redirect_eurlhost=Az URL gazdagépneve nem oldható meg : $1 
 redirect_eclash=A $1 hely már létezik
 redirect_ephd=Az Nginx csak az álnév célkönyvtárak $1 alatt lehet
+
 links_anlog=Nginx hozzáférési napló
 links_enlog=Nginx hibanapló
-links_phpini=PHP konfiguráció
+links_phpini=PHP-FPM konfiguráció
 links_phpini2=$1 PHP konfiguráció
+
 webmin_phpini=$1 PHP konfigurációja
 webmin_phpini2=$1 PHP konfigurációja
+
 monitor_missing=Az Nginx nincs telepítve
 monitor_type=Nginx Webserver
+
 tmpl_directives=Nginx konfigurációs irányelvek hozzáadása
 tmpl_default=Alapértelmezés (a szülősablonból)
 tmpl_none=Egyik sem

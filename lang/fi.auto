@@ -23,6 +23,7 @@ index_startdesc=Käynnistä Nginx-verkkopalvelin nykyisellä kokoonpanolla.
 index_restart=Käytä Nginx-määritystä
 index_restartdesc=Käytä nykyistä kokoonpanoa pysäyttämällä ja käynnistämällä Nginx-palvelin uudelleen.
 index_eglobal=Et voi muokata yleisiä asetuksia
+
 net_title=Verkon kokoonpano
 net_header=Globaalit verkottumisvaihtoehdot
 opt_missing=Kenttään ei syötetty mitään : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Jatkuvien yhteyksien aikakatkaisun on oltava sekunneja
 opt_keepalive_requests=Pyydä rajoituksia jatkuvatoimisille yhteyksille
 opt_ekeepalive_requests=Jatkuvien yhteyksien pyyntörajan on oltava useita pyyntöjä
 opt_secs=sekuntia
+
 mime_title=MIME-tyypit
 mime_search=Etsi vastaavia MIME-tyyppejä :
 mime_ok=Hae
@@ -54,6 +56,7 @@ mime_eword=Tiedostotunniste sisältää virheellisiä merkkejä tai alkaa pistee
 mime_eold=MIME-tyyppiä ei enää ole!
 mime_eclash=Samalla nimellä MIME-tyyppi on jo olemassa
 mime_enone=Yhtään poistettavaa MIME-tyyppiä ei ole valittu
+
 logs_title=Kirjausasetukset
 logs_header=Loki- ja PID-tiedostovaihtoehdot
 opt_error_log=Virhe lokitiedosto
@@ -75,6 +78,7 @@ logs_ftext=Alusta merkkijono
 logs_efname=Lokimuodon nimi $1 voi sisältää vain kirjaimia, numeroita, pisteitä, viivaa ja alaviivoja
 logs_etext=Puuttuva lokimuodon $1 merkkijono
 logs_ecannot=Lokitiedostoja ei voi määrittää
+
 misc_title=Muut asetukset
 misc_header=Käyttäjät ja prosessivaihtoehdot
 opt_worker_processes=Työntekijäprosessien lukumäärä
@@ -92,6 +96,7 @@ opt_eworker_priority=Työntekijän prioriteetin on oltava positiivinen tai negat
 opt_index=Hakemistotiedostot
 opt_default_type=MIME-tyyppi tuntemattomille tiedostoille
 opt_edefault_type=Virheellinen MIME-tyyppi
+
 docs_title=Asiakirja-asetukset
 sdocs_title=Asiakirja-asetukset
 ldocs_title=Asiakirja-asetukset
@@ -99,6 +104,7 @@ docs_header=Tiedosto-, sivu- ja asiakirja-asetukset
 docs_err=Asiakirja-asetusten tallentaminen epäonnistui
 opt_root=Oletushakemisto
 opt_eroot=Oletusjuurikansion on oltava ehdoton polku
+
 fcgi_title=FastCGI-asetukset
 lfcgi_title=FastCGI-asetukset
 fcgi_header=FastCGI-palvelimen ja protokollan asetukset
@@ -117,6 +123,7 @@ fcgi_epvalue=Puuttuu arvo parametrille $1
 opt_fastcgi_buffer_size=Puskurien koko otsikoille
 fcgi_buffer=Koko kuten 4k
 opt_efastcgi_buffer_size=Puskurin koon on oltava 4k tai 1M.
+
 ssi_title=Palvelinpuolen sisällyttämisasetukset
 sssi_title=Palvelinpuolen sisällyttämisasetukset
 lssi_title=Palvelinpuolen sisällyttämisasetukset
@@ -129,6 +136,7 @@ opt_ssi_value_length=Parametrin enimmäispituus
 ssi_err=Palvelinpuolen sisältävien asetusten tallentaminen epäonnistui
 opt_essi_types=$1 ei ole kelvollinen MIME-tyyppi
 opt_essi_value_length=Parametrin enimmäispituuden on oltava numero
+
 manual_title=Muokkaa asetustiedostoja
 manual_file=Asetustiedostoa muokataan:
 manual_ok=Vaihtaa
@@ -136,6 +144,7 @@ manual_efile=Valittu tiedosto ei ole osa Nginx-määritystä!
 manual_test=Testaa uusi kokoonpano ennen tallentamista?
 manual_elink=Dangling symbolinen linkki!
 manual_err=Asetustiedoston tallentaminen epäonnistui
+
 server_create=Luo virtuaalinen isäntä
 server_edit=Muokkaa virtuaalista isäntää
 server_egone=Virtuaalia isäntää ei enää ole!
@@ -184,10 +193,12 @@ server_settings=Virtuaalisen palvelimen asetukset
 server_server=Virtuaalisen isännän määritelmä
 server_eclash=Saman nimen virtuaalinen isäntä on jo olemassa
 server_pp=Välityspalvelin kohteelle $1 
+
 slogs_title=Virtuaalisen palvelimen kirjaaminen
 slogs_header=Lokitiedoston asetukset
 opt_global=Globaaleista asetuksista
 slogs_err=Lokitiedosto-asetusten tallentaminen epäonnistui
+
 ssl_title=SSL-määritykset
 ssl_header=SSL-salaus- ja varmennusvaihtoehdot
 opt_ssl_certificate=SSL-varmennetiedosto
@@ -211,6 +222,7 @@ opt_ssl_protocols=SSL-protokollat tukemaan
 opt_essl_ciphers=Virheellisen näköinen <tt>HIGH:!aNULL:!MD5</tt> - pitäisi olla kuin <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Valittu alla
 ssl_clist=Listattu salat
+
 gzip_title=GZip-pakkausasetukset
 sgzip_title=GZip-pakkausasetukset
 lgzip_title=GZip-pakkausasetukset
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Pakkaustason on oltava luku välillä 1 - 9
 gzip_level=1 = vähiten, 9 = paras
 opt_gzip_types=MIME-tyypit pakkaamiseksi
 opt_egzip_types=$1 ei ole kelvollinen MIME-tyyppi
+
 proxy_title=Välityspalvelimen asetukset
 sproxy_title=Välityspalvelimen asetukset
 lproxy_title=Välityspalvelimen asetukset
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 ei ole kelvollinen otsikon nimi
 opt_eproxy_hide_header=$1 ei ole kelvollinen otsikon nimi
 opt_proxy_pass=Välityspalvelin pyytää
 proxy_url=URL-
+
 access_title=Kulunvalvonta
 saccess_title=Kulunvalvonta
 laccess_title=Kulunvalvonta
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Perustodennustiedosto
 access_eabsolute=Salasanatiedoston on oltava absoluuttinen polku
 access_edir=Salasanatiedosto ei voi olla hakemisto
 access_ecannot=Salasanatiedosto $1 ei ole sallitun hakemistosi $2 alla
+
 rewrite_title=URL-osoitteen uudelleen kirjoittaminen
 srewrite_title=URL-osoitteen uudelleen kirjoittaminen
 lrewrite_title=URL-osoitteen uudelleen kirjoittaminen
@@ -277,6 +292,7 @@ rewrite_redirect=Palauta 302 uudelleenohjaus
 rewrite_permanent=Palauta 301 uudelleenohjaus
 rewrite_efrom=Lähdepolku $1 sisältää välilyöntejä
 rewrite_eto=Kohde-URL-osoite $1 puuttuu tai sisältää välilyöntejä
+
 location_create=Luo sijainti
 location_edit=Muokkaa sijaintia
 location_desc=Sijainti $2 virtuaalisäntässä $1 
@@ -292,6 +308,7 @@ location_rusure=Haluatko varmasti poistaa sijainnin $1 ? Myös kaikki siinä ole
 location_epath=URL-osoitteen polku ei voi olla tyhjä tai sisältää välilyöntejä
 location_return=sijaintivaihtoehdot
 location_ecannot=Juurihakemisto $1 ei ole sallitun hakemistosi $2 alla
+
 log_net=Verkkoasetukset muuttuneet
 log_logs=Muutokset kirjausasetuksissa
 log_misc=Muutti muita asetuksia
@@ -330,23 +347,29 @@ log_rewrite_location=Sijainnin $1 URL-osoitteiden uudelleenkirjoittaminen muutet
 log_create_user=Luonut käyttäjän $1 $2 : een
 log_modify_user=Muokattu käyttäjä $1 $2 : ssa
 log_delete_user=Poistettu käyttäjä $1 $2 : sta
+
 stop_err=Nginxin lopettaminen epäonnistui
 stop_ecannot=Verkkopalvelinta ei saa lopettaa
+
 start_err=Nginxin käynnistäminen epäonnistui
 start_ecannot=Verkkopalvelinta ei saa käynnistää
+
 restart_err=Nginx-määrityksen asettaminen epäonnistui
 restart_etest=Kokoonpano on virheellinen : $1 
+
 match_default=Alihakemiston
 match_exact=Tarkka hakemisto
 match_case=Kirjainkokoherkkä säännöllinen lauseke
 match_nocase=Kirjainkoko herkkä säännöllinen lauseke
 match_noregexp=Poista säännölliset lausekkeet käytöstä
 match_named=Nimetty sijainti
+
 users_title=Hallinnoi käyttäjiä
 users_none=Tämä salasanatiedosto ei vielä sisällä käyttäjiä.
 users_add=Lisää uusi käyttäjä.
 users_efile=Puuttuu tiedostoparametri!
 users_return=käyttäjäluettelo
+
 user_create=Luo käyttäjä
 user_edit=Muokkaa käyttäjää
 user_header=Salasanasuojattu hakemiston käyttäjän tiedot
@@ -357,6 +380,7 @@ user_passset=Asetettu
 user_enabled=Sisäänkirjautuminen käytössä?
 user_egone=Käyttäjää ei enää ole!
 user_err=Käyttäjän tallentaminen epäonnistui
+
 acl_vhosts=Sallitut virtuaaliset isännät
 acl_hosts1=Kaikki
 acl_hosts0=Listattu alle ..
@@ -365,6 +389,7 @@ acl_root=Sallitut hakemistot paikoissa
 acl_global=Voiko muokata globaaleja asetuksia?
 acl_logs=Voiko lokitiedostot määrittää?
 acl_user=Kirjoita salasanatiedostot käyttäjäksi
+
 feat_name=Nginx-verkkosivusto
 feat_losing=Nginx-virtuaalinen isäntä ja kaikki sen määritysdirektiivit poistetaan
 feat_disname=Nginx-verkkosivusto
@@ -433,9 +458,11 @@ feat_clonealias=.. ei tarvita alias-verkkotunnuksille
 feat_eclonefind=.. kloonauksen jälkeen ei löytynyt uutta virtuaalia isäntää nimeltä $1 !
 feat_modifyproxy=Välityspalvelimen määränpään muuttaminen ..
 feat_module=Nginx Webserver (virtuaalisäntä)
+
 fcgid_ecmd=PHP-komentoa ei löytynyt!
 fcgid_ecmdexec=PHP-komentoa $1 ei voitu suorittaa : $2 
 fcgid_ecmdb=PHP-komento $1 ei tue -b-lippua, joka tarvitaan suoritettavaksi FCGId-palvelimena. Sinun on todennäköisesti asennettava erillinen PHP CGI -paketti.
+
 redirect_efind=$1 : n virtuaalimajoitusta ei löytynyt
 redirect_eobj=Uudelleenohjaus ei liity Nginx-määritysobjektiin
 redirect_eobj2=Välityspalvelinta ei liitetä Nginx-määritysobjektiin
@@ -444,14 +471,18 @@ redirect_eurl=Ei URL : $1
 redirect_eurlhost=URL-osoitteessa olevaa isäntänimeä ei voida ratkaista : $1 
 redirect_eclash=$1 : n sijainti on jo olemassa
 redirect_ephd=Nginx sallii vain aliaksien kohdehakemistojen olevan alle $1 
+
 links_anlog=Nginx-käyttöloki
 links_enlog=Nginx-virheloki
-links_phpini=PHP-määritykset
+links_phpini=PHP-FPM-määritykset
 links_phpini2=PHP $1 -kokoonpano
+
 webmin_phpini=$1 PHP-määritykset
 webmin_phpini2=$1 : n PHP $2 -kokoonpano
+
 monitor_missing=Nginxiä ei ole asennettu
 monitor_type=Nginx-verkkopalvelin
+
 tmpl_directives=Nginx-asetusdirektiivien lisääminen
 tmpl_default=Oletus (vanhemmalta)
 tmpl_none=Ei mitään

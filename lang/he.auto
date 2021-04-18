@@ -23,6 +23,7 @@ index_startdesc=הפעל את שרת האינטרנט Nginx באמצעות הת�
 index_restart=החל תצורת Nginx
 index_restartdesc=החל את התצורה הנוכחית על ידי עצירה והפעלה מחדש של שרת האינטרנט Nginx.
 index_eglobal=אינך מורשה לערוך הגדרות גלובליות
+
 net_title=תצורת רשת
 net_header=אפשרויות רשת גלובליות
 opt_missing=לא הוזן דבר לשדה : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=זמן הקצאת זמן לחיבורים מרגיעים 
 opt_keepalive_requests=הגבלת בקשה לחיבורי הרגעה
 opt_ekeepalive_requests=על גבול הבקשה לחיבורי הרגעה להיות מספר בקשות
 opt_secs=שניות
+
 mime_title=סוגי MIME
 mime_search=מצא סוגי MIME תואמים :
 mime_ok=לחפש
@@ -54,6 +56,7 @@ mime_eword=סיומת הקובץ מכילה תווים לא חוקיים או מ
 mime_eold=סוג MIME כבר לא קיים!
 mime_eclash=קיים כבר סוג MIME עם אותו שם
 mime_enone=לא נבחרו סוגי MIME למחיקה
+
 logs_title=הגדרות רישום
 logs_header=אפשרויות קובץ יומן ו- PID
 opt_error_log=קובץ יומן שגיאות
@@ -75,6 +78,7 @@ logs_ftext=מחרוזת עיצוב
 logs_efname=שם פורמט יומן $1 יכול להכיל רק אותיות, מספרים, נקודה, מקף וקו תחתון
 logs_etext=מחרוזת הפורמט חסרה לפורמט היומן $1 
 logs_ecannot=אינך מורשה להגדיר קבצי יומן
+
 misc_title=הגדרות אחרות
 misc_header=משתמשים ואפשרויות תהליכים
 opt_worker_processes=מספר תהליכי עובדים
@@ -92,6 +96,7 @@ opt_eworker_priority=עדיפות העובד חייבת להיות מספר חי
 opt_index=קבצי אינדקס ספריות
 opt_default_type=סוג MIME עבור קבצים לא ידועים
 opt_edefault_type=סוג MIME ברירת מחדל לא חוקי
+
 docs_title=אפשרויות מסמך
 sdocs_title=אפשרויות מסמך
 ldocs_title=אפשרויות מסמך
@@ -99,6 +104,7 @@ docs_header=הגדרות קובץ, עמוד ומסמך
 docs_err=שמירת אפשרויות המסמך נכשלה
 opt_root=ספריית שורש ברירת מחדל
 opt_eroot=ספריית שורש ברירת מחדל חייבת להיות נתיב מוחלט
+
 fcgi_title=אפשרויות FastCGI
 lfcgi_title=אפשרויות FastCGI
 fcgi_header=אפשרויות שרת ופרוטוקול FastCGI
@@ -117,6 +123,7 @@ fcgi_epvalue=ערך חסר לפרמטר $1
 opt_fastcgi_buffer_size=גודל מאגר לכותרות
 fcgi_buffer=גודל כמו 4k
 opt_efastcgi_buffer_size=גודל המאגר חייב להיות כמו 4k או 1M.
+
 ssi_title=כלול הגדרות בצד השרת
 sssi_title=כלול הגדרות בצד השרת
 lssi_title=כלול הגדרות בצד השרת
@@ -129,6 +136,7 @@ opt_ssi_value_length=אורך פרמטר מרבי
 ssi_err=שמירת ההגדרות של צד השרת נכשלה
 opt_essi_types=$1 אינו מסוג MIME תקף
 opt_essi_value_length=אורך הפרמטר המרבי חייב להיות מספר
+
 manual_title=ערוך קבצי תצורה
 manual_file=עריכת קובץ תצורה:
 manual_ok=החלף
@@ -136,6 +144,7 @@ manual_efile=הקובץ שנבחר אינו חלק מתצורת ה- Nginx!
 manual_test=בדוק תצורה חדשה לפני השמירה?
 manual_elink=קישור סמלי משתלשל!
 manual_err=שמירת קובץ התצורה נכשלה
+
 server_create=צור מארח וירטואלי
 server_edit=ערוך מארח וירטואלי
 server_egone=מארח וירטואלי כבר לא קיים!
@@ -184,10 +193,12 @@ server_settings=הגדרות מארח וירטואלי
 server_server=הגדרת מארח וירטואלי
 server_eclash=מארח וירטואלי עם אותו שם כבר קיים
 server_pp=פרוקסי ל- $1 
+
 slogs_title=רישום מארח וירטואלי
 slogs_header=אפשרויות קובץ יומן
 opt_global=מההגדרות הגלובליות
 slogs_err=שמירת אפשרויות קבצי היומן נכשלה
+
 ssl_title=תצורת SSL
 ssl_header=אפשרויות הצפנה והסמכה של SSL
 opt_ssl_certificate=קובץ אישור SSL
@@ -211,6 +222,7 @@ opt_ssl_protocols=פרוטוקולי SSL לתמיכה
 opt_essl_ciphers=רשימת צופן לא חוקית למראה - צריכה להיות כמו <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=נבחר למטה
 ssl_clist=צ'פרים רשומים
+
 gzip_title=אפשרויות דחיסת GZip
 sgzip_title=אפשרויות דחיסת GZip
 lgzip_title=אפשרויות דחיסת GZip
@@ -220,6 +232,7 @@ opt_egzip_comp_level=רמת הדחיסה חייבת להיות מספר בין 1
 gzip_level=1 = פחות, 9 = הכי טוב
 opt_gzip_types=סוגי MIME לדחיסה
 opt_egzip_types=$1 אינו מסוג MIME תקף
+
 proxy_title=הגדרות פרוקסי
 sproxy_title=הגדרות פרוקסי
 lproxy_title=הגדרות פרוקסי
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 אינו שם כותרת חוקי
 opt_eproxy_hide_header=$1 אינו שם כותרת חוקי
 opt_proxy_pass=בקשות פרוקסי ל-
 proxy_url=כתובת אתר
+
 access_title=בקרת גישה
 saccess_title=בקרת גישה
 laccess_title=בקרת גישה
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=קובץ אימות בסיסי
 access_eabsolute=קובץ הסיסמא חייב להיות נתיב מוחלט
 access_edir=קובץ הסיסמה לא יכול להיות ספרייה
 access_ecannot=קובץ הסיסמה $1 אינו נמצא תחת הספרייה המותרת $2 שלך
+
 rewrite_title=כתיבה מחדש של כתובות אתרים
 srewrite_title=כתיבה מחדש של כתובות אתרים
 lrewrite_title=כתיבה מחדש של כתובות אתרים
@@ -277,6 +292,7 @@ rewrite_redirect=החזר הפניה מחדש של 302
 rewrite_permanent=הפניה מחדש של 301
 rewrite_efrom=נתיב המקור $1 מכיל רווחים
 rewrite_eto=כתובת אתר יעד $1 חסרה או מכילה רווחים
+
 location_create=צור מיקום
 location_edit=ערוך מיקום
 location_desc=מיקום $2 במארח הווירטואלי $1 
@@ -292,6 +308,7 @@ location_rusure=האם אתה בטוח שברצונך למחוק את המיקו
 location_epath=נתיב כתובת אתר לא יכול להיות ריק או להכיל רווחים
 location_return=אפשרויות מיקום
 location_ecannot=ספריית השורש $1 אינה נמצאת תחת הספריה המותרת $2 שלך
+
 log_net=שינוי תצורת הרשת
 log_logs=הגדרות רישום השתנו
 log_misc=שינו הגדרות אחרות
@@ -330,23 +347,29 @@ log_rewrite_location=שינויים מחדש של כתובות אתרים למי
 log_create_user=יצר משתמש $1 ב- $2 
 log_modify_user=משתמש שונה $1 ב- $2 
 log_delete_user=המשתמש נמחק $1 ב- $2 
+
 stop_err=עצירת Nginx נכשלה
 stop_ecannot=אינך מורשה להפסיק את שרת האינטרנט
+
 start_err=הפעלת Nginx נכשלה
 start_ecannot=אינך מורשה להפעיל את שרת האינטרנט
+
 restart_err=החלת תצורת Nginx נכשלה
 restart_etest=התצורה אינה חוקית : $1 
+
 match_default=ספריית משנה
 match_exact=מדריך מדויק
 match_case=ביטוי רגיל לרגיש-רישיות
 match_nocase=ביטוי רגיל ללא רישיות
 match_noregexp=השבת ביטויים רגילים
 match_named=מיקום בשם
+
 users_title=נהל משתמשים
 users_none=קובץ סיסמא זה אינו מכיל עדיין משתמשים.
 users_add=הוסף משתמש חדש.
 users_efile=פרמטר קובץ חסר!
 users_return=רשימת משתמש
+
 user_create=צור משתמש
 user_edit=ערוך משתמש
 user_header=פרטי משתמש במדריך מוגן באמצעות סיסמה
@@ -357,6 +380,7 @@ user_passset=מכוון ל
 user_enabled=התחברות מופעלת?
 user_egone=המשתמש כבר לא קיים!
 user_err=שמירת המשתמש נכשלה
+
 acl_vhosts=מארחים וירטואליים מורשים
 acl_hosts1=את כל
 acl_hosts0=מופיע למטה ..
@@ -365,6 +389,7 @@ acl_root=ספריות מותרות למיקומים
 acl_global=האם ניתן לערוך הגדרות גלובליות?
 acl_logs=האם ניתן להגדיר קבצי יומן?
 acl_user=כתוב קבצי סיסמא כמשתמש
+
 feat_name=אתר Nginx
 feat_losing=המארח הווירטואלי של Nginx וכל הוראות התצורה שלו יימחקו
 feat_disname=אתר Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. לא הכרחי לדומיינים של כינוי
 feat_eclonefind=.. לא הצליח למצוא מארח וירטואלי חדש בשם $1 לאחר השיבוט!
 feat_modifyproxy=שינוי יעד ה- proxy ..
 feat_module=שרת האינטרנט Nginx (למארח וירטואלי)
+
 fcgid_ecmd=לא נמצאה פקודת PHP!
 fcgid_ecmdexec=לא ניתן היה לבצע את פקודת PHP $1 : $2 
 fcgid_ecmdb=פקודת PHP $1 אינה תומכת בדגל -b הדרוש להפעלה כשרת FCGId. סביר להניח שתצטרך להתקין חבילת PHP CGI נפרדת.
+
 redirect_efind=לא נמצא virtualhost עבור $1 
 redirect_eobj=הפניה מחדש אינה קשורה לאובייקט תצורת Nginx
 redirect_eobj2=שרת ה- proxy אינו משויך לאובייקט תצורה של Nginx
@@ -444,14 +471,18 @@ redirect_eurl=לא כתובת אתר : $1
 redirect_eurlhost=לא ניתן לפתור שם מארח בכתובת URL : $1 
 redirect_eclash=קיים כבר מיקום עבור $1 
 redirect_ephd=Nginx מאפשרת רק לכינוי ספריות יעד להיות פחות מ- $1 
+
 links_anlog=יומן הגישה של Nginx
 links_enlog=יומן שגיאות Nginx
-links_phpini=תצורת PHP
+links_phpini=תצורת PHP-FPM
 links_phpini2=תצורת PHP $1 
+
 webmin_phpini=תצורת PHP עבור $1 
 webmin_phpini2=תצורת PHP $2 עבור $1 
+
 monitor_missing=Nginx אינו מותקן
 monitor_type=שרת האינטרנט של Nginx
+
 tmpl_directives=הוספת הנחיות תצורת Nginx
 tmpl_default=ברירת מחדל (מתבנית האב)
 tmpl_none=אף אחד
