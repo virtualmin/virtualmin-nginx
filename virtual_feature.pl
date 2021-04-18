@@ -2826,4 +2826,33 @@ if ($fpmport ne $webport) {
 return ($fpmport =~ /^\d+$/ ? 1 : 2, $fpmport);
 }
 
+# feature_save_domain_php_fpm_port(&domain, socket)
+sub feature_save_domain_php_fpm_port
+{
+my ($d, $socket) = @_;
+
+# First update the Nginx config
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+return "No Nginx server found" if (!$server);
+my @locs = &find("location", $server);
+my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
+                   ($_->{'words'}->[1] eq '\.php$' ||
+                        $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
+return "No location block for .php files found" if (!$loc);
+&save_directive($loc, "fastcgi_pass",
+		[ $socket =~ /^\// ? "unix:$socket" : "localhost:$socket" ]);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+
+# Second update the FPM server port
+my $conf = &virtual_server::get_php_fpm_config($d);
+&virtual_server::save_php_fpm_config_value($d, "listen", $socket);
+&virtual_server::register_post_action(
+	\&virtual_server::restart_php_fpm_server, $conf);
+
+return undef;
+}
+
 1;
