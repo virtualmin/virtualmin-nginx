@@ -1711,16 +1711,22 @@ my %cmds_abs = (
 	'kill', &has_command('kill'),
 	'sleep', &has_command('sleep'),
 );
-&init::enable_at_boot($name,
-	      "Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
-	      &command_as_user($d->{'user'}, 0,
-		"$envs $cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile",
-	      &command_as_user($d->{'user'}, 0,
-		"$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`")." ; $cmds_abs{'sleep'} 1",
-	      undef,
-	      { 'fork' => 1,
-		'pidfile' => $pidfile },
-	      );
+&init::enable_at_boot(
+		$name,
+		"Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
+		$cmd,
+		undef,
+		undef,
+		{ 'opts' => {
+		  'env'    => $envs,
+		  'user'   => $d->{'user'},
+		  'group'  => $d->{'user'},
+		  'stop'   => 0,
+		  'reload' => 0,
+		  'logstd' => "$log",
+		  'logerr' => "${log}_error"
+		}},
+		);
 $init::init_mode = $old_init_mode;
 
 # Launch it, and save the PID
