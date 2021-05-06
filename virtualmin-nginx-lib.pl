@@ -1838,7 +1838,7 @@ sub list_fastcgi_params
 {
 my ($server) = @_;
 my $root = &find_value("root", $server);
-$root ||= '$document_root';
+$root ||= '$realpath_root';
 my @rv = (
 	[ 'GATEWAY_INTERFACE', 'CGI/1.1' ],
 	[ 'SERVER_SOFTWARE',   'nginx' ],
