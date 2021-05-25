@@ -23,6 +23,7 @@ index_startdesc=Ibda n-Nginx webserver billi tuża l-konfigurazzjoni kurrenti.
 index_restart=Applika Konfigurazzjoni Nginx
 index_restartdesc=Applika l-konfigurazzjoni kurrenti billi twaqqaf u terġa tibda l-websajt tan-Nginx.
 index_eglobal=M'għandekx permess teditja settings globali
+
 net_title=Konfigurazzjoni tan-Netwerk
 net_header=Għażliet ta 'netwerking globali
 opt_missing=Xejn ma daħal għall-qasam : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Il-ħin għall-konnessjonijiet ta 'żamma għandu jkun ta
 opt_keepalive_requests=Limitu ta 'talba għal konnessjonijiet ta' rbit
 opt_ekeepalive_requests=Limitu ta 'talba għal konnessjonijiet ta' żamma għandu jkun numru ta 'talbiet
 opt_secs=sekondi
+
 mime_title=Tipi MIME
 mime_search=Sib tipi MIME li jaqblu :
 mime_ok=Fittex
@@ -54,6 +56,7 @@ mime_eword=Estensjoni tal-fajl fiha karattri invalidi jew tibda b'tikka
 mime_eold=It-tip MIME m'għadux jeżisti!
 mime_eclash=Tip MIME bl-istess isem diġà jeżisti
 mime_enone=L-ebda tip MIME magħżul biex jitħassar
+
 logs_title=Issettjar tal-qtugħ
 logs_header=Log u l-għażliet tal-fajl PID
 opt_error_log=Żball fil-ġurnal tal-fajl
@@ -75,6 +78,7 @@ logs_ftext=Ifforma l-ispag
 logs_efname=L-isem tal-format tal-ġurnal $1 jista 'jkun fih biss ittri, numri, punt, sing u sottolineu
 logs_etext=Strument tal-format nieqes għall-format tal-ġurnal $1 
 logs_ecannot=M'għandekx permess tikkonfigura fajls tal-ġurnal
+
 misc_title=Issettjar ieħor
 misc_header=Utenti u għażliet tal-proċess
 opt_worker_processes=Numru ta 'proċessi ta' ħaddiema
@@ -92,6 +96,7 @@ opt_eworker_priority=Il-prijorità tal-ħaddiem trid tkun numru pożittiv jew ne
 opt_index=Fajls indiċi tad-Direttorju
 opt_default_type=Tip MIME għal fajls mhux magħrufa
 opt_edefault_type=It-tip MIME default mhux validu
+
 docs_title=Għażliet tad-Dokument
 sdocs_title=Għażliet tad-Dokument
 ldocs_title=Għażliet tad-Dokument
@@ -99,6 +104,7 @@ docs_header=Is-settings tal-fajl, paġna u dokument
 docs_err=Ma rnexxielux isalva l-għażliet tad-dokument
 opt_root=Direttorju tal-għeruq awtomatiku
 opt_eroot=Direttorju tal-għeruq li jkun irrispettivament għandu jkun triq assoluta
+
 fcgi_title=Għażliet FastCGI
 lfcgi_title=Għażliet FastCGI
 fcgi_header=Server FastCGI u għażliet ta 'protokoll
@@ -117,6 +123,7 @@ fcgi_epvalue=Valur nieqes għall-parametru $1
 opt_fastcgi_buffer_size=Daqs tal-Baffer għall-intestaturi
 fcgi_buffer=Daqs bħal 4k
 opt_efastcgi_buffer_size=Id-daqs tal-baffer għandu jkun bħal 4k jew 1M.
+
 ssi_title=In-naħa tas-Server Inkluża l-issettjar
 sssi_title=In-naħa tas-Server Inkluża l-issettjar
 lssi_title=In-naħa tas-Server Inkluża l-issettjar
@@ -129,6 +136,7 @@ opt_ssi_value_length=Tul massimu tal-parametru
 ssi_err=Ma rnexxielux isalva s-settings min-naħa tas-server
 opt_essi_types=$1 mhuwiex tip MIME validu
 opt_essi_value_length=It-tul massimu tal-parametru għandu jkun numru
+
 manual_title=Editja l-Fajls ta 'Konfigurazzjoni
 manual_file=Editjar tal-fajl tal-konfigurazzjoni:
 manual_ok=Aqleb
@@ -136,6 +144,7 @@ manual_efile=Fajl magħżul mhux parti mill-konfigurazzjoni Nginx!
 manual_test=Ittestja konfigurazzjoni ġdida qabel ma tiffranka?
 manual_elink=Rabta simbolika!
 manual_err=Ma rnexxielux isalva l-fajl tal-konfigurazzjoni
+
 server_create=Oħloq Ospitanti Virtwali
 server_edit=Editja l-Ospitanti Virtwali
 server_egone=Ospitanti virtwali m'għadhomx jeżistu!
@@ -184,10 +193,12 @@ server_settings=Settings tal-Ospitanti Virtwali
 server_server=Definizzjoni ta 'Ospitanti Virtwali
 server_eclash=Ospitant virtwali bl-istess isem diġà jeżisti
 server_pp=Proxy għal $1 
+
 slogs_title=Qtugħ tal-Ospitanti Virtwali
 slogs_header=Ġurnal għażliet tal-fajl
 opt_global=Minn settings globali
 slogs_err=Ma rnexxielux isalva l-għażliet tal-fajl tal-log
+
 ssl_title=Konfigurazzjoni SSL
 ssl_header=Għażliet ta 'ċertifikazzjoni u kodifikazzjoni SSL
 opt_ssl_certificate=Fajl taċ-ċertifikat SSL
@@ -211,6 +222,7 @@ opt_ssl_protocols=Protokolli SSL biex jappoġġjaw
 opt_essl_ciphers=Lista ta 'ċifri li tħares mhux valida - għandha tkun simili għall- <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Magħżula hawn taħt
 ssl_clist=Elettriċi mniżżlin
+
 gzip_title=Għażliet ta 'Kompressjoni GZip
 sgzip_title=Għażliet ta 'Kompressjoni GZip
 lgzip_title=Għażliet ta 'Kompressjoni GZip
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Il-livell ta 'kompressjoni għandu jkun numru bejn 1 u 9
 gzip_level=1 = l-inqas, 9 = l-aħjar
 opt_gzip_types=Tipi MIME biex tikkompressa
 opt_egzip_types=$1 mhuwiex tip MIME validu
+
 proxy_title=L-issettjar tal-prokura
 sproxy_title=L-issettjar tal-prokura
 lproxy_title=L-issettjar tal-prokura
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 mhuwiex isem ta 'intestatura validu
 opt_eproxy_hide_header=$1 mhuwiex isem ta 'intestatura validu
 opt_proxy_pass=Talbiet bi prokura
 proxy_url=URL
+
 access_title=Kontroll tal-Aċċess
 saccess_title=Kontroll tal-Aċċess
 laccess_title=Kontroll tal-Aċċess
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Fajl bażiku ta 'awtentikazzjoni
 access_eabsolute=Il-fajl tal-password għandu jkun passaġġ assolut
 access_edir=Il-fajl tal-password ma jistax ikun direttorju
 access_ecannot=Il-fajl tal-password $1 mhux taħt id-direttorju permess $2 tiegħek
+
 rewrite_title=URL Kitba mill-ġdid
 srewrite_title=URL Kitba mill-ġdid
 lrewrite_title=URL Kitba mill-ġdid
@@ -277,6 +292,7 @@ rewrite_redirect=Ritorn 302 direzzjoni mill-ġdid
 rewrite_permanent=Ritorn 301 direzzjoni mill-ġdid
 rewrite_efrom=Il-passaġġ tas-sors $1 fih spazji
 rewrite_eto=URL ta 'destinazzjoni $1 hija nieqsa jew fiha spazji
+
 location_create=Oħloq Post
 location_edit=Editja Post
 location_desc=Post $2 fl-ospitanti virtwali $1 
@@ -292,6 +308,7 @@ location_rusure=Int żgur li trid tħassar il-post $1 ? Is-settings kollha tal-k
 location_epath=Il-mogħdija URL ma tistax tkun vojta jew tinkludi spazji
 location_return=għażliet tal-post
 location_ecannot=Id-direttorju tal-għeruq $1 mhux taħt id-direttorju permess $2 tiegħek
+
 log_net=Konfigurazzjoni tan-netwerk mibdula
 log_logs=Inbidlet is-settings tal-qtugħ
 log_misc=Inbidlet issettjar ieħor
@@ -330,23 +347,29 @@ log_rewrite_location=Bidla URL kitba mill-ġdid għall-lokazzjoni $1 f' $2
 log_create_user=Utent maħluq $1 f' $2 
 log_modify_user=Utent modifikat $1 f' $2 
 log_delete_user=Utent imħassar $1 f' $2 
+
 stop_err=Naqset milli tieqaf Nginx
 stop_ecannot=M’intix permess li twaqqaf il-websajt
+
 start_err=Naqset milli tibda Nginx
 start_ecannot=M'għandekx permess tibda s-sit elettroniku
+
 restart_err=Ma rnexxielux japplika l-konfigurazzjoni Nginx
 restart_etest=Il-konfigurazzjoni mhix valida : $1 
+
 match_default=Sotto-direttorju
 match_exact=Direttorju eżatt
 match_case=Espressjoni regolari sensittiva għall-każ
 match_nocase=Espressjoni regolari insensittiva mill-każ
 match_noregexp=Itfi l-espressjonijiet regolari
 match_named=Post imsemmi
+
 users_title=Immaniġġja l-Utenti
 users_none=Dan il-fajl tal-password għadu ma fihx utenti.
 users_add=Żid utent ġdid.
 users_efile=Parametru tal-fajl Nieqes!
 users_return=lista tal-utenti
+
 user_create=Oħloq Utent
 user_edit=Editja l-Utent
 user_header=Dettalji ta 'utent tad-direttorju protett mill-password
@@ -357,6 +380,7 @@ user_passset=Issettja għal
 user_enabled=Id-dħul attivat?
 user_egone=Utent m'għadux jeżisti!
 user_err=Ma rnexxielux isalva l-utent
+
 acl_vhosts=Hosts virtwali permessi
 acl_hosts1=Kollha
 acl_hosts0=Elenkat hawn taħt ..
@@ -365,6 +389,7 @@ acl_root=Direttorji permessi għal postijiet
 acl_global=Tista 'teditja s-settings globali?
 acl_logs=Tista 'tikkonfigura fajls tal-log?
 acl_user=Ikteb il-fajls tal-password bħala utent
+
 feat_name=Websajt Nginx
 feat_losing=L-ospitanti virtwali Nginx u d-direttivi kollha tal-konfigurazzjoni tagħha se jitħassru
 feat_disname=Websajt Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. mhux meħtieġ għal oqsma tal-alias
 feat_eclonefind=.. ma setgħetx issib ospitanti virtwali ġdid bl-isem $1 wara l-ikklonjar!
 feat_modifyproxy=Timmodifika d-destinazzjoni tal-prokura ..
 feat_module=Nginx Webserver (għall-host virtwali)
+
 fcgid_ecmd=L-ebda kmand PHP ma nstab!
 fcgid_ecmdexec=Il-kmand PHP $1 ma setax jiġi eżegwit : $2 
 fcgid_ecmdb=Kmand PHP $1 ma jappoġġjax il-bandiera -b meħtieġa biex titħaddem bħala server FCGId. X'aktarx li jkollok bżonn tinstalla pakkett PHP CGI separat.
+
 redirect_efind=Ma nstabet l-ebda virtualhost għal $1 
 redirect_eobj=Redirect mhuwiex assoċjat ma 'oġġett ta' konfigurazzjoni Nginx
 redirect_eobj2=Il-prokura mhix assoċjata ma 'oġġett ta' konfigurazzjoni Nginx
@@ -444,14 +471,18 @@ redirect_eurl=Mhux URL : $1
 redirect_eurlhost=Il-hostname fl-URL ma jistax jiġi solvut : $1 
 redirect_eclash=Post għal $1 diġà jeżisti
 redirect_ephd=Nginx jippermetti biss li d-direttorji tad-destinazzjoni ta 'l-alias ikunu taħt $1 
+
 links_anlog=Nginx Access Log
 links_enlog=Nginx Error Log
-links_phpini=Konfigurazzjoni PHP
+links_phpini=Konfigurazzjoni PHP-FPM
 links_phpini2=Konfigurazzjoni PHP $1 
+
 webmin_phpini=Konfigurazzjoni PHP għal $1 
 webmin_phpini2=Konfigurazzjoni PHP $2 għal $1 
+
 monitor_missing=Nginx mhux installat
 monitor_type=Nginx Webserver
+
 tmpl_directives=Iż-żieda ta 'direttivi ta' Nginx config
 tmpl_default=Default (mill-mudell parent)
 tmpl_none=Xejn

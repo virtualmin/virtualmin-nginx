@@ -23,6 +23,7 @@ index_startdesc=현재 구성을 사용하여 Nginx 웹 서버를 시작하십�
 index_restart=Nginx 구성 적용
 index_restartdesc=Nginx 웹 서버를 중지했다가 다시 시작하여 현재 구성을 적용하십시오.
 index_eglobal=전역 설정을 편집 할 수 없습니다
+
 net_title=네트워크 구성
 net_header=글로벌 네트워킹 옵션
 opt_missing=필드에 입력 된 내용이 없습니다  : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=연결 유지 연결 시간 초과는 몇 초 여야합�
 opt_keepalive_requests=연결 유지 요청 제한
 opt_ekeepalive_requests=연결 유지 연결에 대한 요청 제한은 여러 요청이어야합니다.
 opt_secs=초
+
 mime_title=MIME 유형
 mime_search=일치하는 MIME 유형 찾기  :
 mime_ok=검색
@@ -54,6 +56,7 @@ mime_eword=파일 확장자에 유효하지 않은 문자가 있거나 점으로
 mime_eold=MIME 유형이 더 이상 존재하지 않습니다!
 mime_eclash=이름이 같은 MIME 유형이 이미 존재합니다
 mime_enone=삭제할 MIME 유형이 선택되지 않았습니다.
+
 logs_title=로깅 설정
 logs_header=로그 및 PID 파일 옵션
 opt_error_log=오류 로그 파일
@@ -75,6 +78,7 @@ logs_ftext=형식 문자열
 logs_efname=로그 형식 이름 $1 은 문자, 숫자, 점, 대시 및 밑줄 만 포함 할 수 있습니다.
 logs_etext=로그 형식 $1 에 대한 형식 문자열이 없습니다.
 logs_ecannot=로그 파일을 구성 할 수 없습니다
+
 misc_title=다른 설정
 misc_header=사용자 및 프로세스 옵션
 opt_worker_processes=작업자 프로세스 수
@@ -92,6 +96,7 @@ opt_eworker_priority=근로자 우선 순위는 양수 또는 음수 여야합�
 opt_index=디렉토리 색인 파일
 opt_default_type=알 수없는 파일의 MIME 유형
 opt_edefault_type=잘못된 기본 MIME 유형
+
 docs_title=문서 옵션
 sdocs_title=문서 옵션
 ldocs_title=문서 옵션
@@ -99,6 +104,7 @@ docs_header=파일, 페이지 및 문서 설정
 docs_err=문서 옵션을 저장하지 못했습니다
 opt_root=기본 루트 디렉토리
 opt_eroot=기본 루트 디렉토리는 절대 경로 여야합니다
+
 fcgi_title=FastCGI 옵션
 lfcgi_title=FastCGI 옵션
 fcgi_header=FastCGI 서버 및 프로토콜 옵션
@@ -117,6 +123,7 @@ fcgi_epvalue=매개 변수 $1 의 결 측값
 opt_fastcgi_buffer_size=헤더의 버퍼 크기
 fcgi_buffer=4k와 같은 크기
 opt_efastcgi_buffer_size=버퍼 크기는 4k 또는 1M과 같아야합니다.
+
 ssi_title=서버 측 포함 설정
 sssi_title=서버 측 포함 설정
 lssi_title=서버 측 포함 설정
@@ -129,6 +136,7 @@ opt_ssi_value_length=최대 파라미터 길이
 ssi_err=서버 측 포함 설정을 저장하지 못했습니다.
 opt_essi_types=$1 은 (는) 유효한 MIME 유형이 아닙니다
 opt_essi_value_length=최대 매개 변수 길이는 숫자 여야합니다
+
 manual_title=구성 파일 편집
 manual_file=구성 파일 편집 :
 manual_ok=스위치
@@ -136,6 +144,7 @@ manual_efile=선택된 파일은 Nginx 구성의 일부가 아닙니다!
 manual_test=저장하기 전에 새 구성을 테스트 하시겠습니까?
 manual_elink=매달려있는 상징적 인 링크!
 manual_err=구성 파일을 저장하지 못했습니다
+
 server_create=가상 호스트 생성
 server_edit=가상 호스트 편집
 server_egone=가상 호스트가 더 이상 존재하지 않습니다!
@@ -184,10 +193,12 @@ server_settings=가상 호스트 설정
 server_server=가상 호스트 정의
 server_eclash=같은 이름의 가상 호스트가 이미 존재합니다
 server_pp=$1 에 프록시
+
 slogs_title=가상 호스트 로깅
 slogs_header=로그 파일 옵션
 opt_global=전역 설정에서
 slogs_err=로그 파일 옵션을 저장하지 못했습니다
+
 ssl_title=SSL 구성
 ssl_header=SSL 암호화 및 인증 옵션
 opt_ssl_certificate=SSL 인증서 파일
@@ -211,6 +222,7 @@ opt_ssl_protocols=지원할 SSL 프로토콜
 opt_essl_ciphers=잘못 보이는 암호 목록 <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=아래에서 선택
 ssl_clist=나열된 암호
+
 gzip_title=GZip 압축 옵션
 sgzip_title=GZip 압축 옵션
 lgzip_title=GZip 압축 옵션
@@ -220,6 +232,7 @@ opt_egzip_comp_level=압축 수준은 1과 9 사이의 숫자 여야합니다.
 gzip_level=1 = 최소, 9 = 최고
 opt_gzip_types=압축 할 MIME 유형
 opt_egzip_types=$1 은 (는) 유효한 MIME 유형이 아닙니다
+
 proxy_title=프록시 설정
 sproxy_title=프록시 설정
 lproxy_title=프록시 설정
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 은 유효한 헤더 이름이 아닙니다.
 opt_eproxy_hide_header=$1 은 유효한 헤더 이름이 아닙니다.
 opt_proxy_pass=프록시 요청
 proxy_url=URL
+
 access_title=액세스 제어
 saccess_title=액세스 제어
 laccess_title=액세스 제어
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=기본 인증 파일
 access_eabsolute=비밀번호 파일은 절대 경로 여야합니다
 access_edir=비밀번호 파일은 디렉토리가 될 수 없습니다
 access_ecannot=비밀번호 파일 $1 이 (가) 허용 된 디렉토리 $2 에 없습니다.
+
 rewrite_title=URL 다시 쓰기
 srewrite_title=URL 다시 쓰기
 lrewrite_title=URL 다시 쓰기
@@ -277,6 +292,7 @@ rewrite_redirect=302 리디렉션을 반환
 rewrite_permanent=301 리디렉션 반환
 rewrite_efrom=소스 경로 $1 에 공백이 있습니다
 rewrite_eto=도착 URL $1 이 없거나 공백이 있습니다.
+
 location_create=위치 만들기
 location_edit=위치 수정
 location_desc=가상 호스트 $1 의 위치 $2 
@@ -292,6 +308,7 @@ location_rusure=위치 $1 을 (를) 삭제 하시겠습니까? 그 안에있는 
 location_epath=URL 경로는 비어 있거나 공백을 포함 할 수 없습니다
 location_return=위치 옵션
 location_ecannot=루트 디렉토리 $1 이 (가) 허용 된 디렉토리 $2 에 없습니다.
+
 log_net=변경된 네트워크 구성
 log_logs=변경된 로깅 설정
 log_misc=다른 설정 변경
@@ -330,23 +347,29 @@ log_rewrite_location=$2 의 위치 $1 에 대한 URL 재 작성이 변경되었�
 log_create_user=$2 에 사용자 $1 을 (를) 생성했습니다.
 log_modify_user=$2 의 수정 된 사용자 $1 
 log_delete_user=$2 에서 삭제 된 사용자 $1 
+
 stop_err=Nginx를 중지하지 못했습니다
 stop_ecannot=웹 서버를 중지 할 수 없습니다
+
 start_err=Nginx를 시작하지 못했습니다
 start_ecannot=웹 서버를 시작할 수 없습니다
+
 restart_err=Nginx 구성을 적용하지 못했습니다
 restart_etest=구성이 잘못되었습니다  : $1 
+
 match_default=하위 디렉토리
 match_exact=정확한 디렉토리
 match_case=대소 문자 구분 정규 표현식
 match_nocase=대소 문자를 구분하지 않는 정규 표현식
 match_noregexp=정규식 비활성화
 match_named=명명 된 위치
+
 users_title=사용자 관리
 users_none=이 비밀번호 파일에는 아직 사용자가 없습니다.
 users_add=새로운 사용자를 추가하십시오.
 users_efile=파일 매개 변수가 없습니다!
 users_return=사용자 목록
+
 user_create=사용자 생성
 user_edit=사용자 편집
 user_header=비밀번호로 보호 된 디렉토리 사용자 세부 사항
@@ -357,6 +380,7 @@ user_passset=로 설정
 user_enabled=로그인이 가능합니까?
 user_egone=사용자가 더 이상 존재하지 않습니다!
 user_err=사용자를 저장하지 못했습니다
+
 acl_vhosts=허용 된 가상 호스트
 acl_hosts1=모두
 acl_hosts0=아래에 ..
@@ -365,6 +389,7 @@ acl_root=위치에 허용 된 디렉토리
 acl_global=전역 설정을 편집 할 수 있습니까?
 acl_logs=로그 파일을 구성 할 수 있습니까?
 acl_user=사용자로 비밀번호 파일 작성
+
 feat_name=Nginx 웹 사이트
 feat_losing=Nginx 가상 호스트 및 모든 구성 지시문이 삭제됩니다.
 feat_disname=Nginx 웹 사이트
@@ -433,9 +458,11 @@ feat_clonealias=.. 별칭 도메인에는 필요하지 않습니다
 feat_eclonefind=.. 복제 후 $1 (이)라는 새로운 가상 호스트를 찾을 수 없습니다!
 feat_modifyproxy=프록시 대상 수정 ..
 feat_module=Nginx 웹 서버 (가상 호스트 용)
+
 fcgid_ecmd=PHP 명령이 없습니다!
 fcgid_ecmdexec=PHP 명령 $1 을 (를) 실행할 수 없습니다  : $2 
 fcgid_ecmdb=PHP 명령 $1 은 FCGId 서버로 실행하는 데 필요한 -b 플래그를 지원하지 않습니다. 별도의 PHP CGI 패키지를 설치해야 할 수 있습니다.
+
 redirect_efind=$1 에 대한 가상 호스트가 없습니다.
 redirect_eobj=리디렉션이 Nginx 구성 객체와 연결되어 있지 않습니다
 redirect_eobj2=프록시가 Nginx 구성 객체와 연결되어 있지 않습니다
@@ -444,14 +471,18 @@ redirect_eurl=URL이 아님  : $1
 redirect_eurlhost=URL의 호스트 이름을 확인할 수 없습니다  : $1 
 redirect_eclash=$1 의 위치가 이미 존재합니다
 redirect_ephd=Nginx는 별명 대상 디렉토리 만 $1 미만으로 허용합니다.
+
 links_anlog=Nginx 액세스 로그
 links_enlog=Nginx 오류 로그
-links_phpini=PHP 설정
+links_phpini=PHP-FPM 구성
 links_phpini2=PHP $1 구성
+
 webmin_phpini=$1 에 대한 PHP 구성
 webmin_phpini2=$1 에 대한 PHP $2 구성
+
 monitor_missing=Nginx가 설치되지 않았습니다
 monitor_type=Nginx 웹 서버
+
 tmpl_directives=Nginx 설정 지시문 추가
 tmpl_default=기본값 (부모 템플릿에서)
 tmpl_none=없음

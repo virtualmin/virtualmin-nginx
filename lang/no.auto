@@ -23,6 +23,7 @@ index_startdesc=Start Nginx webserver ved å bruke den gjeldende konfigurasjonen
 index_restart=Bruk Nginx-konfigurasjon
 index_restartdesc=Bruk den gjeldende konfigurasjonen ved å stoppe og starte Nginx webserver på nytt.
 index_eglobal=Du har ikke lov til å redigere globale innstillinger
+
 net_title=Nettverkskonfigurasjon
 net_header=Globale nettverksalternativer
 opt_missing=Ingenting lagt inn for feltet : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=Timeout for keepalive tilkoblinger må være et antall se
 opt_keepalive_requests=Forespørselsgrense for keepalive tilkoblinger
 opt_ekeepalive_requests=Forespørselsgrense for keepalive tilkoblinger må være et antall forespørsler
 opt_secs=sekunder
+
 mime_title=MIME-typer
 mime_search=Finn MIME-typer som samsvarer :
 mime_ok=Søk
@@ -54,6 +56,7 @@ mime_eword=Filtypen inneholder ugyldige tegn eller starter med en prikk
 mime_eold=MIME-typen eksisterer ikke lenger!
 mime_eclash=En MIME-type med samme navn eksisterer allerede
 mime_enone=Ingen MIME-typer er valgt å slette
+
 logs_title=Innstillinger for logging
 logs_header=Alternativer for logg og PID-fil
 opt_error_log=Feilloggfil
@@ -75,6 +78,7 @@ logs_ftext=Formater streng
 logs_efname=Loggformatnavn $1 kan bare inneholde bokstaver, tall, prikk, bindestrek og understrek
 logs_etext=Manglende formatstreng for loggformat $1 
 logs_ecannot=Du har ikke lov til å konfigurere loggfiler
+
 misc_title=Andre innstillinger
 misc_header=Brukere og prosessalternativer
 opt_worker_processes=Antall arbeiderprosesser
@@ -92,6 +96,7 @@ opt_eworker_priority=Arbeiderprioritet må være et positivt eller negativt tall
 opt_index=Katalogindeksfiler
 opt_default_type=MIME-type for ukjente filer
 opt_edefault_type=Ugyldig standard MIME-type
+
 docs_title=Dokumentalternativer
 sdocs_title=Dokumentalternativer
 ldocs_title=Dokumentalternativer
@@ -99,6 +104,7 @@ docs_header=Innstillinger for fil, side og dokument
 docs_err=Kunne ikke lagre dokumentalternativer
 opt_root=Standard rotkatalog
 opt_eroot=Standard rotkatalog må være en absolutt bane
+
 fcgi_title=FastCGI-alternativer
 lfcgi_title=FastCGI-alternativer
 fcgi_header=FastCGI-server og protokollalternativer
@@ -117,6 +123,7 @@ fcgi_epvalue=Mangler verdi for parameter $1
 opt_fastcgi_buffer_size=Bufferstørrelse for overskrifter
 fcgi_buffer=Størrelse som 4k
 opt_efastcgi_buffer_size=Bufferstørrelse må være som 4k eller 1M.
+
 ssi_title=Inkluder innstillinger på serversiden
 sssi_title=Inkluder innstillinger på serversiden
 lssi_title=Inkluder innstillinger på serversiden
@@ -129,6 +136,7 @@ opt_ssi_value_length=Maksimal parameterlengde
 ssi_err=Kunne ikke lagre serversiden inkluderer innstillinger
 opt_essi_types=$1 er ikke en gyldig MIME-type
 opt_essi_value_length=Maksimal parameterlengde må være et tall
+
 manual_title=Rediger konfigurasjonsfiler
 manual_file=Redigerer konfigurasjonsfil:
 manual_ok=Bytte om
@@ -136,6 +144,7 @@ manual_efile=Valgt fil er ikke en del av Nginx-konfigurasjonen!
 manual_test=Test ny konfigurasjon før du lagrer?
 manual_elink=Dinglende symbolsk lenke!
 manual_err=Kunne ikke lagre konfigurasjonsfilen
+
 server_create=Lag virtuell vert
 server_edit=Rediger virtuell vert
 server_egone=Virtuell vert eksisterer ikke lenger!
@@ -184,10 +193,12 @@ server_settings=Innstillinger for virtuell vert
 server_server=Definisjon av virtuell vert
 server_eclash=En virtuell vert med samme navn eksisterer allerede
 server_pp=Fullmakt til $1 
+
 slogs_title=Virtuell vertslogging
 slogs_header=Alternativer for loggfil
 opt_global=Fra globale innstillinger
 slogs_err=Kunne ikke lagre alternativer for loggfiler
+
 ssl_title=SSL-konfigurasjon
 ssl_header=SSL-krypterings- og sertifiseringsalternativer
 opt_ssl_certificate=SSL-sertifikatfil
@@ -211,6 +222,7 @@ opt_ssl_protocols=SSL-protokoller for å støtte
 opt_essl_ciphers=Ugyldig <tt>HIGH:!aNULL:!MD5</tt> - skal være som <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Valgt nedenfor
 ssl_clist=Listede sifre
+
 gzip_title=GZip-komprimeringsalternativer
 sgzip_title=GZip-komprimeringsalternativer
 lgzip_title=GZip-komprimeringsalternativer
@@ -220,6 +232,7 @@ opt_egzip_comp_level=Kompresjonsnivået må være et tall mellom 1 og 9
 gzip_level=1 = minst, 9 = best
 opt_gzip_types=MIME-typer å komprimere
 opt_egzip_types=$1 er ikke en gyldig MIME-type
+
 proxy_title=Proxy-innstillinger
 sproxy_title=Proxy-innstillinger
 lproxy_title=Proxy-innstillinger
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 er ikke et gyldig overskriftsnavn
 opt_eproxy_hide_header=$1 er ikke et gyldig overskriftsnavn
 opt_proxy_pass=Fullmaktsforespørsler til
 proxy_url=URL
+
 access_title=Adgangskontroll
 saccess_title=Adgangskontroll
 laccess_title=Adgangskontroll
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Grunnleggende autentiseringsfil
 access_eabsolute=Passordfil må være en absolutt bane
 access_edir=Passordfil kan ikke være en katalog
 access_ecannot=Passordfilen $1 er ikke under den tillatte katalogen $2 
+
 rewrite_title=URL-omskriving
 srewrite_title=URL-omskriving
 lrewrite_title=URL-omskriving
@@ -277,6 +292,7 @@ rewrite_redirect=Returner 302 omdirigering
 rewrite_permanent=Retur 301 tilbake
 rewrite_efrom=Kildesti $1 inneholder mellomrom
 rewrite_eto=Destinasjonsadresse $1 mangler eller inneholder mellomrom
+
 location_create=Lag sted
 location_edit=Rediger beliggenhet
 location_desc=Plassering $2 i virtuell vert $1 
@@ -292,6 +308,7 @@ location_rusure=Er du sikker på at du vil slette plasseringen $1 ? Alle konfigu
 location_epath=URL-banen kan ikke være tom eller inneholde mellomrom
 location_return=stedsalternativer
 location_ecannot=Rotkatalogen $1 er ikke under den tillatte katalogen $2 
+
 log_net=Endret nettverkskonfigurasjon
 log_logs=Endrede loggeinnstillinger
 log_misc=Endret andre innstillinger
@@ -330,23 +347,29 @@ log_rewrite_location=Endret URL-omskriving for plassering $1 i $2
 log_create_user=Opprettet bruker $1 i $2 
 log_modify_user=Endret bruker $1 i $2 
 log_delete_user=Slettet bruker $1 i $2 
+
 stop_err=Kunne ikke stoppe Nginx
 stop_ecannot=Du har ikke lov til å stoppe webserveren
+
 start_err=Kunne ikke starte Nginx
 start_ecannot=Du har ikke lov til å starte webserveren
+
 restart_err=Kunne ikke bruke Nginx-konfigurasjonen
 restart_etest=Konfigurasjonen er ugyldig : $1 
+
 match_default=Sub-katalogen
 match_exact=Eksakt katalog
 match_case=Små og små bokstaver
 match_nocase=Tilfelle ufølsom regelmessig uttrykk
 match_noregexp=Deaktiver vanlige uttrykk
 match_named=Navngitt sted
+
 users_title=Administrer brukere
 users_none=Denne passordfilen inneholder ingen brukere ennå.
 users_add=Legg til en ny bruker.
 users_efile=Mangler filparameter!
 users_return=brukerliste
+
 user_create=Opprett bruker
 user_edit=Rediger bruker
 user_header=Brukerdetaljer for passordbeskyttet katalog
@@ -357,6 +380,7 @@ user_passset=Satt til
 user_enabled=Pålogging aktivert?
 user_egone=Bruker eksisterer ikke lenger!
 user_err=Kunne ikke lagre brukeren
+
 acl_vhosts=Tillatte virtuelle verter
 acl_hosts1=Alle
 acl_hosts0=Oppført nedenfor ..
@@ -365,6 +389,7 @@ acl_root=Tillatte kataloger for lokasjoner
 acl_global=Kan du redigere globale innstillinger?
 acl_logs=Kan konfigurere loggfiler?
 acl_user=Skriv passordfiler som bruker
+
 feat_name=Nginx nettsted
 feat_losing=Den virtuelle Nginx-verten og alle konfigurasjonsdirektivene blir slettet
 feat_disname=Nginx nettsted
@@ -433,9 +458,11 @@ feat_clonealias=.. ikke nødvendig for aliasdomener
 feat_eclonefind=.. kunne ikke finne en ny virtuell vert med navnet $1 etter kloning!
 feat_modifyproxy=Endre proxy-destinasjon ..
 feat_module=Nginx webserver (for virtuell vert)
+
 fcgid_ecmd=Ingen PHP-kommando funnet!
 fcgid_ecmdexec=PHP-kommandoen $1 kunne ikke utføres : $2 
 fcgid_ecmdb=PHP-kommando $1 støtter ikke -b-flagget som trengs for å kjøre som en FCGId-server. Du må sannsynligvis installere en egen PHP CGI-pakke.
+
 redirect_efind=Ingen virtualhost for $1 ble funnet
 redirect_eobj=Omdirigering er ikke tilknyttet et Nginx-konfigurasjonsobjekt
 redirect_eobj2=Proxy er ikke tilknyttet et Nginx-konfigurasjonsobjekt
@@ -444,14 +471,18 @@ redirect_eurl=Ikke en URL : $1
 redirect_eurlhost=Vertsnavn i URL kan ikke løses : $1 
 redirect_eclash=En plassering for $1 eksisterer allerede
 redirect_ephd=Nginx lar kun destinasjonsmappene for aliaser være under $1 
+
 links_anlog=Nginx tilgangslogg
 links_enlog=Nginx feillogg
-links_phpini=PHP-konfigurasjon
+links_phpini=PHP-FPM-konfigurasjon
 links_phpini2=PHP $1 -konfigurasjon
+
 webmin_phpini=PHP-konfigurasjon for $1 
 webmin_phpini2=PHP $2 -konfigurasjon for $1 
+
 monitor_missing=Nginx er ikke installert
 monitor_type=Nginx webserver
+
 tmpl_directives=Legger til Nginx-konfigurasjonsdirektiver
 tmpl_default=Standard (fra overordnet mal)
 tmpl_none=Ingen

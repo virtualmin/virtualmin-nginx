@@ -1209,8 +1209,14 @@ elsif ($mode eq "fpm" && $oldmode ne "fpm") {
 		$d->{'php_fpm_version'} = $fpm->[0];
 		}
 	&virtual_server::create_php_fpm_pool($d);
-	$port = $d->{'php_fpm_port'} ||
-		&virtual_server::get_php_fpm_socket_file($d);
+	my $listen = &virtual_server::get_php_fpm_config_value($d, "listen");
+	if ($listen =~ /^\S+:(\d+)$/ ||
+	    $listen =~ /^(\d+)$/ ||
+	    $listen =~ /^(\/\S+)$/) {
+		$port = $1;
+		}
+	$port ||= $d->{'php_fpm_port'} ||
+		  &virtual_server::get_php_fpm_socket_file($d);
 	}
 elsif ($mode eq "none" && $oldmode ne "none") {
 	# Disable php block in vhost by returning 404
@@ -2807,6 +2813,76 @@ foreach my $s (@servers) {
 			}
 		}
 	}
+return undef;
+}
+
+# feature_get_domain_php_fpm_port(&domain)
+sub feature_get_domain_php_fpm_port
+{
+my ($d) = @_;
+
+# Get the port used in the Nginx config
+my $server = &find_domain_server($d);
+return (0, "No Nginx server found") if (!$server);
+my @locs = &find("location", $server);
+my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
+                   ($_->{'words'}->[1] eq '\.php$' ||
+                        $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
+return (0, "No location block for .php files found") if (!$loc);
+my ($pass) = &find("fastcgi_pass", $loc);
+return (0, "No fastcgi_pass directive found") if (!$pass);
+my $webport;
+if ($pass->{'words'}->[0] =~ /^localhost:(\d+)/ ||
+    $pass->{'words'}->[0] =~ /^unix:(\/\S+)/) {
+	$webport = $1;
+	}
+else {
+	return (0, "Unexpected fastcgi_pass directive : $pass->{'words'}->[0]");
+	}
+
+# Get the Nginx listen directive
+my $fpmport;
+my $listen = &virtual_server::get_php_fpm_config_value($d, "listen");
+if ($listen =~ /^\S+:(\d+)$/ ||
+    $listen =~ /^(\d+)$/ ||
+    $listen =~ /^(\/\S+)$/) {
+        $fpmport = $1;
+        }
+return (0, "No listen directive found in FPM config") if (!$fpmport);
+
+if ($fpmport ne $webport) {
+        return (0, "Apache config port $webport does not ".
+                   "match FPM config $fpmport");
+        }
+return ($fpmport =~ /^\d+$/ ? 1 : 2, $fpmport);
+}
+
+# feature_save_domain_php_fpm_port(&domain, socket)
+sub feature_save_domain_php_fpm_port
+{
+my ($d, $socket) = @_;
+
+# First update the Nginx config
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+return "No Nginx server found" if (!$server);
+my @locs = &find("location", $server);
+my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
+                   ($_->{'words'}->[1] eq '\.php$' ||
+                        $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
+return "No location block for .php files found" if (!$loc);
+&save_directive($loc, "fastcgi_pass",
+		[ $socket =~ /^\// ? "unix:$socket" : "localhost:$socket" ]);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+
+# Second update the FPM server port
+my $conf = &virtual_server::get_php_fpm_config($d);
+&virtual_server::save_php_fpm_config_value($d, "listen", $socket);
+&virtual_server::register_post_action(
+	\&virtual_server::restart_php_fpm_server, $conf);
+
 return undef;
 }
 

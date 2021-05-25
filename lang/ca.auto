@@ -23,6 +23,7 @@ index_startdesc=Inicieu el servidor web Nginx mitjançant la configuració actua
 index_restart=Aplica la configuració de Nginx
 index_restartdesc=Apliqueu la configuració actual aturant i reiniciant el servidor web Nginx.
 index_eglobal=No teniu permís per editar la configuració global
+
 net_title=Configuració de xarxa
 net_header=Opcions de xarxa global
 opt_missing=No s'ha introduït res al camp : $1 
@@ -37,6 +38,7 @@ opt_ekeepalive_timeout=El temps de temps per a les connexions de manteniment ha 
 opt_keepalive_requests=Límit de sol·licitud de connexions conservatives
 opt_ekeepalive_requests=El límit de sol·licitud per a connexions conservatives ha de ser un nombre de sol·licituds
 opt_secs=segons
+
 mime_title=Tipus MIME
 mime_search=Trobeu els tipus MIME coincidents :
 mime_ok=Cerca
@@ -54,6 +56,7 @@ mime_eword=L’extensió de fitxer conté caràcters no vàlids o comença amb u
 mime_eold=El tipus MIME ja no existeix.
 mime_eclash=Ja existeix un tipus MIME amb el mateix nom
 mime_enone=No s'ha seleccionat cap tipus MIME per eliminar
+
 logs_title=Configuració de registre
 logs_header=Opcions de fitxer de registre i PID
 opt_error_log=Error del fitxer de registre
@@ -75,6 +78,7 @@ logs_ftext=Format de la cadena
 logs_efname=El nom del format de registre $1 només pot contenir lletres, números, punt, guionet i guió baix
 logs_etext=Falta la cadena de format del format $1 del registre
 logs_ecannot=No teniu permís de configurar fitxers de registre
+
 misc_title=Altres configuracions
 misc_header=Usuaris i opcions de procés
 opt_worker_processes=Nombre de processos de treballadors
@@ -92,6 +96,7 @@ opt_eworker_priority=La prioritat del treballador ha de ser un nombre positiu o 
 opt_index=Arxius d'índex de directoris
 opt_default_type=Tipus MIME per a fitxers desconeguts
 opt_edefault_type=El tipus MIME predeterminat no és vàlid
+
 docs_title=Opcions del document
 sdocs_title=Opcions del document
 ldocs_title=Opcions del document
@@ -99,6 +104,7 @@ docs_header=Configuració de fitxers, pàgina i document
 docs_err=No s'ha pogut desar les opcions del document
 opt_root=Directori arrel predeterminat
 opt_eroot=El directori arrel predeterminat ha de ser una ruta absoluta
+
 fcgi_title=Opcions FastCGI
 lfcgi_title=Opcions FastCGI
 fcgi_header=Opcions de protocol i servidor FastCGI
@@ -117,6 +123,7 @@ fcgi_epvalue=Falta el valor del paràmetre $1
 opt_fastcgi_buffer_size=Mida del buffer per a les capçaleres
 fcgi_buffer=Tamany com 4k
 opt_efastcgi_buffer_size=La mida del buffer ha de ser de 4K o 1M.
+
 ssi_title=Side-Server Inclou la configuració
 sssi_title=Side-Server Inclou la configuració
 lssi_title=Side-Server Inclou la configuració
@@ -129,6 +136,7 @@ opt_ssi_value_length=Longitud màxima del paràmetre
 ssi_err=No s'ha pogut desar els paràmetres del servidor
 opt_essi_types=$1 no és un tipus MIME vàlid
 opt_essi_value_length=La longitud màxima del paràmetre ha de ser un número
+
 manual_title=Edita fitxers de configuració
 manual_file=Edició del fitxer de configuració:
 manual_ok=Interruptor
@@ -136,6 +144,7 @@ manual_efile=El fitxer seleccionat no forma part de la configuració de Nginx.
 manual_test=Proveu la nova configuració abans de desar-la?
 manual_elink=Enllaç simbòlic
 manual_err=No s'ha pogut desar el fitxer de configuració
+
 server_create=Crea un servidor virtual
 server_edit=Edita l'amfitrió virtual
 server_egone=L’amfitrió virtual ja no existeix.
@@ -184,10 +193,12 @@ server_settings=Configuració de l'amfitrió virtual
 server_server=Definició de l'amfitrió virtual
 server_eclash=Ja existeix un host virtual amb el mateix nom
 server_pp=Proxy de $1 
+
 slogs_title=Registre d'hostes virtuals
 slogs_header=Opcions de fitxer de registre
 opt_global=Des de la configuració global
 slogs_err=No s'ha pogut desar les opcions del fitxer de registre
+
 ssl_title=Configuració SSL
 ssl_header=Opcions de xifratge i certificació SSL
 opt_ssl_certificate=Fitxer de certificat SSL
@@ -211,6 +222,7 @@ opt_ssl_protocols=Protocols SSL per donar suport
 opt_essl_ciphers=La llista de xifres que no té aspecte vàlid ha de ser com <tt>HIGH:!aNULL:!MD5</tt>
 opt_selected=Seleccionat a continuació
 ssl_clist=Xifrats registrats
+
 gzip_title=Opcions de compressió GZip
 sgzip_title=Opcions de compressió GZip
 lgzip_title=Opcions de compressió GZip
@@ -220,6 +232,7 @@ opt_egzip_comp_level=El nivell de compressió ha d’estar entre 1 i 9
 gzip_level=1 = menys, 9 = millor
 opt_gzip_types=Tipus MIME per comprimir
 opt_egzip_types=$1 no és un tipus MIME vàlid
+
 proxy_title=Configuració del servidor intermediari
 sproxy_title=Configuració del servidor intermediari
 lproxy_title=Configuració del servidor intermediari
@@ -239,6 +252,7 @@ opt_eproxy_pass_header=$1 no és un nom de capçalera vàlid
 opt_eproxy_hide_header=$1 no és un nom de capçalera vàlid
 opt_proxy_pass=Sol·licitud de representació a
 proxy_url=URL
+
 access_title=Control d'accés
 saccess_title=Control d'accés
 laccess_title=Control d'accés
@@ -262,6 +276,7 @@ opt_auth_basic_user_file=Fitxer d’autenticació bàsica
 access_eabsolute=El fitxer de contrasenya ha de ser una ruta absoluta
 access_edir=El fitxer de contrasenya no pot ser un directori
 access_ecannot=El fitxer de contrasenya $1 no es troba al directori permès $2 
+
 rewrite_title=Reescriptura de l'URL
 srewrite_title=Reescriptura de l'URL
 lrewrite_title=Reescriptura de l'URL
@@ -277,6 +292,7 @@ rewrite_redirect=Redirecció 302
 rewrite_permanent=Redirecció 301
 rewrite_efrom=El camí d'origen $1 conté espais
 rewrite_eto=Falta l'URL de destinació $1 o conté espais
+
 location_create=Crea la ubicació
 location_edit=Edita la ubicació
 location_desc=Ubicació $2 a l'amfitrió virtual $1 
@@ -292,6 +308,7 @@ location_rusure=Confirmeu que voleu suprimir la ubicació $1 ? Totes les configu
 location_epath=El camí d’URL no pot estar buit ni contenir espais
 location_return=opcions d’ubicació
 location_ecannot=El directori arrel $1 no es troba al directori permès $2 
+
 log_net=S'ha canviat la configuració de la xarxa
 log_logs=S'han canviat la configuració del registre
 log_misc=S'han canviat altres configuracions
@@ -330,23 +347,29 @@ log_rewrite_location=S'ha canviat la reescriptura de l'URL per a la ubicació $1
 log_create_user=Usuari creat $1 a $2 
 log_modify_user=Usuari modificat $1 en $2 
 log_delete_user=Usuari suprimit $1 de $2 
+
 stop_err=No s'ha pogut aturar Nginx
 stop_ecannot=No teniu permís d’aturar el servidor web
+
 start_err=No s'ha pogut iniciar Nginx
 start_ecannot=No teniu permès iniciar el servidor web
+
 restart_err=No s'ha pogut aplicar la configuració de Nginx
 restart_etest=La configuració no és vàlida : $1 
+
 match_default=Subdirector
 match_exact=Directori exacte
 match_case=Expressió regular entre majúscules i minúscules
 match_nocase=Expressió regular insensible entre majúscules i minúscules
 match_noregexp=Desactiva les expressions regulars
 match_named=Ubicació anomenada
+
 users_title=Gestiona els usuaris
 users_none=Aquest fitxer de contrasenya encara no conté usuaris.
 users_add=Afegeix un usuari nou.
 users_efile=Falta el paràmetre del fitxer!
 users_return=llista d’usuaris
+
 user_create=Crear usuari
 user_edit=Edita l'usuari
 user_header=Detalls de l'usuari del directori protegit amb contrasenya
@@ -357,6 +380,7 @@ user_passset=Ajustat a
 user_enabled=S'ha activat el compte?
 user_egone=L'usuari ja no existeix.
 user_err=No s'ha pogut desar l'usuari
+
 acl_vhosts=Amfitrions virtuals permesos
 acl_hosts1=Tots
 acl_hosts0=S'enumeren a continuació ..
@@ -365,6 +389,7 @@ acl_root=Directori permès per a ubicacions
 acl_global=Es poden editar configuracions globals?
 acl_logs=Podeu configurar fitxers de registre?
 acl_user=Escriviu fitxers de contrasenya com a usuari
+
 feat_name=Lloc web de Nginx
 feat_losing=S'eliminaran l'amfitrió virtual de Nginx i totes les seves directives de configuració
 feat_disname=Lloc web de Nginx
@@ -433,9 +458,11 @@ feat_clonealias=.. No és necessari per a dominis alias
 feat_eclonefind=.. No s'ha pogut trobar un nou host virtual anomenat $1 després de la clonació.
 feat_modifyproxy=Modificació de la destinació del servidor intermediari.
 feat_module=Nginx Webserver (per a host virtual)
+
 fcgid_ecmd=No s'ha trobat cap comanda PHP.
 fcgid_ecmdexec=No s'ha pogut executar l'ordre PHP $1 : $2 
 fcgid_ecmdb=L'ordre PHP $1 no admet el senyalador -b necessari per executar-se com a servidor FCGId. Probablement haureu d’instal·lar un paquet CGI PHP independent.
+
 redirect_efind=No s'ha trobat cap virtual virtual per a $1 
 redirect_eobj=Redirect no està associat amb un objecte de configuració Nginx
 redirect_eobj2=El proxy no està associat amb un objecte de configuració de Nginx
@@ -444,14 +471,18 @@ redirect_eurl=No és una URL : $1
 redirect_eurlhost=El nom d'amfitrió a l'URL no es pot resoldre : $1 
 redirect_eclash=Ja existeix una ubicació per a $1 
 redirect_ephd=Nginx només permet que els directoris de destinació dels àlies siguin inferiors a $1 
+
 links_anlog=Registre d'accés Nginx
 links_enlog=Registre d’errors Nginx
-links_phpini=Configuració de PHP
+links_phpini=Configuració PHP-FPM
 links_phpini2=PHP $1 Configuració
+
 webmin_phpini=Configuració PHP per a $1 
 webmin_phpini2=Configuració PHP $2 per a $1 
+
 monitor_missing=Nginx no està instal·lat
 monitor_type=Servidor web Nginx
+
 tmpl_directives=Afegint directives de configuració de Nginx
 tmpl_default=Per defecte (de la plantilla principal)
 tmpl_none=Cap
