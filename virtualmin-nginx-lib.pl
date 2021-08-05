@@ -1889,6 +1889,64 @@ foreach my $l (@locs) {
 return undef;
 }
 
+# setup_fcgiwrap_server(&domain)
+# Starts up a fcgiwrap process running as the domain user, and enables it
+# at boot time. Returns an OK flag and the port number selected to listen on.
+sub setup_fcgiwrap_server
+{
+my ($d) =  @_;
+my $port;
+
+# Work out socket file for fcgiwrap
+my $socketdir = "/var/fcgiwrap";
+if (!-d $socketdir) {
+	&make_dir($socketdir, 0777);
+	}
+my $domdir = "$socketdir/$d->{'id'}.sock";
+if (!-d $domdir) {
+	&make_dir($domdir, 0770);
+	}
+my $user = &get_nginx_user();
+&set_ownership_permissions($user, $d->{'gid'}, undef, $domdir);
+my $port = "$domdir/socket";
+
+# Get the command
+my ($cmd, $envs_to_set, $log, $pidfile, $basecmd) =
+	&get_fcgiwrap_server_command($d, $port);
+$cmd || return (0, $text{'fcgid_ecmd'});
+
+# Create init script
+&foreign_require("init");
+my $old_init_mode = $init::init_mode;
+if ($init::init_mode eq "upstart") {
+	$init::init_mode = "init";
+	}
+my $name = &init_script_name($d);
+&init::enable_at_boot(
+		$name,
+		"Nginx fcgiwrap server for $d->{'dom'} (Virtualmin)",
+		$cmd,
+		undef,
+		undef,
+		{ 'opts' => {
+			  'user'   => $d->{'user'},
+			  'group'  => $d->{'user'},
+			  'stop'   => 0,
+			  'reload' => 0,
+			  'logstd' => "$log",
+			  'logerr' => "${log}_error"
+		}},
+		);
+$init::init_mode = $old_init_mode;
+
+# Launch it, and save the PID
+&init::start_action($name);
+
+return (1, $port);
+}
+
+
+
 # url_to_upstream(url)
 # Converts a URL like http://www.foo.com/ to an upstream host:port spec
 sub url_to_upstream

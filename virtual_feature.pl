@@ -272,6 +272,12 @@ if (!$d->{'alias'}) {
              'words' => [ &split_quoted_string('^(.+\.php)(/.+)$') ]
           } ]);
 
+	if (&feature_web_supports_cgi()) {
+		# Point cgi-bin to fastcgi server
+
+		# Setup a fastcgi server for this domain
+		}
+
 	&flush_config_file_lines();
 	&unlock_all_config_files();
 
@@ -1106,7 +1112,7 @@ return -1;		# PHP is always run as domain owner
 
 sub feature_web_supports_cgi
 {
-return 0;		# No CGI support
+return &has_command("fcgiwrap") ? 1 : 0;
 }
 
 sub feature_web_supported_php_modes
