@@ -273,9 +273,14 @@ if (!$d->{'alias'}) {
           } ]);
 
 	if (&feature_web_supports_cgi()) {
-		# Point cgi-bin to fastcgi server
-
 		# Setup a fastcgi server for this domain
+		my ($ok, $port) = &setup_fcgiwrap_server($d);
+		if ($ok) {
+			$d->{'nginx_fcgiwrap_port'} = $port;
+			}
+
+		# Point cgi-bin to fastcgi server
+		# XXX
 		}
 
 	&flush_config_file_lines();
@@ -681,6 +686,7 @@ if (!$d->{'alias'}) {
 	elsif ($mode eq "fpm") {
 		&virtual_server::delete_php_fpm_pool($d);
 		}
+	&delete_fcgiwrap_server($d);
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
