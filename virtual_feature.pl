@@ -280,7 +280,22 @@ if (!$d->{'alias'}) {
 			}
 
 		# Point cgi-bin to fastcgi server
-		# XXX
+		my $cloc = { 'name' => 'location',
+			     'words' => [ '/cgi-bin/' ],
+			     'type' => 1,
+			     'members' => [
+			       { 'name' => 'gzip',
+				 'words' => [ 'off' ] },
+			       { 'name' => 'root',
+				 'words' => [ $d->{'home'}.'/cgi-bin' ] },
+			       { 'name' => 'fastcgi_pass',
+				 'words' => [ 'unix:'.$port ] },
+			       { 'name' => 'fastcgi_param',
+				 'words' => [ 'SCRIPT_FILENAME',
+					      $d->{'home'}.'$fastcgi_script_name' ] },
+			     ]
+			   };
+		&save_directive($server, [ ], [ $cloc ]);
 		}
 
 	&flush_config_file_lines();
