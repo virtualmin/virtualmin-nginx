@@ -1716,7 +1716,7 @@ my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 my $phd = &virtual_server::public_html_dir($d);
 my $dest = $redirect->{'dest'};
-if ($dest !~ /^(http|https):/) {
+if ($dest !~ /^(http|https|\$scheme):/) {
 	$dest =~ s/^\Q$phd\E// || return &text('redirect_ephd', $phd);
 	}
 my $re = $redirect->{'path'};
@@ -2883,6 +2883,67 @@ my $conf = &virtual_server::get_php_fpm_config($d);
 &virtual_server::save_php_fpm_config_value($d, "listen", $socket);
 &virtual_server::register_post_action(
 	\&virtual_server::restart_php_fpm_server, $conf);
+
+return undef;
+}
+
+# feature_save_web_autoconfig(&domain, enabled)
+# Enable or disable redirects for mail client auto-configuration
+sub feature_save_web_autoconfig
+{
+my ($d, $enable) = @_;
+my @autoconfig = &virtual_server::get_autoconfig_hostname($d);
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+return "No Nginx server found" if (!$server);
+
+# Add or remove autoconfig alias names
+my $sn = &find("server_name", $server);
+if ($enable) {
+	# Add all autoconfig domains
+	$sn->{'words'} = [ &unique(@{$sn->{'words'}}, @autoconfig) ];
+	}
+else {
+	# Remove all autoconfig domains
+	$sn->{'words'} = [ grep { &indexof($_, @autoconfig) < 0 }
+				@{$sn->{'words'}} ];
+	}
+&save_directive($server, "server_name", [ $sn ]);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+
+# Add redirects to the CGI script
+my @paths = ( "/mail/config-v1.1.xml",
+	      "/.well-known/autoconfig/mail/config-v1.1.xml",
+	      "/AutoDiscover/AutoDiscover.xml",
+	      "/Autodiscover/Autodiscover.xml",
+	      "/autodiscover/autodiscover.xml" );
+my @redirs = &feature_list_web_redirects($d);
+if ($enable) {
+	# Add redirects for all paths
+	foreach my $p (@paths) {
+		my ($r) = grep { $_->{'path'} eq $p } @redirs;
+		if (!$r) {
+			$r = { 'path' => $p,
+			       'http' => 1,
+			       'https' => 1,
+			       'dest' => "\$scheme://\$host/cgi-bin/autoconfig.cgi" };
+			my $err = &feature_create_web_redirect($d, $r);
+			return $err if ($err);
+			}
+		}
+	}
+else {
+	# Remove redirects for all paths
+	foreach my $p (@paths) {
+		my ($r) = grep { $_->{'path'} eq $p } @redirs;
+		if ($r) {
+			my $err = &feature_delete_web_redirect($d, $r);
+			return $err if ($err);
+			}
+		}
+	}
 
 return undef;
 }
