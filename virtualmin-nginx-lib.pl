@@ -1710,17 +1710,33 @@ my %cmds_abs = (
 	'chmod', &has_command('chmod'),
 	'kill', &has_command('kill'),
 	'sleep', &has_command('sleep'),
-);
-&init::enable_at_boot($name,
-	      "Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
-	      &command_as_user($d->{'user'}, 0,
-		"$envs $cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile",
-	      &command_as_user($d->{'user'}, 0,
-		"$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`")." ; $cmds_abs{'sleep'} 1",
-	      undef,
-	      { 'fork' => 1,
-		'pidfile' => $pidfile },
-	      );
+	);
+if (defined(&init::enable_at_boot_as_user)) {
+	# Init system can run commands as the user
+	&init::enable_at_boot_as_user($name,
+		      "Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
+		      "$envs $cmd >>$log 2>&1 </dev/null & $cmds_abs{'echo'} \$! >$pidfile",
+		      "$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`",
+		      undef,
+		      { 'fork' => 1,
+			'pidfile' => $pidfile },
+		      $d->{'user'},
+		      );
+
+	}
+else {
+	# Older Webmin requires use of command_as_user
+	&init::enable_at_boot($name,
+		      "Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
+		      &command_as_user($d->{'user'}, 0,
+			"$envs $cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile",
+		      &command_as_user($d->{'user'}, 0,
+			"$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`")." ; $cmds_abs{'sleep'} 1",
+		      undef,
+		      { 'fork' => 1,
+			'pidfile' => $pidfile },
+		      );
+	}
 $init::init_mode = $old_init_mode;
 
 # Launch it, and save the PID
@@ -1923,21 +1939,38 @@ my %cmds_abs = (
 	'sleep', &has_command('sleep'),
 	'fuser', &has_command('fuser'),
 	'rm', &has_command('rm'),
-);
-&init::enable_at_boot($name,
-	      "Nginx fcgiwrap server for $d->{'dom'} (Virtualmin)",
-	      &command_as_user($d->{'user'}, 0,
-		"$cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile && sleep 2 && $cmds_abs{'chmod'} 777 $port",
-	      &command_as_user($d->{'user'}, 0,
-		"$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`").
-		" ; $cmds_abs{'sleep'} 1".
-		($cmds_abs{'fuser'} ? " ; $cmds_abs{'fuser'} $port | xargs kill"
-				    : "").
-		" ; $cmds_abs{'rm'} -f $port",
-	      undef,
-	      { 'fork' => 1,
-		'pidfile' => $pidfile },
-	      );
+	);
+if (defined(&init::enable_at_boot_as_user)) {
+	# Init system can run commands as the user
+	&init::enable_at_boot_as_user($name,
+		      "Nginx fcgiwrap server for $d->{'dom'} (Virtualmin)",
+		      "$cmds_abs{'rm'} -f $port ; $cmd >>$log 2>&1 </dev/null & $cmds_abs{'echo'} \$! >$pidfile && sleep 2 && $cmds_abs{'chmod'} 777 $port",
+		      "$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile` ; ".
+		      "$cmds_abs{'sleep'} 1 ; ".
+		      "$cmds_abs{'rm'} -f $port",
+		      undef,
+		      { 'fork' => 1,
+			'pidfile' => $pidfile },
+		      $d->{'user'},
+		      );
+	}
+else {
+	# Older Webmin requires use of command_as_user
+	&init::enable_at_boot($name,
+		      "Nginx fcgiwrap server for $d->{'dom'} (Virtualmin)",
+		      &command_as_user($d->{'user'}, 0,
+			"$cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile && sleep 2 && $cmds_abs{'chmod'} 777 $port",
+		      &command_as_user($d->{'user'}, 0,
+			"$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`").
+			" ; $cmds_abs{'sleep'} 1".
+			($cmds_abs{'fuser'} ? " ; $cmds_abs{'fuser'} $port | xargs kill"
+					    : "").
+			" ; $cmds_abs{'rm'} -f $port",
+		      undef,
+		      { 'fork' => 1,
+			'pidfile' => $pidfile },
+		      );
+	}
 $init::init_mode = $old_init_mode;
 
 # Launch it, and save the PID

@@ -593,6 +593,11 @@ if (!$d->{'alias'}) {
 			&virtual_server::delete_php_fpm_pool($oldd);
 			&virtual_server::create_php_fpm_pool($d);
 			}
+		if (&feature_web_supports_cgi()) {
+			# Also fix the CGI wrapper
+			&delete_fcgiwrap_server($oldd);
+			&setup_fcgiwrap_server($d);
+			}
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		}
