@@ -533,6 +533,13 @@ my $dir = $dirs->{$name};
 return $dir ? $dir->{'default'} : undef;
 }
 
+sub get_default_server_param
+{
+my $ver = &get_nginx_version();
+return &compare_version_numbers($ver, "0.8.21") >= 0 ?
+	"default_server" : "default";
+}
+
 # list_nginx_modules()
 # Returns a list of enabled modules. Includes those compiled in by default
 # unless disabled, plus extra compiled in at build time.
