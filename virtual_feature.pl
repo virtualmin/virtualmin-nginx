@@ -170,10 +170,11 @@ if (!$d->{'alias'}) {
 			{ 'name' => 'listen',
 			  'words' => [ $d->{'ip'}.$portstr ] });
 		if ($d->{'ip6'}) {
+			my $def = &get_default_server_param();
 			push(@{$server->{'members'}},
 				{ 'name' => 'listen',
 				  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
-				       $d->{'virt6'} ? ( 'default' ) : ( ) ] });
+				       $d->{'virt6'} ? ( $def ) : ( ) ] });
 			}
 		}
 
@@ -2122,20 +2123,40 @@ my ($d) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 &lock_all_config_files();
-
-# Add IP to server_name for this server
-my $obj = &find("server_name", $server);
-my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
-if ($idx < 0) {
-	push(@{$obj->{'words'}}, $d->{'ip'});
-	&save_directive($server, "server_name", [ $obj ]);
-	}
-
-# Remove IP from server_name for other servers
 my $conf = &get_config();
 my $http = &find("http", $conf);
+
+# Add default_server to listen directives for this server
+my $def = &get_default_server_param();
+my @listen = &find("listen", $server);
+foreach my $l (@listen) {
+	if (&indexof($def, @{$l->{'words'}}) < 0) {
+		push(@{$l->{'words'}}, $def);
+		}
+	}
+my $first_lip = $listen[0]->{'words'}->[0];
+$first_lip =~ s/(^|:)\d+$//;
+&save_directive($server, "listen", \@listen);
+
+# Remove default_server from listen directive for other servers on the IP
 foreach my $os (&find("server", $http)) {
-	next if ($os eq $server);
+	my @listen = &find("listen", $os);
+	my $changed = 0;
+	foreach my $l (@listen) {
+		my $lip = $l->{'words'}->[0];
+		$lip =~ s/(^|:)\d+$//;
+		next if ($lip ne $first_lip);
+		my $idx = &indexof($def, @{$l->{'words'}});
+		if ($idx >= 0) {
+			splice(@{$l->{'words'}}, $idx, 1);
+			$changed++;
+			}
+		}
+	&save_directive($os, "listen", \@listen) if ($changed);
+	}
+
+# Remove IP from server_name for all servers, as we don't do that anymore
+foreach my $os (&find("server", $http)) {
 	my $obj = &find("server_name", $os);
 	my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
 	if ($idx >= 0) {
@@ -2151,12 +2172,20 @@ return undef;
 }
 
 # feature_is_web_default(&domain)
-# Returns 1 if the server's IP is in server_names
+# Returns 1 if this domain's Nginx server is the default
 sub feature_is_web_default
 {
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return 0 if (!$server);
+
+# Does listen contain default_server?
+my $listen = &find("listen", $server);
+return 0 if (!$listen);
+my $def = &get_default_server_param();
+return 1 if (&indexof($def, @{$listen->{'words'}}) >= 0);
+
+# Fall back to check for IP server_name
 my $obj = &find("server_name", $server);
 return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
 }
