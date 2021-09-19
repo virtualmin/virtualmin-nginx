@@ -2574,15 +2574,19 @@ sub feature_find_web_html_cgi_dirs
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return undef if (!$server);
-$d->{'public_html_path'} = &find_value("root", $server);
-if ($d->{'public_html_path'} =~ /^\Q$d->{'home'}\E\/(.*)$/) {
+my $root = &find_value("root", $server);
+return undef if (!$root);
+$d->{'public_html_path'} = $root;
+if ($root =~ /^\Q$d->{'home'}\E\/(.*)$/) {
+	# Under home directory
 	$d->{'public_html_dir'} = $1;
 	}
-elsif ($d->{'public_html_path'} eq $d->{'home'}) {
+elsif ($root eq $d->{'home'}) {
 	# Same as home directory!
 	$d->{'public_html_dir'} = ".";
 	}
 else {
+	# Some other location not relative to the home
 	delete($d->{'public_html_dir'});
 	}
 }
