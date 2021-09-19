@@ -2140,6 +2140,7 @@ $first_lip =~ s/(^|:)\d+$//;
 
 # Remove default_server from listen directive for other servers on the IP
 foreach my $os (&find("server", $http)) {
+	next if ($os eq $server);
 	my @listen = &find("listen", $os);
 	my $changed = 0;
 	foreach my $l (@listen) {
