@@ -2209,10 +2209,10 @@ my ($d, $mode) = @_;
 my $server = &find_domain_server($d);
 return undef if (!$server);
 if ($mode eq 'cert') {
-	return &find_value($server, "ssl_certificate");
+	return &find_value("ssl_certificate", $server);
 	}
 elsif ($mode eq 'key') {
-	return &find_value($server, "ssl_certificate_key");
+	return &find_value("ssl_certificate_key", $server);
 	}
 elsif ($mode eq 'ca') {
 	# Always appeneded to the cert file
