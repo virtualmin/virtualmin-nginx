@@ -170,10 +170,11 @@ if (!$d->{'alias'}) {
 			{ 'name' => 'listen',
 			  'words' => [ $d->{'ip'}.$portstr ] });
 		if ($d->{'ip6'}) {
+			my $def = &get_default_server_param();
 			push(@{$server->{'members'}},
 				{ 'name' => 'listen',
 				  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
-				       $d->{'virt6'} ? ( 'default' ) : ( ) ] });
+				       $d->{'virt6'} ? ( $def ) : ( ) ] });
 			}
 		}
 
@@ -271,6 +272,32 @@ if (!$d->{'alias'}) {
         [ {  'name'  => 'fastcgi_split_path_info',
              'words' => [ &split_quoted_string('^(.+\.php)(/.+)$') ]
           } ]);
+
+	if (&feature_web_supports_cgi()) {
+		# Setup a fastcgi server for this domain
+		my ($ok, $port) = &setup_fcgiwrap_server($d);
+		if ($ok) {
+			$d->{'nginx_fcgiwrap_port'} = $port;
+			}
+
+		# Point cgi-bin to fastcgi server
+		my $cloc = { 'name' => 'location',
+			     'words' => [ '/cgi-bin/' ],
+			     'type' => 1,
+			     'members' => [
+			       { 'name' => 'gzip',
+				 'words' => [ 'off' ] },
+			       { 'name' => 'root',
+				 'words' => [ $d->{'home'}.'/cgi-bin' ] },
+			       { 'name' => 'fastcgi_pass',
+				 'words' => [ 'unix:'.$port ] },
+			       { 'name' => 'fastcgi_param',
+				 'words' => [ 'SCRIPT_FILENAME',
+					      $d->{'home'}.'$fastcgi_script_name' ] },
+			     ]
+			   };
+		&save_directive($server, [ ], [ $cloc ]);
+		}
 
 	&flush_config_file_lines();
 	&unlock_all_config_files();
@@ -567,6 +594,11 @@ if (!$d->{'alias'}) {
 			&virtual_server::delete_php_fpm_pool($oldd);
 			&virtual_server::create_php_fpm_pool($d);
 			}
+		if (&feature_web_supports_cgi()) {
+			# Also fix the CGI wrapper
+			&delete_fcgiwrap_server($oldd);
+			&setup_fcgiwrap_server($d);
+			}
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		}
@@ -675,6 +707,7 @@ if (!$d->{'alias'}) {
 	elsif ($mode eq "fpm") {
 		&virtual_server::delete_php_fpm_pool($d);
 		}
+	&delete_fcgiwrap_server($d);
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
@@ -1106,7 +1139,7 @@ return -1;		# PHP is always run as domain owner
 
 sub feature_web_supports_cgi
 {
-return 0;		# No CGI support
+return &has_command("fcgiwrap") ? 1 : 0;
 }
 
 sub feature_web_supported_php_modes
@@ -1715,7 +1748,7 @@ my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 my $phd = &virtual_server::public_html_dir($d);
 my $dest = $redirect->{'dest'};
-if ($dest !~ /^(http|https):/) {
+if ($dest !~ /^(http|https|\$scheme):/) {
 	$dest =~ s/^\Q$phd\E// || return &text('redirect_ephd', $phd);
 	}
 my $re = $redirect->{'path'};
@@ -2121,20 +2154,41 @@ my ($d) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 &lock_all_config_files();
-
-# Add IP to server_name for this server
-my $obj = &find("server_name", $server);
-my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
-if ($idx < 0) {
-	push(@{$obj->{'words'}}, $d->{'ip'});
-	&save_directive($server, "server_name", [ $obj ]);
-	}
-
-# Remove IP from server_name for other servers
 my $conf = &get_config();
 my $http = &find("http", $conf);
+
+# Add default_server to listen directives for this server
+my $def = &get_default_server_param();
+my @listen = &find("listen", $server);
+foreach my $l (@listen) {
+	if (&indexof($def, @{$l->{'words'}}) < 0) {
+		push(@{$l->{'words'}}, $def);
+		}
+	}
+my $first_lip = $listen[0]->{'words'}->[0];
+$first_lip =~ s/(^|:)\d+$//;
+&save_directive($server, "listen", \@listen);
+
+# Remove default_server from listen directive for other servers on the IP
 foreach my $os (&find("server", $http)) {
 	next if ($os eq $server);
+	my @listen = &find("listen", $os);
+	my $changed = 0;
+	foreach my $l (@listen) {
+		my $lip = $l->{'words'}->[0];
+		$lip =~ s/(^|:)\d+$//;
+		next if ($lip ne $first_lip);
+		my $idx = &indexof($def, @{$l->{'words'}});
+		if ($idx >= 0) {
+			splice(@{$l->{'words'}}, $idx, 1);
+			$changed++;
+			}
+		}
+	&save_directive($os, "listen", \@listen) if ($changed);
+	}
+
+# Remove IP from server_name for all servers, as we don't do that anymore
+foreach my $os (&find("server", $http)) {
 	my $obj = &find("server_name", $os);
 	my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
 	if ($idx >= 0) {
@@ -2150,12 +2204,20 @@ return undef;
 }
 
 # feature_is_web_default(&domain)
-# Returns 1 if the server's IP is in server_names
+# Returns 1 if this domain's Nginx server is the default
 sub feature_is_web_default
 {
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return 0 if (!$server);
+
+# Does listen contain default_server?
+my $listen = &find("listen", $server);
+return 0 if (!$listen);
+my $def = &get_default_server_param();
+return 1 if (&indexof($def, @{$listen->{'words'}}) >= 0);
+
+# Fall back to check for IP server_name
 my $obj = &find("server_name", $server);
 return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
 }
@@ -2178,10 +2240,10 @@ my ($d, $mode) = @_;
 my $server = &find_domain_server($d);
 return undef if (!$server);
 if ($mode eq 'cert') {
-	return &find_value($server, "ssl_certificate");
+	return &find_value("ssl_certificate", $server);
 	}
 elsif ($mode eq 'key') {
-	return &find_value($server, "ssl_certificate_key");
+	return &find_value("ssl_certificate_key", $server);
 	}
 elsif ($mode eq 'ca') {
 	# Always appeneded to the cert file
@@ -2543,15 +2605,19 @@ sub feature_find_web_html_cgi_dirs
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return undef if (!$server);
-$d->{'public_html_path'} = &find_value("root", $server);
-if ($d->{'public_html_path'} =~ /^\Q$d->{'home'}\E\/(.*)$/) {
+my $root = &find_value("root", $server);
+return undef if (!$root);
+$d->{'public_html_path'} = $root;
+if ($root =~ /^\Q$d->{'home'}\E\/(.*)$/) {
+	# Under home directory
 	$d->{'public_html_dir'} = $1;
 	}
-elsif ($d->{'public_html_path'} eq $d->{'home'}) {
+elsif ($root eq $d->{'home'}) {
 	# Same as home directory!
 	$d->{'public_html_dir'} = ".";
 	}
 else {
+	# Some other location not relative to the home
 	delete($d->{'public_html_dir'});
 	}
 }
@@ -2882,6 +2948,67 @@ my $conf = &virtual_server::get_php_fpm_config($d);
 &virtual_server::save_php_fpm_config_value($d, "listen", $socket);
 &virtual_server::register_post_action(
 	\&virtual_server::restart_php_fpm_server, $conf);
+
+return undef;
+}
+
+# feature_save_web_autoconfig(&domain, enabled)
+# Enable or disable redirects for mail client auto-configuration
+sub feature_save_web_autoconfig
+{
+my ($d, $enable) = @_;
+my @autoconfig = &virtual_server::get_autoconfig_hostname($d);
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+return "No Nginx server found" if (!$server);
+
+# Add or remove autoconfig alias names
+my $sn = &find("server_name", $server);
+if ($enable) {
+	# Add all autoconfig domains
+	$sn->{'words'} = [ &unique(@{$sn->{'words'}}, @autoconfig) ];
+	}
+else {
+	# Remove all autoconfig domains
+	$sn->{'words'} = [ grep { &indexof($_, @autoconfig) < 0 }
+				@{$sn->{'words'}} ];
+	}
+&save_directive($server, "server_name", [ $sn ]);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+
+# Add redirects to the CGI script
+my @paths = ( "/mail/config-v1.1.xml",
+	      "/.well-known/autoconfig/mail/config-v1.1.xml",
+	      "/AutoDiscover/AutoDiscover.xml",
+	      "/Autodiscover/Autodiscover.xml",
+	      "/autodiscover/autodiscover.xml" );
+my @redirs = &feature_list_web_redirects($d);
+if ($enable) {
+	# Add redirects for all paths
+	foreach my $p (@paths) {
+		my ($r) = grep { $_->{'path'} eq $p } @redirs;
+		if (!$r) {
+			$r = { 'path' => $p,
+			       'http' => 1,
+			       'https' => 1,
+			       'dest' => "\$scheme://\$host/cgi-bin/autoconfig.cgi" };
+			my $err = &feature_create_web_redirect($d, $r);
+			return $err if ($err);
+			}
+		}
+	}
+else {
+	# Remove redirects for all paths
+	foreach my $p (@paths) {
+		my ($r) = grep { $_->{'path'} eq $p } @redirs;
+		if ($r) {
+			my $err = &feature_delete_web_redirect($d, $r);
+			return $err if ($err);
+			}
+		}
+	}
 
 return undef;
 }

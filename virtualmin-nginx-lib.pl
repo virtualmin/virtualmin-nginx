@@ -533,6 +533,13 @@ my $dir = $dirs->{$name};
 return $dir ? $dir->{'default'} : undef;
 }
 
+sub get_default_server_param
+{
+my $ver = &get_nginx_version();
+return &compare_version_numbers($ver, "0.8.21") >= 0 ?
+	"default_server" : "default";
+}
+
 # list_nginx_modules()
 # Returns a list of enabled modules. Includes those compiled in by default
 # unless disabled, plus extra compiled in at build time.
@@ -1710,23 +1717,33 @@ my %cmds_abs = (
 	'chmod', &has_command('chmod'),
 	'kill', &has_command('kill'),
 	'sleep', &has_command('sleep'),
-);
-&init::enable_at_boot(
-		$name,
-		"Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
-		$cmd,
-		undef,
-		undef,
-		{ 'opts' => {
-		  'env'    => $envs,
-		  'user'   => $d->{'user'},
-		  'group'  => $d->{'user'},
-		  'stop'   => 0,
-		  'reload' => 0,
-		  'logstd' => "$log",
-		  'logerr' => "${log}_error"
-		}},
-		);
+	);
+if (defined(&init::enable_at_boot_as_user)) {
+	# Init system can run commands as the user
+	&init::enable_at_boot_as_user($name,
+		      "Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
+		      "$envs $cmd >>$log 2>&1 </dev/null & $cmds_abs{'echo'} \$! >$pidfile",
+		      "$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`",
+		      undef,
+		      { 'fork' => 1,
+			'pidfile' => $pidfile },
+		      $d->{'user'},
+		      );
+
+	}
+else {
+	# Older Webmin requires use of command_as_user
+	&init::enable_at_boot($name,
+		      "Starts Nginx PHP FastCGI server for $d->{'dom'} (Virtualmin)",
+		      &command_as_user($d->{'user'}, 0,
+			"$envs $cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile",
+		      &command_as_user($d->{'user'}, 0,
+			"$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`")." ; $cmds_abs{'sleep'} 1",
+		      undef,
+		      { 'fork' => 1,
+			'pidfile' => $pidfile },
+		      );
+	}
 $init::init_mode = $old_init_mode;
 
 # Launch it, and save the PID
@@ -1781,6 +1798,7 @@ my $name = "php-fcgi-$d->{'dom'}";
 $name =~ s/\./-/g;
 return $name;
 }
+
 
 # find_php_fcgi_server(&domain)
 # Returns the full path to the PHP command used by this domain's fcgi server
@@ -1887,6 +1905,144 @@ foreach my $l (@locs) {
 		}
 	}
 return undef;
+}
+
+# setup_fcgiwrap_server(&domain)
+# Starts up a fcgiwrap process running as the domain user, and enables it
+# at boot time. Returns an OK flag and the port number selected to listen on.
+sub setup_fcgiwrap_server
+{
+my ($d) =  @_;
+
+# Work out socket file for fcgiwrap
+my $socketdir = "/var/fcgiwrap";
+if (!-d $socketdir) {
+	&make_dir($socketdir, 0777);
+	}
+my $domdir = "$socketdir/$d->{'id'}.sock";
+if (!-d $domdir) {
+	&make_dir($domdir, 0770);
+	}
+my $user = &get_nginx_user();
+&set_ownership_permissions($user, $d->{'gid'}, undef, $domdir);
+my $port = "$domdir/socket";
+
+# Get the command
+my ($cmd, $log, $pidfile) = &get_fcgiwrap_server_command($d, $port);
+$cmd || return (0, $text{'fcgid_ecmd'});
+
+# Create init script
+&foreign_require("init");
+my $old_init_mode = $init::init_mode;
+if ($init::init_mode eq "upstart") {
+	$init::init_mode = "init";
+	}
+my $name = &init_script_fcgiwrap_name($d);
+my %cmds_abs = (
+	'echo', &has_command('echo'),
+	'cat', &has_command('cat'),
+	'chmod', &has_command('chmod'),
+	'kill', &has_command('kill'),
+	'sleep', &has_command('sleep'),
+	'fuser', &has_command('fuser'),
+	'rm', &has_command('rm'),
+	);
+if (defined(&init::enable_at_boot_as_user)) {
+	# Init system can run commands as the user
+	&init::enable_at_boot_as_user($name,
+		      "Nginx fcgiwrap server for $d->{'dom'} (Virtualmin)",
+		      "$cmds_abs{'rm'} -f $port ; $cmd >>$log 2>&1 </dev/null & $cmds_abs{'echo'} \$! >$pidfile && sleep 2 && $cmds_abs{'chmod'} 777 $port",
+		      "$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile` ; ".
+		      "$cmds_abs{'sleep'} 1 ; ".
+		      "$cmds_abs{'rm'} -f $port",
+		      undef,
+		      { 'fork' => 1,
+			'pidfile' => $pidfile },
+		      $d->{'user'},
+		      );
+	}
+else {
+	# Older Webmin requires use of command_as_user
+	&init::enable_at_boot($name,
+		      "Nginx fcgiwrap server for $d->{'dom'} (Virtualmin)",
+		      &command_as_user($d->{'user'}, 0,
+			"$cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile && sleep 2 && $cmds_abs{'chmod'} 777 $port",
+		      &command_as_user($d->{'user'}, 0,
+			"$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile`").
+			" ; $cmds_abs{'sleep'} 1".
+			($cmds_abs{'fuser'} ? " ; $cmds_abs{'fuser'} $port | xargs kill"
+					    : "").
+			" ; $cmds_abs{'rm'} -f $port",
+		      undef,
+		      { 'fork' => 1,
+			'pidfile' => $pidfile },
+		      );
+	}
+$init::init_mode = $old_init_mode;
+
+# Launch it, and save the PID
+&init::start_action($name);
+
+return (1, $port);
+}
+
+# delete_fcgiwrap_server(&domain)
+# Shut down the fcgiwrap process, and delete it from starting at boot
+sub delete_fcgiwrap_server
+{
+my ($d) = @_;
+
+# Stop the server
+&foreign_require("init");
+my $name = &init_script_fcgiwrap_name($d);
+&init::stop_action($name);
+
+# Delete init script
+my $old_init_mode = $init::init_mode;
+if ($init::init_mode eq "upstart") {
+        $init::init_mode = "init";
+        }
+&init::disable_at_boot($name);
+&init::delete_at_boot($name);
+$init::init_mode = $old_init_mode;
+
+# Delete socket file, if any
+if ($d->{'nginx_fcgiwrap_port'} =~ /^(\/\S+)\/socket$/) {
+	my $domdir = $1;
+	&unlink_file($d->{'nginx_fcgiwrap_port'});
+	&unlink_file($domdir);
+	}
+}
+
+# get_fcgiwrap_server_command(&domain, port)
+# Returns a command to run the fcgiwrap server, log file and PID file
+sub get_fcgiwrap_server_command
+{
+my ($d, $port) = @_;
+my $cmd = &has_command("fcgiwrap");
+if ($port =~ /^\//) {
+	$cmd .= " -s unix:".$port;
+	}
+else {
+	$cmd .= " -s tcp:127.0.0.1:".$port;
+	}
+my $log = "$d->{'home'}/logs/fcgiwrap.log";
+my $piddir = "/var/php-nginx";
+if (!-d $piddir) {
+	&make_dir($piddir, 0777);
+	}
+my $pidfile = "$piddir/$d->{'id'}.fcgiwrap.pid";
+return ($cmd, $log, $pidfile);
+}
+
+# init_script_fcgiwrap_name(&domain)
+# Returns the name of the init script for the FCGId server
+sub init_script_fcgiwrap_name
+{
+my ($d) = @_;
+my $name = "fcgiwrap-$d->{'dom'}";
+$name =~ s/\./-/g;
+return $name;
 }
 
 # url_to_upstream(url)
