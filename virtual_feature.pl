@@ -296,6 +296,12 @@ if (!$d->{'alias'}) {
 					      $d->{'home'}.'$fastcgi_script_name' ] },
 			     ]
 			   };
+		foreach my $p (&list_fastcgi_params($server)) {
+			next if ($p->[0] eq 'SCRIPT_FILENAME');
+			push(@{$cloc->{'members'}},
+			     { 'name' => 'fastcgi_param',
+			       'words' => [ @$p ] });
+			}
 		&save_directive($server, [ ], [ $cloc ]);
 		}
 
