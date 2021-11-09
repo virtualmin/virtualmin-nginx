@@ -96,8 +96,7 @@ while(@lines) {
 			   'eline' => $lnum,
 			   'members' => [ ] };
 		my $value = $1;
-		$ns->{'words'} = [ &split_words(" ".$value) ];
-		$ns->{'value'} = $ns->{'words'}->[0];
+		&set_split_words($ns, " ".$value);
 		push(@stack, $addto);
 		push(@$addto, $ns);
 		$addto = $ns->{'members'};
@@ -112,8 +111,7 @@ while(@lines) {
 			   'eline' => $lnum,
 			   'members' => [ ] };
 		my $value = $2;
-		$ns->{'words'} = [ &split_words($value) ];
-		$ns->{'value'} = $ns->{'words'}->[0];
+		&set_split_words($ns, $value);
 		push(@stack, $addto);
 		push(@$addto, $ns);
 		$addto = $ns->{'members'};
@@ -175,6 +173,16 @@ while($value =~ s/^\s+"([^"]+)"// ||
 	push(@words, $1);
 	}
 return @words;
+}
+
+# set_split_words(&directive, string)
+# Set the words and value fields based on a string
+sub set_split_words
+{
+my ($ns, $value) = @_;
+my @s = &split_words($value);
+$ns->{'words'} = \@s;
+$ns->{'value'} = @s ? $s[0] : undef;
 }
 
 # get_add_to_file(name)
