@@ -977,9 +977,10 @@ if (@doms) {
 	# Grant access to system logs
 	my @extras;
 	foreach my $sd (@doms) {
-		push(@extras, &get_nginx_log($d, 0));
-		push(@extras, &get_nginx_log($d, 1));
+		push(@extras, &get_nginx_log($sd, 0));
+		push(@extras, &get_nginx_log($sd, 1));
 		}
+	@extras = &unique(@extras);
 	push(@rv, [ "syslog",
 		    { 'extras' => join("\t", @extras),
 		      'any' => 0,
@@ -2986,6 +2987,14 @@ else {
 	}
 
 return undef;
+}
+
+# feature_reset(&domain)
+# Reset the Nginx config, but preserve redirects and PHP settings
+sub feature_reset
+{
+my ($d) = @_;
+# XXX
 }
 
 1;
