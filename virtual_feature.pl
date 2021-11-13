@@ -2994,7 +2994,55 @@ return undef;
 sub feature_reset
 {
 my ($d) = @_;
-# XXX
+my $ssl = $d->{'virtualmin-nginx-ssl'};
+
+# Save redirects, PHP version, PHP mode and per-directory settings
+my (@redirs, $mode, @dirs);
+if (!$d->{'alias'}) {
+	@redirs = &virtual_server::list_redirects($d);
+	$mode = &virtual_server::get_domain_php_mode($d);
+	@dirs = &virtual_server::list_domain_php_directories($d);
+	}
+
+# Remove the SSL and regular websites
+if ($ssl) {
+	$d->{'virtualmin-nginx-ssl'} = 0;
+	&virtualmin_nginx_ssl::feature_delete($d);
+	}
+$d->{'virtualmin-nginx'} = 0;
+$d->{'web_nodeletelogs'} = 1;
+&feature_delete($d);
+
+# Recreate the SSL and regular websites
+$d->{'virtualmin-nginx'} = 1;
+$d->{'web_nodeletelogs'} = 0;
+&feature_setup($d);
+if ($ssl) {
+	$d->{'virtualmin-nginx-ssl'} = 1;
+	&virtualmin_nginx_ssl::feature_setup($d);
+	}
+
+if (!$d->{'alias'}) {
+	# Put back redirects
+	&$virtual_server::first_print(
+		$virtual_server::text{'reset_webrestore'});
+	foreach my $r (@redirs) {
+		&virtual_server::create_redirect($d, $r);
+		}
+
+	# Put back PHP mode
+	&virtual_server::save_domain_php_mode($d, $mode);
+
+	# Put back per-domain PHP versions
+	if ($mode ne "none" && $mode ne "mod_php") {
+		foreach my $dir (@dirs) {
+			&virtual_server::save_domain_php_directory(
+				$d, $dir->{'dir'}, $dir->{'version'});
+			}
+		}
+	&$virtual_server::first_print($virtual_server::text{'setup_done'});
+	}
+
 }
 
 1;
