@@ -296,6 +296,12 @@ if (!$d->{'alias'}) {
 					      $d->{'home'}.'$fastcgi_script_name' ] },
 			     ]
 			   };
+		foreach my $p (&list_fastcgi_params($server)) {
+			next if ($p->[0] eq 'SCRIPT_FILENAME');
+			push(@{$cloc->{'members'}},
+			     { 'name' => 'fastcgi_param',
+			       'words' => [ @$p ] });
+			}
 		&save_directive($server, [ ], [ $cloc ]);
 		}
 
@@ -971,9 +977,10 @@ if (@doms) {
 	# Grant access to system logs
 	my @extras;
 	foreach my $sd (@doms) {
-		push(@extras, &get_nginx_log($d, 0));
-		push(@extras, &get_nginx_log($d, 1));
+		push(@extras, &get_nginx_log($sd, 0));
+		push(@extras, &get_nginx_log($sd, 1));
 		}
+	@extras = &unique(@extras);
 	push(@rv, [ "syslog",
 		    { 'extras' => join("\t", @extras),
 		      'any' => 0,
@@ -3011,6 +3018,62 @@ else {
 	}
 
 return undef;
+}
+
+# feature_reset(&domain)
+# Reset the Nginx config, but preserve redirects and PHP settings
+sub feature_reset
+{
+my ($d) = @_;
+my $ssl = $d->{'virtualmin-nginx-ssl'};
+
+# Save redirects, PHP version, PHP mode and per-directory settings
+my (@redirs, $mode, @dirs);
+if (!$d->{'alias'}) {
+	@redirs = &virtual_server::list_redirects($d);
+	$mode = &virtual_server::get_domain_php_mode($d);
+	@dirs = &virtual_server::list_domain_php_directories($d);
+	}
+
+# Remove the SSL and regular websites
+if ($ssl) {
+	$d->{'virtualmin-nginx-ssl'} = 0;
+	&virtualmin_nginx_ssl::feature_delete($d);
+	}
+$d->{'virtualmin-nginx'} = 0;
+$d->{'web_nodeletelogs'} = 1;
+&feature_delete($d);
+
+# Recreate the SSL and regular websites
+$d->{'virtualmin-nginx'} = 1;
+$d->{'web_nodeletelogs'} = 0;
+&feature_setup($d);
+if ($ssl) {
+	$d->{'virtualmin-nginx-ssl'} = 1;
+	&virtualmin_nginx_ssl::feature_setup($d);
+	}
+
+if (!$d->{'alias'}) {
+	# Put back redirects
+	&$virtual_server::first_print(
+		$virtual_server::text{'reset_webrestore'});
+	foreach my $r (@redirs) {
+		&virtual_server::create_redirect($d, $r);
+		}
+
+	# Put back PHP mode
+	&virtual_server::save_domain_php_mode($d, $mode);
+
+	# Put back per-domain PHP versions
+	if ($mode ne "none" && $mode ne "mod_php") {
+		foreach my $dir (@dirs) {
+			&virtual_server::save_domain_php_directory(
+				$d, $dir->{'dir'}, $dir->{'version'});
+			}
+		}
+	&$virtual_server::first_print($virtual_server::text{'setup_done'});
+	}
+
 }
 
 1;
