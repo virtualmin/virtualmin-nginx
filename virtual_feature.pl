@@ -2940,19 +2940,23 @@ return "No Nginx server found" if (!$server);
 
 # Add or remove autoconfig alias names
 my $sn = &find("server_name", $server);
+my @oldsn = @{$sn->{'words'}};
+my @newsn;
 if ($enable) {
 	# Add all autoconfig domains
-	$sn->{'words'} = [ &unique(@{$sn->{'words'}}, @autoconfig) ];
+	@newsn = &unique(@{$sn->{'words'}}, @autoconfig);
 	}
 else {
 	# Remove all autoconfig domains
-	$sn->{'words'} = [ grep { &indexof($_, @autoconfig) < 0 }
-				@{$sn->{'words'}} ];
+	@newsn = grep { &indexof($_, @autoconfig) < 0 } @oldsn;
 	}
-&save_directive($server, "server_name", [ $sn ]);
-&flush_config_file_lines();
+if (join(" ", @oldsn) ne join(" ", @newsn)) {
+	$sn->{'words'} = \@newsn;
+	&save_directive($server, "server_name", [ $sn ]);
+	&flush_config_file_lines();
+	&virtual_server::register_post_action(\&print_apply_nginx);
+	}
 &unlock_all_config_files();
-&virtual_server::register_post_action(\&print_apply_nginx);
 
 # Add redirects to the CGI script
 my @paths = ( "/mail/config-v1.1.xml",
@@ -3043,6 +3047,67 @@ if (!$d->{'alias'}) {
 	&$virtual_server::first_print($virtual_server::text{'setup_done'});
 	}
 
+}
+
+# feature_get_supported_http_protocols(&domain)
+# Nginx supports only HTTP/1.1 and HTTP2 over SSL
+sub feature_get_supported_http_protocols
+{
+my ($d) = @_;
+if ($d->{'virtualmin-nginx-ssl'}) {
+	return ['http/1.1', 'h2'];
+	}
+return [];
+}
+
+# feature_get_http_protocols(&domain)
+# Checks if http2 is enabled for the SSL listen
+sub feature_get_http_protocols
+{
+my ($d) = @_;
+if ($d->{'virtualmin-nginx-ssl'}) {
+	my $s = &find_domain_server($d);
+	return "No Nginx server found!" if (!$s);
+	foreach my $l (&find("listen", $s)) {
+		my @w = @{$l->{'words'}};
+		if (&indexof("ssl", @w) >= 0 && &indexof("http2", @w) >= 0) {
+			return ['http/1.1', 'h2']
+			}
+		}
+	return ['http/1.1'];
+	}
+return [];
+}
+
+# feature_save_http_protocols(&domain, &protocols)
+# Turn http2 on or off for the SSL listen
+sub feature_save_http_protocols
+{
+my ($d, $prots) = @_;
+if ($d->{'virtualmin-nginx-ssl'}) {
+	my $s = &find_domain_server($d);
+	return "No Nginx server found!" if (!$s);
+	&lock_all_config_files();
+	my @listen = &find("listen", $s);
+	foreach my $l (@listen) {
+		my @w = @{$l->{'words'}};
+		if (&indexof("ssl", @w) >= 0) {
+			# Found one to modify
+			if (&indexof("h2", @$prots) >= 0) {
+				@w = &unique(@w, "http2");
+				}
+			else {
+				@w = grep { $_ ne "http2" } @w;
+				}
+			$l->{'words'} = \@w;
+			}
+		}
+	&save_directive($s, "listen", \@listen);
+	&flush_config_file_lines();
+	&unlock_all_config_files();
+	&virtual_server::register_post_action(\&print_apply_nginx);
+	}
+return undef;
 }
 
 1;
