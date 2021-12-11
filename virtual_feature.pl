@@ -2402,6 +2402,37 @@ if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
 		}
 	}
 
+# Change IPv4 in listen directive if changed
+if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
+	my @listen = &find("listen", $server);
+	foreach my $l (@listen) {
+		if ($l->{'words'}->[0] eq $oldd->{'ip'}) {
+			$l->{'words'}->[0] = $d->{'ip'};
+			}
+		elsif ($l->{'words'}->[0] =~ /^(\S+):(\d+)$/ &&
+		       $1 eq $oldd->{'ip'}) {
+			$l->{'words'}->[0] = $d->{'ip'}.":".$2;
+			}
+		}
+	&save_directive($server, "listen", \@listen);
+	}
+
+# Change IPv6 in listen directive if changed
+# XXX
+if ($oldd && $d->{'ip6'} && $oldd->{'ip6'} ne $d->{'ip6'}) {
+	my @listen = &find("listen", $server);
+	foreach my $l (@listen) {
+		if ($l->{'words'}->[0] eq "[".$oldd->{'ip6'}."]") {
+			$l->{'words'}->[0] = "[".$d->{'ip6'}."]";
+			}
+		elsif ($l->{'words'}->[0] =~ /^\[(\S+)\]:(\d+)$/ &&
+		       $1 eq $oldd->{'ip6'}) {
+			$l->{'words'}->[0] = "[".$d->{'ip6'}."]:".$2;
+			}
+		}
+	&save_directive($server, "listen", \@listen);
+	}
+
 # Fix up home directory if changed
 if ($oldd && $d->{'home'} ne $oldd->{'home'}) {
 	&recursive_change_directives(
