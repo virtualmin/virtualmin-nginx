@@ -22,6 +22,7 @@ while(!$dead) {
 	$childpid = fork();
 	if ($childpid == 0) {
 		exec(@ARGV);
+		exit(1);
 		}
 	waitpid($childpid, 0);
 
