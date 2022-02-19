@@ -228,7 +228,8 @@ return wantarray ? @rv : $rv[0];
 sub find_value
 {
 my ($name, $conf) = @_;
-my @rv = map { $_->{'words'}->[0] || $_->{'value'} } &find($name, $conf);
+my @rv = map { my @w = @{$_->{'words'}};
+	       (@w ? $w[0] : undef) || $_->{'value'} } &find($name, $conf);
 return wantarray ? @rv : $rv[0];
 }
 
@@ -1310,9 +1311,9 @@ my @servers = &find("server", $http);
 foreach my $s (@servers) {
 	my $obj = &find("server_name", $s);
 	foreach my $name (@{$obj->{'words'}}) {
-		if (lc($name) eq lc($d->{'dom'}) ||
-		    lc($name) eq "www.".lc($d->{'dom'}) ||
-		    lc($name) eq "*.".lc($d->{'dom'})) {
+		if (defined($name) && (lc($name) eq lc($d->{'dom'}) ||
+				       lc($name) eq "www.".lc($d->{'dom'}) ||
+				       lc($name) eq "*.".lc($d->{'dom'}))) {
 			return $s;
 			}
 		}
