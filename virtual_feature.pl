@@ -1172,11 +1172,12 @@ my $fpmsock = &virtual_server::get_php_fpm_socket_file($d, 1);
 my $fpmport = $d->{'php_fpm_port'};
 if ($loc) {
 	my ($pass) = &find("fastcgi_pass", $loc);
-	if ($pass && $pass->{'words'}->[0] =~ /^(localhost|unix):(.*)$/) {
+	if ($pass && $pass->{'words'}->[0] =~ /^(localhost|127\.0\.0\.1|unix):(.*)$/) {
 		if ($1 eq "unix" && $2 eq $fpmsock) {
 			return 'fpm';
 			}
-		elsif ($1 eq "localhost" && $fpmport && $2 eq $fpmport) {
+		elsif (($1 eq "localhost" || $1 eq "127.0.0.1") &&
+		       $fpmport && $2 eq $fpmport) {
 			return 'fpm';
 			}
 		else {
@@ -1250,7 +1251,7 @@ if ($port) {
 	if ($loc) {
 		&lock_file($loc->{'file'});
 		&save_directive($loc, "fastcgi_pass",
-			$port =~ /^\d+$/ ? [ "localhost:".$port ]
+			$port =~ /^\d+$/ ? [ "127.0.0.1:".$port ]
 					 : [ "unix:".$port ]);
 		&flush_file_lines($loc->{'file'});
 		&unlock_file($loc->{'file'});
@@ -2447,7 +2448,7 @@ if ($oldd && $oldd->{'nginx_php_port'} ne $d->{'nginx_php_port'}) {
 	if ($l) {
 		&save_directive($l, "fastcgi_pass",
 			$oldd->{'nginx_php_port'} =~ /^\d+$/ ?
-			    [ "localhost:".$oldd->{'nginx_php_port'} ] :
+			    [ "127.0.0.1:".$oldd->{'nginx_php_port'} ] :
 			    [ "unix:".$oldd->{'nginx_php_port'} ]);
 		$d->{'nginx_php_port'} = $oldd->{'nginx_php_port'};
 		}
@@ -2570,7 +2571,7 @@ my ($l) = grep { ($_->{'words'}->[1] eq '\.php$' ||
 if ($l) {
 	&save_directive($l, "fastcgi_pass",
 		$d->{'nginx_php_port'} =~ /^\d+$/ ?
-		    [ "localhost:".$d->{'nginx_php_port'} ] :
+		    [ "127.0.0.1:".$d->{'nginx_php_port'} ] :
 		    [ "unix:".$d->{'nginx_php_port'} ]);
 	}
 
@@ -2906,6 +2907,7 @@ my ($pass) = &find("fastcgi_pass", $loc);
 return (0, "No fastcgi_pass directive found") if (!$pass);
 my $webport;
 if ($pass->{'words'}->[0] =~ /^localhost:(\d+)/ ||
+    $pass->{'words'}->[0] =~ /^127\.0\.0\.1:(\d+)/ ||
     $pass->{'words'}->[0] =~ /^unix:(\/\S+)/) {
 	$webport = $1;
 	}
