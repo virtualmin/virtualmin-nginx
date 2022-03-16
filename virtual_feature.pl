@@ -2948,7 +2948,7 @@ my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
                         $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 return "No location block for .php files found" if (!$loc);
 &save_directive($loc, "fastcgi_pass",
-		[ $socket =~ /^\// ? "unix:$socket" : "localhost:$socket" ]);
+		[ $socket =~ /^\// ? "unix:$socket" : "127.0.0.1:$socket" ]);
 &flush_config_file_lines();
 &unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
