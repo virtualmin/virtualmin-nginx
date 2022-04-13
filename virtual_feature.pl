@@ -960,12 +960,13 @@ return undef;
 sub feature_webmin
 {
 my ($d, $alld) = @_;
-my @doms = map { $_->{'dom'} } grep { $_->{$module_name} } @$alld;
+my @doms = grep { $_->{$module_name} } @$alld;
+my @dnames = map { $_->{'dom'} } @doms;
 if (@doms) {
 	# Grant access to Nginx module
 	my @rv;
 	push(@rv, [ $module_name,
-		   { 'vhosts' => join(' ', @doms),
+		   { 'vhosts' => join(' ', @dnames),
 		     'root' => $d->{'home'},
 		     'global' => 0,
 		     'logs' => 0,
