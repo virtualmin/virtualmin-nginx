@@ -1311,7 +1311,7 @@ my @servers = &find("server", $http);
 foreach my $s (@servers) {
 	my $obj = &find("server_name", $s);
 	foreach my $name (@{$obj->{'words'}}) {
-		if (defined($name) && (lc($name) eq lc($d->{'dom'}) ||
+		if (defined($name) && ref($d) && (lc($name) eq lc($d->{'dom'}) ||
 				       lc($name) eq "www.".lc($d->{'dom'}) ||
 				       lc($name) eq "*.".lc($d->{'dom'}))) {
 			return $s;
