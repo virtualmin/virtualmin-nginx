@@ -329,6 +329,9 @@ if (!$d->{'alias'}) {
 		&set_nginx_log_permissions($d, $l);
 		}
 
+	# Save HTML dirs
+	&feature_find_web_html_cgi_dirs($d);
+
 	return 1;
 	}
 else {
