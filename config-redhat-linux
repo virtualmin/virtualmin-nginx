@@ -6,3 +6,4 @@ apply_cmd=/etc/init.d/nginx restart
 child_procs=4
 php_socket=1
 listen_mode=1
+proxy_websockets=0

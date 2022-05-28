@@ -1902,6 +1902,19 @@ if ($url) {
 	       'words' => [ $url ],
 	     },
 	    );
+	if ($config{'proxy_websockets'}) {
+		# Add directives to proxy websockets 
+		push(@{$l->{'members'}},
+		     { 'name' => 'proxy_http_version',
+		       'words' => [ '1.1' ], },
+		     { 'name' => 'proxy_set_header',
+		       'words' => [ 'Upgrade', '$http_upgrade' ], },
+		     { 'name' => 'proxy_set_header',
+		       'words' => [ 'Connection', 'Upgrade' ], },
+		     { 'name' => 'proxy_set_header',
+		       'words' => [ 'Host', '$host' ], },
+		    );
+		}
 	}
 $balancer->{'location'} = $l;
 my $before = &find_before_location($server, $balancer->{'path'});
