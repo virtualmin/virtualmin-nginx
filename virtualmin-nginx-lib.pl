@@ -154,7 +154,8 @@ while(@lines) {
 			}
 		}
 	elsif ($l =~ /\S/) {
-		print STDERR "Invalid Nginx config line $l at $lnum\n";
+		$l =~ s/\r|\n//g;
+		print STDERR "Invalid Nginx config line $l at $lnum in $file\n";
 		}
 	$lnum++;
 	}
