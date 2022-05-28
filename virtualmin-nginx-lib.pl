@@ -121,7 +121,7 @@ while(@lines) {
 		$addto = pop(@stack);
 		$addto->[@$addto-1]->{'eline'} = $lnum;
 		}
-	elsif ($l =~ /^\s*(\S+)((\s+("([^"]*)"|'([^']*)'|[^ ;]+))*);/) {
+	elsif ($l =~ /^\s*(\S+)((\s+("([^"]*)"|'([^']*)'|[^ ;]+))*)\s*;/) {
 		# Found a directive
 		my ($name, $value) = ($1, $2);
 		my @words = &split_words($value);
