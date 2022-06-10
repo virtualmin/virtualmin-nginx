@@ -1091,7 +1091,7 @@ if ($mode eq "fcgid") {
 	}
 elsif ($mode eq "fpm") {
 	# Link to edit FPM configs with PHP settings
-	my $conf = &virtual_server::get_php_fpm_config();
+	my $conf = &virtual_server::get_php_fpm_config($d);
 	if ($conf) {
 		my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 		push(@rv, { 'mod' => 'phpini',
