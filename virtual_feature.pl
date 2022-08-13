@@ -1077,6 +1077,7 @@ foreach my $log ([ 0, $text{'links_anlog'} ],
 my $mode = &feature_get_web_php_mode($d);
 if ($mode eq "fcgid") {
 	# Link to edit per-version php.ini files
+	my @dirs = &virtual_server::list_domain_php_directories($d);
 	foreach my $ini (&virtual_server::find_domain_php_ini_files($d)) {
 		push(@rv, { 'mod' => 'phpini',
 			    'desc' => $ini->[0] ?
@@ -1085,12 +1086,12 @@ if ($mode eq "fcgid") {
 			    'page' => 'list_ini.cgi?file='.
 					&urlize($ini->[1]),
 			    'cat' => 'services',
-			  });
+			  }) if ($dirs[0]->{'version'} == $ini->[0]);
 		}
 	}
 elsif ($mode eq "fpm") {
 	# Link to edit FPM configs with PHP settings
-	my $conf = &virtual_server::get_php_fpm_config();
+	my $conf = &virtual_server::get_php_fpm_config($d);
 	if ($conf) {
 		my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
 		push(@rv, { 'mod' => 'phpini',

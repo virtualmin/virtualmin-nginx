@@ -467,10 +467,10 @@ foreach my $w (@_) {
 	if ($w eq "") {
 		push(@rv, '""');
 		}
-	elsif ($w =~ /\s|;|\$/ && $w !~ /"/) {
+	elsif ($w =~ /\s|;|\$/ && $w !~ /"/ && $w !~ /^\$/) {
 		push(@rv, "\"$w\"");
 		}
-	elsif ($w =~ /\s|;|\$/) {
+	elsif ($w =~ /\s|;|\$/ && $w !~ /^\$/) {
 		push(@rv, "'$w'");
 		}
 	else {
