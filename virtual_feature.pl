@@ -1156,7 +1156,7 @@ return &has_command("fcgiwrap") ? 1 : 0;
 
 sub feature_web_supported_php_modes
 {
-my @rv = ('fcgid');
+my @rv = ('none', 'fcgid');
 if (&virtual_server::get_php_fpm_config()) {
 	push(@rv, 'fpm');
 	}
@@ -1190,7 +1190,7 @@ if ($loc) {
 			}
 		}
 	}
-return undef;
+return 'none';
 }
 
 # feature_save_web_php_mode(&domain, mode)
@@ -1247,19 +1247,45 @@ elsif ($mode eq "fpm" && $oldmode ne "fpm") {
 		  &virtual_server::get_php_fpm_socket_file($d);
 	}
 
-# Update the port in the config, if changed
+# Find the location block for PHP
+my @locs = &find("location", $server);
+my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
+		   ($_->{'words'}->[1] eq '\.php$' ||
+		    $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
+
 if ($port) {
-	my @locs = &find("location", $server);
-	my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
-			   ($_->{'words'}->[1] eq '\.php$' ||
-			   	$_->{'words'}->[1] eq '\.php(/|$)') } @locs;
+	# Update the port in the config, if changed
+	if (!$loc) {
+		&lock_file($server->{'file'});
+		$loc = { 'name' => 'location',
+			 'words' => [ '~', '\.php(/|$)' ],
+			 'type' => 1,
+			 'members' => [
+			    { 'name' => 'try_files',
+			      'words' => [ '$uri', '$fastcgi_script_name',
+					   '=404' ],
+			    },
+			 ],
+		       };
+		&save_directive($server, [ ], [ $loc ]);
+		&flush_file_lines($server->{'file'});
+		&unlock_file($server->{'file'});
+		}
+	&lock_file($loc->{'file'});
+	&save_directive($loc, "fastcgi_pass",
+		$port =~ /^\d+$/ ? [ "127.0.0.1:".$port ]
+				 : [ "unix:".$port ]);
+	&flush_file_lines($loc->{'file'});
+	&unlock_file($loc->{'file'});
+	&virtual_server::register_post_action(\&print_apply_nginx);
+	}
+elsif ($mode eq 'none') {
+	# Remove the location block
 	if ($loc) {
-		&lock_file($loc->{'file'});
-		&save_directive($loc, "fastcgi_pass",
-			$port =~ /^\d+$/ ? [ "127.0.0.1:".$port ]
-					 : [ "unix:".$port ]);
-		&flush_file_lines($loc->{'file'});
-		&unlock_file($loc->{'file'});
+		&lock_file($server->{'file'});
+		&save_directive($server, [ $loc ], [ ]);
+		&flush_file_lines($server->{'file'});
+		&unlock_file($server->{'file'});
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
 	}
