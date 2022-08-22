@@ -255,6 +255,18 @@ if (!$d->{'alias'}) {
 	&save_directive($server, "fastcgi_param",
 		[ map { { 'words' => $_ } } @params ]);
 	
+	# Add .well-known location work with proxy enabled sites
+	my $wploc = { 'name' => 'location',
+		     'words' => [ '^~', '/.well-known/' ],
+		     'type' => 1,
+		     'members' => [
+			{ 'name' => 'try_files',
+			  'words' => [ '$uri', '/' ],
+			},
+		     ],
+		   };
+	&save_directive($server, [ ], [ $wploc ]);
+
 	# Add location
 	my $ploc = { 'name' => 'location',
 		     'words' => [ '~', '\.php(/|$)' ],
