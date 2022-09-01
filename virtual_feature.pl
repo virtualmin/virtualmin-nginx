@@ -1186,16 +1186,11 @@ my @locs = &find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
 		   ($_->{'words'}->[1] eq '\.php$' ||
 		   	$_->{'words'}->[1] eq '\.php(/|$)') } @locs;
-my $fpmsock = &virtual_server::get_php_fpm_socket_file($d, 1);
-my $fpmport = $d->{'php_fpm_port'};
 if ($loc) {
 	my ($pass) = &find("fastcgi_pass", $loc);
 	if ($pass && $pass->{'words'}->[0] =~ /^(localhost|127\.0\.0\.1|unix):(.*)$/) {
-		if ($1 eq "unix" && $2 eq $fpmsock) {
-			return 'fpm';
-			}
-		elsif (($1 eq "localhost" || $1 eq "127.0.0.1") &&
-		       $fpmport && $2 eq $fpmport) {
+		if (($1 eq "localhost" || $1 eq "127.0.0.1" || $1 eq "unix") &&
+		     $2 && $2 !~ /\.sock\/socket/) {
 			return 'fpm';
 			}
 		else {
