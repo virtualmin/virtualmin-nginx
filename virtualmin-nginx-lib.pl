@@ -1960,7 +1960,7 @@ my %cmds_abs = (
 if (defined(&init::enable_at_boot_as_user)) {
 	# Init system can run commands as the user
 	&init::enable_at_boot_as_user($name,
-		      "Nginx fcgiwrap server for $d->{'dom'} (Virtualmin)",
+		      "Nginx FCGIwrap server for $d->{'dom'} (Virtualmin)",
 		      "$cmds_abs{'rm'} -f $port ; $cmd >>$log 2>&1 </dev/null & $cmds_abs{'echo'} \$! >$pidfile && sleep 2 && $cmds_abs{'chmod'} 777 $port",
 		      "$cmds_abs{'kill'} `$cmds_abs{'cat'} $pidfile` ; ".
 		      "$cmds_abs{'sleep'} 1 ; ".
@@ -1974,7 +1974,7 @@ if (defined(&init::enable_at_boot_as_user)) {
 else {
 	# Older Webmin requires use of command_as_user
 	&init::enable_at_boot($name,
-		      "Nginx fcgiwrap server for $d->{'dom'} (Virtualmin)",
+		      "Nginx FCGIwrap server for $d->{'dom'} (Virtualmin)",
 		      &command_as_user($d->{'user'}, 0,
 			"$cmd >>$log 2>&1 </dev/null")." & $cmds_abs{'echo'} \$! >$pidfile && $cmds_abs{'chmod'} +r $pidfile && sleep 2 && $cmds_abs{'chmod'} 777 $port",
 		      &command_as_user($d->{'user'}, 0,
