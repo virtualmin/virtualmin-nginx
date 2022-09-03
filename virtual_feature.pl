@@ -1497,15 +1497,8 @@ elsif ($mode eq "fpm") {
 	# Read from FPM config file
 	my $conf = &virtual_server::get_php_fpm_config();
 	return -1 if (!$conf);
-	my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-	my $lref = &read_file_lines($file, 1);
-	my $childs = 0;
-	foreach my $l (@$lref) {
-		if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
-			$childs = $1;
-			}
-		}
-	&unflush_file_lines($file);
+	my $childs = &virtual_server::get_php_fpm_pool_config_value(
+			$conf, $d->{'id'}, "pm.max_children");
 	return $childs == $childrenmax ? 0 : $childs;
 	}
 else {
@@ -1535,20 +1528,9 @@ if ($children != $d->{'nginx_php_children'}) {
 		# Set in the FPM config
 		my $conf = &virtual_server::get_php_fpm_config();
 		return 0 if (!$conf);
-		my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-		return 0 if (!-r $file);
-		&lock_file($file);
-		my $lref = &read_file_lines($file);
 		$children = $childrenmax if ($children == 0);   # Recommended default
-		foreach my $l (@$lref) {
-			if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
-				$l = "pm.max_children = $children";
-				}
-			}
-		&flush_file_lines($file);
-		&unlock_file($file);
-		&virtual_server::register_post_action(
-			\&virtual_server::restart_php_fpm_server);
+		&save_php_fpm_pool_config_value(
+			$conf, $d->{'id'}, "pm.max_children", $children);
 		}
 	&virtual_server::save_domain($d);
 	}
