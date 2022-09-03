@@ -1224,7 +1224,7 @@ if ($mode eq "fcgid" && $oldmode ne "fcgid") {
 	my $ok;
 	$d->{'nginx_php_version'} ||= $tmpl->{'web_phpver'};
 	$d->{'nginx_php_children'} ||= $config{'child_procs'} ||
-				       $tmpl->{'web_phpchildren'} || 1;
+				       $tmpl->{'web_phpchildren'} || 0;
 	($ok, $port) = &setup_php_fcgi_server($d);
 	$ok || return $port;
 	$d->{'nginx_php_port'} = $port;
@@ -1403,6 +1403,7 @@ sub feature_get_fcgid_max_execution_time
 {
 my ($d) = @_;
 my $server = &find_domain_server($d);
+my $maxexectime = $virtual_server::max_php_fcgid_timeout || 9999;
 if ($server) {
 	my $ver = &get_nginx_version();
 	$ver =~ s/^(\d+\.\d+)(.*)/$1/;
@@ -1411,12 +1412,12 @@ if ($server) {
 		my ($t) = grep { $_->{'words'}->[0] eq "read_timeout" }
 			     &find("fastcgi_param", $server);
 		my $v = $t ? $t->{'words'}->[1] : undef;
-		return !$v ? undef : $v == 9999 ? undef : $v;
+		return !$v ? undef : $v == $maxexectime ? undef : $v;
 		}
 	else {
 		# Old format directive
 		my $t = &find_value("fastcgi_read_timeout", $server);
-		return $t == 9999 ? undef : $t if ($t);
+		return $t == $maxexectime ? undef : $t if ($t);
 		}
 	return &get_default("fastcgi_read_timeout");
 	}
@@ -1429,6 +1430,7 @@ sub feature_set_fcgid_max_execution_time
 my ($d, $max) = @_;
 &lock_all_config_files();
 my $server = &find_domain_server($d);
+my $maxexectime = $virtual_server::max_php_fcgid_timeout || 9999;
 if ($server) {
 	my $ver = &get_nginx_version();
 	$ver =~ s/^(\d+\.\d+)(.*)/$1/;
@@ -1437,13 +1439,13 @@ if ($server) {
 		my @p = &find("fastcgi_param", $server);
 		@p = grep { $_->{'words'}->[0] ne 'read_timeout' } @p;
 		push(@p, { 'name' => 'fastcgi_param',
-			   'words' => [ "read_timeout", ($max || 9999) ] });
+			   'words' => [ "read_timeout", ($max || $maxexectime) ] });
 		&save_directive($server, "fastcgi_param", \@p);
 		}
 	else {
 		# Old format directive
 		&save_directive($server, "fastcgi_read_timeout",
-			        [ $max || 9999 ]);
+			        [ $max || $maxexectime ]);
 		}
 	}
 &flush_config_file_lines();
@@ -1483,24 +1485,28 @@ sub feature_get_web_php_children
 {
 my ($d) = @_;
 my $mode = &feature_get_web_php_mode($d);
+my $childrenmax = 
+	defined(&virtual_server::get_php_max_childred_allowed) ? 
+	&virtual_server::get_php_max_childred_allowed() :
+	$virtual_server::max_php_fcgid_children;
 if ($mode eq "fcgid") {
 	# Stored in the domain's config
-	return $d->{'nginx_php_children'} || 1;
+	return $d->{'nginx_php_children'} || 0;
 	}
 elsif ($mode eq "fpm") {
 	# Read from FPM config file
-        my $conf = &virtual_server::get_php_fpm_config();
-        return -1 if (!$conf);
-        my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
-        my $lref = &read_file_lines($file, 1);
-        my $childs = 0;
-        foreach my $l (@$lref) {
-                if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
-                        $childs = $1;
-                        }
-                }
-        &unflush_file_lines($file);
-        return $childs == 9999 ? 0 : $childs;
+	my $conf = &virtual_server::get_php_fpm_config();
+	return -1 if (!$conf);
+	my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
+	my $lref = &read_file_lines($file, 1);
+	my $childs = 0;
+	foreach my $l (@$lref) {
+		if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
+			$childs = $1;
+			}
+		}
+	&unflush_file_lines($file);
+	return $childs == $childrenmax ? 0 : $childs;
 	}
 else {
 	return undef;
@@ -1512,7 +1518,11 @@ else {
 sub feature_save_web_php_children
 {
 my ($d, $children) = @_;
-$d->{'nginx_php_children'} ||= 1;
+my $childrenmax = 
+	defined(&virtual_server::get_php_max_childred_allowed) ? 
+	&virtual_server::get_php_max_childred_allowed() :
+	$virtual_server::max_php_fcgid_children;
+$d->{'nginx_php_children'} ||= 0;
 if ($children != $d->{'nginx_php_children'}) {
 	$d->{'nginx_php_children'} = $children;
 	my $mode = &feature_get_web_php_mode($d);
@@ -1529,7 +1539,7 @@ if ($children != $d->{'nginx_php_children'}) {
 		return 0 if (!-r $file);
 		&lock_file($file);
 		my $lref = &read_file_lines($file);
-		$children = 9999 if ($children == 0);   # Unlimited
+		$children = $childrenmax if ($children == 0);   # Recommended default
 		foreach my $l (@$lref) {
 			if ($l =~ /pm.max_children\s*=\s*(\d+)/) {
 				$l = "pm.max_children = $children";
