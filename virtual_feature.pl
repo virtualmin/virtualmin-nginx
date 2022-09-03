@@ -1529,7 +1529,7 @@ if ($children != $d->{'nginx_php_children'}) {
 		my $conf = &virtual_server::get_php_fpm_config();
 		return 0 if (!$conf);
 		$children = $childrenmax if ($children == 0);   # Recommended default
-		&save_php_fpm_pool_config_value(
+		&virtual_server::save_php_fpm_pool_config_value(
 			$conf, $d->{'id'}, "pm.max_children", $children);
 		}
 	&virtual_server::save_domain($d);
