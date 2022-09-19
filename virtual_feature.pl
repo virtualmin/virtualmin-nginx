@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Time::Local;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %config, $module_name, %access, $default_content_dir);
+our (%text, %config, $module_name, %access);
 
 # feature_name()
 # Returns a short name for this feature
@@ -804,10 +804,10 @@ else {
 
 	if ($tmpl->{'disabled_url'} eq 'none') {
 		# Disable is done via default website page
-		my $def_tpl = &read_file_contents("$default_content_dir/index.html");
+		my $def_tpl = &read_file_contents("$virtual_server::default_content_dir/index.html");
 		my %hashtmp = %$d;
-		$hashtmp{'TMPLTTITLE'} = $text{'deftmplt_website_disabled'};
-		$hashtmp{'TMPLTSLOGAN'} = $text{'deftmplt_disable_slog'};
+		$hashtmp{'TMPLTTITLE'} = $virtual_server::text{'deftmplt_website_disabled'};
+		$hashtmp{'TMPLTSLOGAN'} = $virtual_server::text{'deftmplt_disable_slog'};
 		if ($d->{'disabled_why'}) {
 			$hashtmp{'TMPLTCONTENT'} = $d->{'disabled_why'};
 			}
