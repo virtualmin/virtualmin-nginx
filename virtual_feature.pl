@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Time::Local;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %config, $module_name, %access);
+our (%text, %config, $module_name, %access, $default_content_dir);
 
 # feature_name()
 # Returns a short name for this feature
@@ -803,12 +803,21 @@ else {
 			     $_->{'words'}->[1] eq '/.*' } @locs;
 
 	if ($tmpl->{'disabled_url'} eq 'none') {
-		# Disable is done via local HTML
-		my $dis = &virtual_server::disabled_website_html($d);
+		# Disable is done via default website page
+		my $def_tpl = &read_file_contents("$default_content_dir/index.html");
+		my %hashtmp = %$d;
+		$hashtmp{'TMPLTTITLE'} = $text{'deftmplt_website_disabled'};
+		$hashtmp{'TMPLTSLOGAN'} = $text{'deftmplt_disable_slog'};
+		if ($d->{'disabled_why'}) {
+			$hashtmp{'TMPLTCONTENT'} = $d->{'disabled_why'};
+			}
+		%hashtmp = &virtual_server::populate_default_index_page(%hashtmp);
+		$def_tpl = &virtual_server::substitute_virtualmin_template($def_tpl, \%hashtmp);
 		my $msg = $tmpl->{'disabled_web'} eq 'none' ?
-			"<h1>Website Disabled</h1>\n" :
+			$def_tpl :
 			join("\n", split(/\t/, $tmpl->{'disabled_web'}));
 		$msg = &virtual_server::substitute_domain_template($msg, $d);
+		my $dis = &virtual_server::disabled_website_html($d);
 		my $fh = "DISABLED";
 		&open_lock_tempfile($fh, ">$dis");
 		&print_tempfile($fh, $msg);
