@@ -272,9 +272,12 @@ if (!$d->{'alias'}) {
 		     'words' => [ '~', '\.php(/|$)' ],
 		     'type' => 1,
 		     'members' => [
-			{ 'name' => 'try_files',
-			  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
-			},
+				{ 'name' => 'try_files',
+				  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+				},
+				{ 'name' => 'default_type',
+				  'words' => [ 'application/x-httpd-php' ],
+				}
 		     ],
 		   };
 	&save_directive($server, [ ], [ $ploc ]);
@@ -1274,16 +1277,19 @@ if ($port) {
 	# Update the port in the config, if changed
 	if (!$loc) {
 		&lock_file($server->{'file'});
-		$loc = { 'name' => 'location',
-			 'words' => [ '~', '\.php(/|$)' ],
-			 'type' => 1,
-			 'members' => [
-			    { 'name' => 'try_files',
-			      'words' => [ '$uri', '$fastcgi_script_name',
-					   '=404' ],
-			    },
-			 ],
-		       };
+			$loc =
+			   { 'name' => 'location',
+				'words' => [ '~', '\.php(/|$)' ],
+				'type' => 1,
+				'members' => [
+					{ 'name' => 'default_type',
+					  'words' => [ 'application/x-httpd-php' ],
+					},
+					{ 'name' => 'try_files',
+					  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+					},
+				  ],
+			   };
 		&save_directive($server, [ ], [ $loc ]);
 		&flush_file_lines($server->{'file'});
 		&unlock_file($server->{'file'});
@@ -1300,7 +1306,20 @@ elsif ($mode eq 'none') {
 	# Remove the location block
 	if ($loc) {
 		&lock_file($server->{'file'});
-		&save_directive($server, [ $loc ], [ ]);
+		my $locdeftype =
+		   { 'name' => 'location',
+			'words' => [ '~', '\.php(/|$)' ],
+			'type' => 1,
+			'members' => [
+				{ 'name' => 'default_type',
+				  'words' => [ 'text/plain' ],
+				},
+				{ 'name' => 'try_files',
+				  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+				},
+			],
+		   };
+		&save_directive($server, [ $loc ], [ $locdeftype ]);
 		&flush_file_lines($server->{'file'});
 		&unlock_file($server->{'file'});
 		&virtual_server::register_post_action(\&print_apply_nginx);
