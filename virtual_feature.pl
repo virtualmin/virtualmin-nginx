@@ -1755,6 +1755,8 @@ foreach my $r (@rewrites) {
 		}
 	if ($redirect) {
 		if ($r->{'words'}->[1] =~ /^(http|https):/) {
+			$redirect->{'dest'} = &replace_apache_vars(
+						$redirect->{'dest'}, 0);
 			$redirect->{'alias'} = 0;
 			}
 		else {
@@ -1786,6 +1788,9 @@ my $phd = &virtual_server::public_html_dir($d);
 my $dest = $redirect->{'dest'};
 if ($dest !~ /^(http|https|\$scheme):/) {
 	$dest =~ s/^\Q$phd\E// || return &text('redirect_ephd', $phd);
+	}
+else {
+	$dest = &replace_apache_vars($dest, 1);
 	}
 my $re = $redirect->{'path'};
 if ($re ne '^/(?!.well-known)') {
@@ -3213,6 +3218,23 @@ if ($d->{'virtualmin-nginx-ssl'}) {
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
 return undef;
+}
+
+# replace_apache_vars(string, [to-nginx])
+# Swap Apache and Nginx request vars
+sub replace_apache_vars
+{
+my ($dest, $nginx) = @_;
+my %vmap = ( '%{HTTP_HOST}', '$host',
+	     '%{HTTP_PORT}', '$port',
+	   );
+if (!$nginx) {
+	%vmap = reverse(%vmap);
+	}
+foreach my $k (keys %vmap) {
+	$dest =~ s/\Q$k\E/$vmap{$k}/g;
+	}
+return $dest;
 }
 
 1;
