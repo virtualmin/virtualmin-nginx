@@ -284,9 +284,11 @@ if (!$d->{'alias'}) {
 
 	# Add extra directive
 	&save_directive($server, "fastcgi_split_path_info",
-        [ {  'name'  => 'fastcgi_split_path_info',
-             'words' => [ &split_quoted_string('^(.+\.php)(/.+)$') ]
-          } ]);
+		[
+		  {  'name'  => 'fastcgi_split_path_info',
+		     'words' => [ &split_quoted_string('^(.+\.php)(/.+)$') ]
+		  },
+		]);
 
 	if (&feature_web_supports_cgi()) {
 		# Setup a fastcgi server for this domain
