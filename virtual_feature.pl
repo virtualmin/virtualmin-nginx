@@ -1559,8 +1559,19 @@ if ($children != $d->{'nginx_php_children'}) {
 		my $conf = &virtual_server::get_php_fpm_config();
 		return 0 if (!$conf);
 		$children = $childrenmax if ($children == 0);   # Recommended default
+		my $fpmstartservers =
+		       defined(&virtual_server::get_php_start_servers) ? 
+		       &virtual_server::get_php_start_servers($children) : 1;
+		my $fpmmaxspare =
+		       defined(&virtual_server::get_php_max_spare_servers) ? 
+		       &virtual_server::get_php_max_spare_servers($children) :
+		       int($children / 2) || $children;
 		&virtual_server::save_php_fpm_pool_config_value(
 			$conf, $d->{'id'}, "pm.max_children", $children);
+		&virtual_server::save_php_fpm_pool_config_value(
+			$conf, $d->{'id'}, "pm.start_servers", $fpmstartservers);
+		&virtual_server::save_php_fpm_pool_config_value(
+			$conf, $d->{'id'}, "pm.max_spare_servers", $fpmmaxspare);
 		}
 	&virtual_server::save_domain($d);
 	}
