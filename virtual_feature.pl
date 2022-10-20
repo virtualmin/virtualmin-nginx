@@ -2848,7 +2848,7 @@ else {
 sub domain_server_names
 {
 my ($d) = @_;
-return ( $d->{'dom'}, "www.".$d->{'dom'} );
+return ( $d->{'dom'}, "www.".$d->{'dom'}, "mail.".$d->{'dom'} );
 }
 
 # get_nginx_log(&domain, [errorlog])
