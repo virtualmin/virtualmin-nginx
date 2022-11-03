@@ -1757,7 +1757,7 @@ foreach my $r (@rewrites) {
 		$redirect->{'code'} = $m eq 'permanent' ? 301 :
 				      $m eq 'redirect' ? 302 : undef;
 		}
-	elsif ($r->{'words'}->[0] eq '^/(?!.well-known)(.*)' &&
+	elsif ($r->{'words'}->[0] =~ /\^\/\(\?\!\.well\-known\)/ &&
 	       $r->{'words'}->[2] eq 'break') {
 		# Special case for / which excludes .well-known
 		$redirect = { 'path' => '^/(?!.well-known)',
@@ -1806,7 +1806,7 @@ else {
 	$dest = &replace_apache_vars($dest, 1);
 	}
 my $re = $redirect->{'path'};
-if ($re ne '^/(?!.well-known)') {
+if ($re !~ /\^\/\(\?\!\.well\-known\)/) {
 	$re = '^\\Q'.$re.'\\E';
 	}
 my @c = !$redirect->{'code'} ? ( 'break' ) :
@@ -1815,14 +1815,16 @@ my @c = !$redirect->{'code'} ? ( 'break' ) :
 my $r = { 'name' => 'rewrite',
 	  'words' => [ $re, $dest, @c ],
 	};
-if ($redirect->{'regexp'}) {
-	# All sub-directories go to same dest path
-	$r->{'words'}->[0] .= "(.*)";
-	}
-else {
-	# Redirect sub-directory to same sub-dir on dest
-	$r->{'words'}->[0] .= "(.*)";
-	$r->{'words'}->[1] .= "\$1";
+if ($re !~ /\^\/\(\?\!\.well\-known\)/) {
+	if ($redirect->{'regexp'}) {
+		# All sub-directories go to same dest path
+		$r->{'words'}->[0] .= "(.*)";
+		}
+	else {
+		# Redirect sub-directory to same sub-dir on dest
+		$r->{'words'}->[0] .= "(.*)";
+		$r->{'words'}->[1] .= "\$1";
+		}
 	}
 &lock_all_config_files();
 if ($redirect->{'http'} && $redirect->{'https'}) {
