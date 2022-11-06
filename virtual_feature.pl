@@ -1099,6 +1099,22 @@ foreach my $log ([ 0, $text{'links_anlog'} ],
 		}
 	}
 
+# Link to PHP log, if enabled
+my $phplog;
+if (defined(&virtual_server::get_domain_php_error_log)) {
+	$phplog = &get_domain_php_error_log::get_domain_php_error_log($d);
+	}
+if ($phplog) {
+        my $param = &virtual_server::master_admin() ? "file" : "extra";
+        push(@rv, { 'mod' => 'syslog',
+                    'desc' => $text{'links_phplog'},
+                    'page' => "save_log.cgi?view=1&nonavlinks=1".
+                              "&linktitle=".&urlize($text{'links_phplog'})."&".
+                              "$param=".&urlize($phplog),
+                    'cat' => 'logs',
+                  });
+        }
+
 # Links to edit PHP configs
 my $mode = &feature_get_web_php_mode($d);
 if ($mode eq "fcgid") {
