@@ -2615,6 +2615,26 @@ if (-r $file."_alog") {
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 	}
 
+# Restore SSL cert and key
+my $cert = $d->{'ssl_cert'} || &feature_get_web_ssl_file($d, 'cert');
+my $key = $d->{'ssl_key'} || &feature_get_web_ssl_file($d, 'key');
+my $ca = $d->{'ssl_chain'} || &feature_get_web_ssl_file($d, 'ca');
+if ($cert && -r $file."_cert") {
+	&lock_file($cert);
+	&virtual_server::write_ssl_file_contents($d, $cert, $file."_cert");
+	&unlock_file($cert);
+	}
+if ($key && -r $file."_key") {
+	&lock_file($key);
+	&virtual_server::write_ssl_file_contents($d, $key, $file."_key");
+	&unlock_file($key);
+	}
+if ($ca && -r $file."_ca") {
+	&lock_file($ca);
+	&virtual_server::write_ssl_file_contents($d, $ca, $file."_ca");
+	&unlock_file($ca);
+	}
+
 return 1;
 }
 
