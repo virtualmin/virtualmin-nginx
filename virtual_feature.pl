@@ -2451,6 +2451,20 @@ if ($alog && !&is_under_directory($d->{'home'}, $alog) &&
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 	}
 
+# Save SSL cert and key
+my $cert = &feature_get_web_ssl_file($d, 'cert');
+my $key = &feature_get_web_ssl_file($d, 'key');
+my $ca = &feature_get_web_ssl_file($d, 'ca');
+if ($cert) {
+	&virtual_server::copy_write_as_domain_user($d, $cert, $file."_cert");
+	}
+if ($key) {
+	&virtual_server::copy_write_as_domain_user($d, $key, $file."_key");
+	}
+if ($ca) {
+	&virtual_server::copy_write_as_domain_user($d, $ca, $file."_ca");
+	}
+
 return 1;
 }
 
