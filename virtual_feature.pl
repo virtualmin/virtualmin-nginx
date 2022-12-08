@@ -1102,7 +1102,7 @@ foreach my $log ([ 0, $text{'links_anlog'} ],
 # Link to PHP log, if enabled
 my $phplog;
 if (defined(&virtual_server::get_domain_php_error_log)) {
-	$phplog = &get_domain_php_error_log::get_domain_php_error_log($d);
+	$phplog = &virtual_server::get_domain_php_error_log($d);
 	}
 if ($phplog) {
         my $param = &virtual_server::master_admin() ? "file" : "extra";
