@@ -590,7 +590,7 @@ if (!$d->{'alias'}) {
 	if ($d->{'dom'} ne $oldd->{'dom'}) {
 		my $newfile = &get_add_to_file($d->{'dom'});
 		my $server = &find_domain_server($d);
-		if ($server->{'file'} ne $newfile &&
+		if ((!$newfile || $server->{'file'} ne $newfile) &&
 		    $server->{'file'} =~ /\Q$oldd->{'dom'}\E/) {
 			&$virtual_server::first_print($text{'feat_modifyfile'});
 			&delete_server_link($server);
