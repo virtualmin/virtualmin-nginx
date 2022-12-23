@@ -2093,7 +2093,7 @@ if (@urls && $balancer->{'path'} ne '/') {
 	     },
 	     );
 	}
-esle {
+else {
 	&save_directive($l, 'rewrite', [ ]);
 	}
 &flush_config_file_lines();
