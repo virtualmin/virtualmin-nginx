@@ -1975,17 +1975,6 @@ if ($url) {
 	my $p = $balancer->{'path'};
 	if ($p ne '/') {
 		$p =~ s/\/$//;
-		push(@{$l->{'members'}},
-		     { 'name' => 'rewrite',
-		       'words' => [ '^'.$p.'$', $p.'/', 'redirect' ],
-		     },
-		     { 'name' => 'rewrite',
-		       'words' => [ '^'.$p.'(/.*)', '$1', 'break' ],
-		     },
-		     { 'name' => 'proxy_redirect',
-		       'words' => [ $url, $p ],
-		     },
-		    );
 		}
 	push(@{$l->{'members'}},
 	     { 'name' => 'proxy_pass',
@@ -2076,25 +2065,6 @@ else {
 	# Just change one URL
 	&save_directive($l, "proxy_pass", \@urls);
 	$url = @urls ? $urls[0] : undef;
-	}
-if (@urls && $balancer->{'path'} ne '/') {
-	# Add rewrites for the path
-	my $p = $balancer->{'path'};
-	$p =~ s/\/$//;
-	&save_directive($l, 'rewrite',
-	     { 'name' => 'rewrite',
-	       'words' => [ '^'.$p.'$', $p.'/', 'redirect' ],
-	     },
-	     { 'name' => 'rewrite',
-	       'words' => [ '^'.$p.'(/.*)', '$1', 'break' ],
-	     },
-	     { 'name' => 'proxy_redirect',
-	       'words' => [ $url, $p ],
-	     },
-	     );
-	}
-else {
-	&save_directive($l, 'rewrite', [ ]);
 	}
 &flush_config_file_lines();
 &unlock_all_config_files();
