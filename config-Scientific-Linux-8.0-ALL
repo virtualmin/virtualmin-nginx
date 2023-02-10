@@ -1,0 +1,8 @@
+nginx_config=/etc/nginx/nginx.conf
+nginx_cmd=/usr/sbin/nginx
+start_cmd=service nginx start
+stop_cmd=service nginx stop
+apply_cmd=service nginx restart
+child_procs=4
+php_socket=1
+listen_mode=1
