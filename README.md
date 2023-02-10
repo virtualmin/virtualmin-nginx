@@ -1,29 +1,26 @@
+
+
 <!-- PROJECT SHIELDS -->
 
-  <p align="center">
-    <a href="https://github.com/virtualmin/virtualmin-nginx/graphs/contributors"><img src="https://img.shields.io/github/contributors/virtualmin/virtualmin-nginx"></a>
-    <a href="https://github.com/virtualmin/virtualmin-nginx/network/members"><img src="https://img.shields.io/github/forks/virtualmin/virtualmin-nginx"></a>
-    <a href="#"><img src="https://img.shields.io/github/stars/virtualmin/virtualmin-nginx"></a>
-    <a href="https://github.com/virtualmin/virtualmin-nginx/issues"><img src="https://img.shields.io/github/issues-raw/virtualmin/virtualmin-nginx"></a>
-    <a href="https://github.com/virtualmin/virtualmin-nginx/blob/master/LICENSE"><img src="https://img.shields.io/github/license/virtualmin/virtualmin-nginx"></a>
-  </p>
+[![Contributors](https://img.shields.io/github/contributors/virtualmin/virtualmin-nginx)](https://github.com/virtualmin/virtualmin-nginx/graphs/contributors)
+[![Contributors](https://img.shields.io/github/contributors/virtualmin/virtualmin-nginx)](https://github.com/virtualmin/virtualmin-nginx/graphs/contributors)
+[![Forks](https://img.shields.io/github/forks/virtualmin/virtualmin-nginx)](https://github.com/virtualmin/virtualmin-nginx/network/members)
+[![Stargazers](https://img.shields.io/github/stars/virtualmin/virtualmin-nginx)](#)
+[![Issues](https://img.shields.io/github/issues-raw/virtualmin/virtualmin-nginx)](https://github.com/virtualmin/virtualmin-nginx/issues)
+[![MIT License](https://img.shields.io/github/license/virtualmin/virtualmin-nginx)](https://github.com/virtualmin/virtualmin-nginx/blob/master/LICENSE)
 
 
 
-<h3 align="center">Virtualmin NGINX with Reverse Proxy</h3>
+# Virtualmin NGINX with Reverse Proxy
 
-  <p align="center">
-    A plugin for Webmin to enable NGINX with Virtualmin.
-    <br />
-    <a href="https://github.com/virtualmin/virtualmin-nginx"><strong>Explore the docs »</strong></a>
-    <br />
-    <a href="https://github.com/virtualmin/virtualmin-nginx/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/virtualmin/virtualmin-nginx/issues">Request Feature</a>
-  </p>
-</div>
+A plugin for Webmin to enable NGINX with Virtualmin.<br>
+[![Explore the docs »](https://badgen.net/badge/Explore%20the/Docs%20»/)](https://github.com/virtualmin/virtualmin-nginx) 
 
-
+Questions or issues?<br>
+[![Request Feature](https://badgen.net/badge/Request/Feature/cyan)](https://github.com/virtualmin/virtualmin-nginx/issues) 
+[![Report Bug](https://badgen.net/badge/Report/Bug/cyan)](https://github.com/virtualmin/virtualmin-nginx/issues) 
+ 
+ 
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -56,18 +53,7 @@ This is a module for Webmin to use NGINX as a web server and reverse proxy.
 
 ### Supported systems
 
-This is not an exhaustive list, but supported system may include:
-* AlmaLinux 7.x, 8.x, 9.x
-* Rocky Linux 7.x, 8.x, 9.x
-* Scientific Linux 7.x, 8.x, 9.x
-* CentOS 7.x, 8.x
-* CentOS Stream 8.x, 9.x
-* Debian Linux 10.x
-* Oracle Linux 8.x
-* RedHat Enterprise Linux 7.x
-* Ubuntu 18.x, 19.x, 20.x, 21.x, 22.x, 
-
-Please note this this project is still under development, and later versions of the above OS also might work. 
+You can find a list of the supported system here: https://www.virtualmin.com/documentation/os-support/
 
 For any issues or requests, please  <a href="https://github.com/virtualmin/virtualmin-nginx/issues">Report Bug</a> or <a href="https://github.com/virtualmin/virtualmin-nginx/issues">Request Feature</a>
 
