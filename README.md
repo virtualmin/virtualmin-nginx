@@ -5,7 +5,7 @@ Virtualmin plugin to use the nginx web server instead of Apache.
 # Installation
 
 The recommended way to install Virtualmin is to use the `virtualmin-install.sh`
-automated install script, found on the [Download page](https://www.virtualmin.com/download)
+automated install script, found on the [download page](https://www.virtualmin.com/download)
 of Virtualmin.com. To get the LEMP stack, which includes nginx instead of 
 Apache, use the `-b LEMP` option when installing.
 
@@ -21,7 +21,7 @@ packages.
 The install script uses your OS native package manager to install all software,
 including our packages.
 
-The `LEMP` stack installs Virtualmin with the nginx and nginx-ssl plugsin, nginx,
+The `LEMP` stack installs Virtualmin with the nginx and nginx-ssl plugins, nginx,
 BIND, Postfix, MariaDB, PHP, etc. and sets them up for use in a shared virtual hosting
 environment.
 
