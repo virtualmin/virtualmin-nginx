@@ -55,8 +55,6 @@ This is a module for Webmin to use NGINX as a web server and reverse proxy.
 
 You can find a list of the supported system here: https://www.virtualmin.com/documentation/os-support/
 
-For any issues or requests, please  <a href="https://github.com/virtualmin/virtualmin-nginx/issues">Report Bug</a> or <a href="https://github.com/virtualmin/virtualmin-nginx/issues">Request Feature</a>
-
 ### Prerequisites
 
 To use, you must have Webmin and Virtualmin installed.  You also need to have LEMP installed including NGINX and PHP.
