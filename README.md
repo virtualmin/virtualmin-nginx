@@ -27,4 +27,4 @@ environment.
 
 # OS Support
 
-We support this plugin on the same [operating systems as Virtualmin itself](.
+We support this plugin on the same [operating systems as Virtualmin itself](https://www.virtualmin.com/documentation/os-support/).
