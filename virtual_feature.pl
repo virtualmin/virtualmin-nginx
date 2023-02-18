@@ -2525,7 +2525,8 @@ if ($oldd && $d->{'ip6'} && $oldd->{'ip6'} ne $d->{'ip6'}) {
 	}
 
 # Fix up home directory if changed
-if ($oldd && $d->{'home'} ne $oldd->{'home'}) {
+if ($oldd && $d->{'home'} && $oldd->{'home'} &&
+    $d->{'home'} ne $oldd->{'home'}) {
 	&recursive_change_directives(
 		$server, $oldd->{'home'}, $d->{'home'}, 0, 1);
 	}

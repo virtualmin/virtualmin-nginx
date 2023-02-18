@@ -1541,6 +1541,7 @@ else {
 sub recursive_change_directives
 {
 my ($parent, $oldv, $newv, $suffix, $prefix, $infix) = @_;
+return if (!$oldv);
 foreach my $dir (@{$parent->{'members'}}) {
 	my $changed = 0;
 	foreach my $w (@{$dir->{'words'}}) {
