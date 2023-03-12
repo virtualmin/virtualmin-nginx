@@ -7,11 +7,6 @@ use POSIX;
 our $dead = 0;
 our $childpid = 0;
 
-if (!-x $ARGV[0]) {
-	print STDERR "PHP command $ARGV[0] does not exist!\n";
-	exit(2);
-	}
-
 $SIG{'TERM'} = sub {
 		$dead = 1;
 		if ($childpid) {
@@ -23,6 +18,10 @@ $SIG{'TERM'} = sub {
 	};
 
 while(!$dead) {
+	if (!-x $ARGV[0]) {
+		print STDERR "PHP command $ARGV[0] does not exist!\n";
+		exit(2);
+		}
 	my $start = time();
 	$childpid = fork();
 	if ($childpid == 0) {
