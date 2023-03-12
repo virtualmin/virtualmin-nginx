@@ -7,6 +7,11 @@ use POSIX;
 our $dead = 0;
 our $childpid = 0;
 
+if (!-x $ARGV[0]) {
+	print STDERR "PHP command $ARGV[0] does not exist!\n";
+	exit(2);
+	}
+
 $SIG{'TERM'} = sub {
 		$dead = 1;
 		if ($childpid) {
