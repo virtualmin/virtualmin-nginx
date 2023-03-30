@@ -2018,7 +2018,8 @@ if ($init::init_mode eq "upstart") {
 $init::init_mode = $old_init_mode;
 
 # Delete socket file, if any
-if ($d->{'nginx_fcgiwrap_port'} =~ /^(\/\S+)\/socket$/) {
+if ($d->{'nginx_fcgiwrap_port'} &&
+    $d->{'nginx_fcgiwrap_port'} =~ /^(\/\S+)\/socket$/) {
 	my $domdir = $1;
 	&unlink_file($d->{'nginx_fcgiwrap_port'});
 	&unlink_file($domdir);
