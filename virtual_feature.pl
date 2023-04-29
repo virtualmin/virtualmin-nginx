@@ -1215,7 +1215,7 @@ $server || return undef;
 my @locs = &find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
 		   ($_->{'words'}->[1] eq '\.php$' ||
-		   	$_->{'words'}->[1] eq '\.php(/|$)') } @locs;
+		    $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 if ($loc) {
 	my ($pass) = &find("fastcgi_pass", $loc);
 	if ($pass && $pass->{'words'}->[0] =~ /^(localhost|127\.0\.0\.1|unix):(.*)$/) {
@@ -2678,20 +2678,14 @@ if (!$server) {
 # Fix domain name, which is incorrect in copied directives
 &recursive_change_directives($server, $oldd->{'dom'},
 			     $d->{'dom'}, 0, 0, 1);
-
-# Fix PHP server port, which is incorrect in copied directives
-my ($l) = grep { ($_->{'words'}->[1] eq '\.php$' ||
-                  $_->{'words'}->[1] eq '\.php(/|$)') }
-	       &find("location", $server);
-if ($l && $d->{'nginx_php_port'}) {
-	&save_directive($l, "fastcgi_pass",
-		$d->{'nginx_php_port'} =~ /^\d+$/ ?
-		    [ "127.0.0.1:".$d->{'nginx_php_port'} ] :
-		    [ "unix:".$d->{'nginx_php_port'} ]);
-	}
-
 &flush_config_file_lines();
 &unlock_all_config_files();
+
+# Re-setup the PHP mode
+my $mode = &feature_get_web_php_mode($oldd);
+delete($d->{'nginx_php_port'});
+&feature_save_web_php_mode($d, $mode);
+
 &virtual_server::register_post_action(\&print_apply_nginx);
 
 &$virtual_server::second_print($virtual_server::text{'setup_done'});

@@ -1793,7 +1793,7 @@ if ($init::init_mode eq "systemd") {
 	}
 
 # Delete socket file, if any
-if ($d->{'nginx_php_port'} =~ /^(\/\S+)\/socket$/) {
+if ($d->{'nginx_php_port'} && $d->{'nginx_php_port'} =~ /^(\/\S+)\/socket$/) {
 	my $domdir = $1;
 	&unlink_file($d->{'nginx_php_port'});
 	&unlink_file($domdir);
