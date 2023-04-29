@@ -2683,7 +2683,7 @@ if (!$server) {
 my ($l) = grep { ($_->{'words'}->[1] eq '\.php$' ||
                   $_->{'words'}->[1] eq '\.php(/|$)') }
 	       &find("location", $server);
-if ($l) {
+if ($l && $d->{'nginx_php_port'}) {
 	&save_directive($l, "fastcgi_pass",
 		$d->{'nginx_php_port'} =~ /^\d+$/ ?
 		    [ "127.0.0.1:".$d->{'nginx_php_port'} ] :
