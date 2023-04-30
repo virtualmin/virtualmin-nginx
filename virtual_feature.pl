@@ -2677,7 +2677,7 @@ if (!$server) {
 
 # Fix domain name, which is incorrect in copied directives
 &recursive_change_directives($server, $oldd->{'dom'},
-			     $d->{'dom'}, 0, 0, 1);
+			     $d->{'dom'}, 0, 0, 1, [ "server_name" ]);
 &flush_config_file_lines();
 &unlock_all_config_files();
 

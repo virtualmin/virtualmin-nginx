@@ -1536,34 +1536,40 @@ else {
 }
 
 # recursive_change_directives(&parent, old-value, new-value, [suffix-too],
-# 			      [prefix-too], [infix-too])
+# 			      [prefix-too], [infix-too], [&skip-named])
 # Change all directives who have a value that is the old value to the new one
 sub recursive_change_directives
 {
-my ($parent, $oldv, $newv, $suffix, $prefix, $infix) = @_;
+my ($parent, $oldv, $newv, $suffix, $prefix, $infix, $skip) = @_;
 return if (!$oldv);
 foreach my $dir (@{$parent->{'members'}}) {
-	my $changed = 0;
-	foreach my $w (@{$dir->{'words'}}) {
-		if ($infix && $w =~ /\Q$oldv\E/) {
-			$w =~ s/\Q$oldv\E/$newv/g;
-			$changed++;
+	if (!$skip || &indexof($dir->{'name'}, @$skip) < 0) {
+		my $changed = 0;
+		foreach my $w (@{$dir->{'words'}}) {
+			my $ow = $w;
+			if ($infix && $w =~ /\Q$oldv\E/) {
+				$w =~ s/\Q$oldv\E/$newv/g;
+				$changed++;
+				}
+			elsif ($suffix && $w =~ /\Q$oldv\E$/) {
+				$w =~ s/\Q$oldv\E$/$newv/;
+				$changed++;
+				}
+			elsif ($prefix && $w =~ /^\Q$oldv\E/) {
+				$w =~ s/^\Q$oldv\E/$newv/;
+				$changed++;
+				}
+			elsif ($w eq $oldv) {
+				$w = $newv;
+				$changed++;
+				}
+			if ($ow ne $w) {
+				print STDERR "changed $ow to $w\n";
+				}
 			}
-		elsif ($suffix && $w =~ /\Q$oldv\E$/) {
-			$w =~ s/\Q$oldv\E$/$newv/g;
-			$changed++;
+		if ($changed) {
+			&save_directive($parent, [ $dir ], [ $dir ]);
 			}
-		elsif ($prefix && $w =~ /^\Q$oldv\E/) {
-			$w =~ s/^\Q$oldv\E/$newv/g;
-			$changed++;
-			}
-		elsif ($w eq $oldv) {
-			$w = $newv;
-			$changed++;
-			}
-		}
-	if ($changed) {
-		&save_directive($parent, [ $dir ], [ $dir ]);
 		}
 	if ($dir->{'type'}) {
 		&recursive_change_directives($dir, $oldv, $newv,
