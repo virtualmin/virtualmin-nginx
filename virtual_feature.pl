@@ -2675,6 +2675,10 @@ if (!$server) {
 &recursive_change_directives(
 	$server, $oldd->{'home'}.'/', $d->{'home'}.'/', 0, 1, 0);
 
+# Fix domain ID
+&recursive_change_directives(
+	$server, $oldd->{'id'}, $d->{'id'}, 0, 0, 0);
+
 # Fix domain name, which is incorrect in copied directives
 &recursive_change_directives($server, $oldd->{'dom'},
 			     $d->{'dom'}, 0, 0, 1, [ "server_name" ]);
