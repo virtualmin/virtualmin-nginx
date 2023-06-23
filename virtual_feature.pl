@@ -1249,7 +1249,7 @@ elsif ($oldmode eq "fcgid" && $mode ne "fcgid") {
 	}
 
 my $port;
-if ($mode eq "fcgid" && $oldmode ne "fcgid") {
+if ($mode eq "fcgid" && ($oldmode ne "fcgid" || !$d->{'nginx_php_port'})) {
 	# Setup FCGI server on a new port
 	my $ok;
 	$d->{'nginx_php_version'} ||= $tmpl->{'web_phpver'};
@@ -1259,7 +1259,7 @@ if ($mode eq "fcgid" && $oldmode ne "fcgid") {
 	$ok || return $port;
 	$d->{'nginx_php_port'} = $port;
 	}
-elsif ($mode eq "fpm" && $oldmode ne "fpm") {
+elsif ($mode eq "fpm" && ($oldmode ne "fpm" || !$d->{'php_fpm_port'})) {
 	# Setup FPM pool
 	if (!$d->{'php_fpm_version'}) {
 		# Work out the default FPM version from the template
