@@ -327,6 +327,17 @@ if (!$d->{'alias'}) {
 
 	# Setup the selected PHP mode
 	&virtual_server::save_domain_php_mode($d, $mode);
+
+	# Enable PHP logging
+	if ($d->{'php_error_log'}) {
+                &virtual_server::save_domain_php_error_log(
+			$d, $d->{'php_error_log'});
+                }
+        elsif ($tmpl->{'php_log'}) {
+                &virtual_server::save_domain_php_error_log(
+			$d, &virtual_server::get_default_php_error_log($d));
+                }
+
 	&$virtual_server::second_print(
 		$virtual_server::text{'setup_done'});
 
