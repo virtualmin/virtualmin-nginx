@@ -243,7 +243,8 @@ if (!$d->{'alias'}) {
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
 	# Set up fcgid or FPM server
-	my $mode = &virtual_server::template_to_php_mode($tmpl);
+	my $mode = $d->{'default_php_mode'} || &virtual_server::template_to_php_mode($tmpl);
+	delete($d->{'default_php_mode'});
 	&$virtual_server::first_print($text{'feat_php'.$mode});
 
 	# Create initial config block for running PHP scripts. The port gets
