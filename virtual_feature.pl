@@ -2883,6 +2883,7 @@ else {
 sub domain_server_names
 {
 my ($d) = @_;
+return split(/ /, $d->{'dom_defnames'}) if ($d->{'dom_defnames'});
 return ( $d->{'dom'}, "www.".$d->{'dom'}, "mail.".$d->{'dom'} );
 }
 
