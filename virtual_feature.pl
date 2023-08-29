@@ -823,12 +823,8 @@ else {
 		# Disable is done via default website page
 		my $def_tpl = &read_file_contents("$virtual_server::default_content_dir/index.html");
 		my %hashtmp = %$d;
-		$hashtmp{'TMPLTTITLE'} = $virtual_server::text{'deftmplt_website_disabled'};
-		$hashtmp{'TMPLTSLOGAN'} = $virtual_server::text{'deftmplt_disable_slog'};
-		if ($d->{'disabled_why'}) {
-			$hashtmp{'TMPLTCONTENT'} = $d->{'disabled_why'};
-			}
-		%hashtmp = &virtual_server::populate_default_index_page(%hashtmp);
+		%hashtmp = &virtual_server::populate_default_index_page($d, %hashtmp);
+		$def_tpl = &virtual_server::replace_default_index_page($d, $def_tpl);
 		$def_tpl = &virtual_server::substitute_virtualmin_template($def_tpl, \%hashtmp);
 		my $msg = $tmpl->{'disabled_web'} eq 'none' ?
 			$def_tpl :
