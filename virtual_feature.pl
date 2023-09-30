@@ -997,6 +997,19 @@ if (!$d->{'alias'}) {
 		}
 	}
 
+# Make sure fcgiwrap server is running
+if ($d->{'nginx_fcgiwrap_port'}) {
+	&foreign_require("init");
+	my $name = &init_script_fcgiwrap_name($d);
+	my $st = &init::action_status($name);
+	if (!$st) {
+		return $text{'feat_evalidatefcgiwrapinit'};
+		}
+	elsif (!&init::status_action($name)) {
+		return $text{'feat_evalidatefcgiwraprun'};
+		}
+	}
+
 return undef;
 }
 

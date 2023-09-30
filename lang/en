@@ -459,6 +459,8 @@ feat_clonealias=.. not necessary for alias domains
 feat_eclonefind=.. could not find new virtual host named $1 after cloning!
 feat_modifyproxy=Modifying proxy destination ..
 feat_module=Nginx Webserver (for virtual host)
+feat_evalidatefcgiwrapinit=No FCGIwrap server bootup action exists!
+feat_evalidatefcgiwraprun=The FCGIwrap server for this domain is not running
 
 fcgid_ecmd=No PHP command found!
 fcgid_ecmdexec=PHP command $1 could not be executed : $2
