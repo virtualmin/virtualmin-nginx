@@ -253,7 +253,8 @@ if (!$d->{'alias'}) {
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
 	# Set up fcgid or FPM server
-	my $mode = &virtual_server::template_to_php_mode($tmpl);
+	my $mode = $d->{'default_php_mode'} || &virtual_server::template_to_php_mode($tmpl);
+	delete($d->{'default_php_mode'});
 	&$virtual_server::first_print($text{'feat_php'.$mode});
 
 	# Create initial config block for running PHP scripts. The port gets
@@ -832,12 +833,8 @@ else {
 		# Disable is done via default website page
 		my $def_tpl = &read_file_contents("$virtual_server::default_content_dir/index.html");
 		my %hashtmp = %$d;
-		$hashtmp{'TMPLTTITLE'} = $virtual_server::text{'deftmplt_website_disabled'};
-		$hashtmp{'TMPLTSLOGAN'} = $virtual_server::text{'deftmplt_disable_slog'};
-		if ($d->{'disabled_why'}) {
-			$hashtmp{'TMPLTCONTENT'} = $d->{'disabled_why'};
-			}
-		%hashtmp = &virtual_server::populate_default_index_page(%hashtmp);
+		%hashtmp = &virtual_server::populate_default_index_page($d, %hashtmp);
+		$def_tpl = &virtual_server::replace_default_index_page($d, $def_tpl);
 		$def_tpl = &virtual_server::substitute_virtualmin_template($def_tpl, \%hashtmp);
 		my $msg = $tmpl->{'disabled_web'} eq 'none' ?
 			$def_tpl :
@@ -2892,6 +2889,7 @@ else {
 sub domain_server_names
 {
 my ($d) = @_;
+return split(/\s+/, $d->{'dom_defnames'}) if ($d->{'dom_defnames'});
 return ( $d->{'dom'}, "www.".$d->{'dom'}, "mail.".$d->{'dom'} );
 }
 
