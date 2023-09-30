@@ -1464,6 +1464,8 @@ else {
 		}
 	}
 
+&virtual_server::create_php_bin_links($d, $mode);
+
 return undef;
 }
 
