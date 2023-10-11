@@ -1788,7 +1788,7 @@ foreach my $r (@rewrites) {
 	my $redirect;
 	if ($r->{'words'}->[2] &&
 	    $r->{'words'}->[2] =~ /break|redirect|permanent/ &&
-	    $r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?/) {
+	    $r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?(\$)?/) {
 		# Regular redirect
 		$redirect = { 'path' => $1,
 			      'dest' => $r->{'words'}->[1],
@@ -1801,6 +1801,9 @@ foreach my $r (@rewrites) {
 			else {
 				$redirect->{'regexp'} = 1;
 				}
+			}
+		elsif ($3) {
+			$redirect->{'exact'} = 1;
 			}
 		my $m = $r->{'words'}->[2];
 		$redirect->{'code'} = $m eq 'permanent' ? 301 :
@@ -1874,6 +1877,10 @@ if ($re !~ /\^\/\(\?\!\.well\-known\)/) {
 	if ($redirect->{'regexp'}) {
 		# All sub-directories go to same dest path
 		$r->{'words'}->[0] .= "(.*)";
+		}
+	elsif ($redirect->{'exact'}) {
+		# Redirect only the specific path
+		$r->{'words'}->[0] .= "\$";
 		}
 	else {
 		# Redirect sub-directory to same sub-dir on dest
