@@ -1815,11 +1815,19 @@ foreach my $r (@rewrites) {
 		}
 	if ($redirect) {
 		if ($r->{'words'}->[1] =~ /^(http|https):/) {
+			# Redirect to a specific URL
 			$redirect->{'dest'} = &replace_apache_vars(
 						$redirect->{'dest'}, 0);
 			$redirect->{'alias'} = 0;
 			}
+		elsif ($r->{'words'}->[2] eq 'redirect' ||
+		       $r->{'words'}->[2] eq 'permanent') {
+			# Redirect to a URL path, which is taken as relative
+			# to the original URL
+			$redirect->{'alias'} = 0;
+			}
 		else {
+			# Rewrite to a new directory path
 			$redirect->{'dest'} = $phd.$redirect->{'dest'};
 			$redirect->{'alias'} = 1;
 			}
@@ -1846,17 +1854,15 @@ my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 my $phd = &virtual_server::public_html_dir($d);
 my $dest = $redirect->{'dest'};
-if ($dest !~ /^(http|https|\$scheme):/) {
-	$dest =~ s/^\Q$phd\E// || return &text('redirect_ephd', $phd);
-	}
-else {
+if ($dest =~ /^(http|https|\$scheme):/) {
 	$dest = &replace_apache_vars($dest, 1);
 	}
 my $re = $redirect->{'path'};
 if ($re !~ /\^\/\(\?\!\.well\-known\)/) {
 	$re = '^\\Q'.$re.'\\E';
 	}
-my @c = !$redirect->{'code'} ? ( 'break' ) :
+my @c = !$redirect->{'code'} && $redirect->{'alias'} ? ( 'break' ) :
+	!$redirect->{'code'} && !$redirect->{'alias'} ? ( 'redirect' ) :
 	$redirect->{'code'} eq '301' ? ( 'permanent' ) :
 	$redirect->{'code'} eq '302' ? ( 'redirect' ) : ( 'break' );
 my $r = { 'name' => 'rewrite',
