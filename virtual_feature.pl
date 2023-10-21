@@ -1809,14 +1809,18 @@ foreach my $r (@rewrites) {
 		$redirect->{'code'} = $m eq 'permanent' ? 301 :
 				      $m eq 'redirect' ? 302 : undef;
 		}
-	elsif ($r->{'words'}->[0] =~ /\^\/\(\?\!\.well\-known\)/ &&
-	       $r->{'words'}->[2] eq 'break') {
+	elsif ($r->{'words'}->[0] =~ /\^\/\(\?\!\.well\-known\)(\$)?/) {
 		# Special case for / which excludes .well-known
 		$redirect = { 'path' => '^/(?!.well-known)',
 			      'dest' => $r->{'words'}->[1],
 			      'object' => $r,
-			      'regexp' => 1,
 			    };
+		if ($1) {
+			$redirect->{'exact'} = 1;
+			}
+		else {
+			$redirect->{'regexp'} = 1;
+			}
 		}
 	if ($redirect) {
 		if ($r->{'words'}->[1] =~ /^(http|https):/) {
