@@ -1112,7 +1112,7 @@ return ( ) if (!$server);
 my @rv = ( { 'mod' => $module_name,
 	     'desc' => $text{'feat_edit'},
 	     'page' => 'edit_server.cgi?id='.&server_id($server),
-	     'cat' => 'web' } );
+	     'cat' => 'services' } );
 
 # Links to logs
 foreach my $log ([ 0, $text{'links_anlog'} ],
@@ -1158,7 +1158,7 @@ if ($mode eq "fcgid") {
 				&text('links_phpini'),
 			    'page' => 'list_ini.cgi?file='.
 					&urlize($ini->[1]),
-			    'cat' => 'web',
+			    'cat' => 'services',
 			  }) if ($dirs[0]->{'version'} == $ini->[0]);
 		}
 	}
@@ -1170,7 +1170,7 @@ elsif ($mode eq "fpm") {
 		push(@rv, { 'mod' => 'phpini',
 			    'desc' => &text('links_phpini'),
 			    'page' => 'list_ini.cgi?file='.&urlize($file),
-			    'cat' => 'web',
+			    'cat' => 'services',
 			  });
 		}
 	}
