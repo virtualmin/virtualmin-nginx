@@ -301,43 +301,16 @@ if (!$d->{'alias'}) {
 		  },
 		]);
 
-	if (&feature_web_supports_cgi()) {
-		# Setup a fastcgi server for this domain
-		my ($ok, $port) = &setup_fcgiwrap_server($d);
-		if ($ok) {
-			$d->{'nginx_fcgiwrap_port'} = $port;
-			}
-
-		# Point cgi-bin to fastcgi server
-		my $cloc = { 'name' => 'location',
-			     'words' => [ '/cgi-bin/' ],
-			     'type' => 1,
-			     'members' => [
-			       { 'name' => 'gzip',
-				 'words' => [ 'off' ] },
-			       { 'name' => 'root',
-				 'words' => [ $d->{'home'}.'/cgi-bin' ] },
-			       { 'name' => 'fastcgi_pass',
-				 'words' => [ 'unix:'.$port ] },
-			       { 'name' => 'fastcgi_param',
-				 'words' => [ 'SCRIPT_FILENAME',
-					      $d->{'home'}.'$fastcgi_script_name' ] },
-			     ]
-			   };
-		foreach my $p (&list_fastcgi_params($server)) {
-			next if ($p->[0] eq 'SCRIPT_FILENAME');
-			push(@{$cloc->{'members'}},
-			     { 'name' => 'fastcgi_param',
-			       'words' => [ @$p ] });
-			}
-		&save_directive($server, [ ], [ $cloc ]);
-		}
-
 	&flush_config_file_lines();
 	&unlock_all_config_files();
 
 	# Setup the selected PHP mode
 	&virtual_server::save_domain_php_mode($d, $mode);
+
+	# Enable selected CGI mode
+	if (&feature_web_supports_cgi()) {
+		&feature_save_get_domain_cgi_mode($d, 'fcgiwrap');
+		}
 
 	# Enable PHP logging
 	if ($d->{'php_error_log'}) {
@@ -3305,6 +3278,65 @@ if ($d->{'virtualmin-nginx-ssl'}) {
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
 return undef;
+}
+
+# feature_web_get_domain_cgi_mode(&domain)
+# Returns 'fcgiwrap' if enabled for a domain, undef otherwise
+sub feature_web_get_domain_cgi_mode
+{
+my ($d) = @_;
+return $d->{'nginx_fcgiwrap_port'} ? 'fcgiwrap' : undef;
+}
+
+# feature_save_get_domain_cgi_mode(&domain, mode)
+# Enable or disable CGIs with fcgiwrap
+sub feature_save_get_domain_cgi_mode
+{
+my ($d, $mode) = @_;
+if ($mode eq 'fcgiwrap' && !$d->{'nginx_fcgiwrap_port'}) {
+	my ($ok, $port) = &setup_fcgiwrap_server($d);
+	if ($ok) {
+		$d->{'nginx_fcgiwrap_port'} = $port;
+		}
+	&save_domain($d);
+
+	# Point cgi-bin to fastcgi server
+	my $server = &find_domain_server($d);
+	my $cloc = { 'name' => 'location',
+		     'words' => [ '/cgi-bin/' ],
+		     'type' => 1,
+		     'members' => [
+		       { 'name' => 'gzip',
+			 'words' => [ 'off' ] },
+		       { 'name' => 'root',
+			 'words' => [ $d->{'home'}.'/cgi-bin' ] },
+		       { 'name' => 'fastcgi_pass',
+			 'words' => [ 'unix:'.$port ] },
+		       { 'name' => 'fastcgi_param',
+			 'words' => [ 'SCRIPT_FILENAME',
+				      $d->{'home'}.'$fastcgi_script_name' ] },
+		     ]
+		   };
+	foreach my $p (&list_fastcgi_params($server)) {
+		next if ($p->[0] eq 'SCRIPT_FILENAME');
+		push(@{$cloc->{'members'}},
+		     { 'name' => 'fastcgi_param',
+		       'words' => [ @$p ] });
+		}
+	&save_directive($server, [ ], [ $cloc ]);
+	&flush_file_lines($server->{'file'});
+	}
+elsif ($mode eq '' && $d->{'nginx_fcgiwrap_port'}) {
+	&delete_php_fcgi_server($d);
+	&save_domain($d);
+	my $server = &find_domain_server($d);
+	my ($cgi) = grep { $_->{'words'}->[0] eq '/cgi-bin/' }
+			 &find("location", $server);
+	if ($cgi) {
+		&save_directive($server, [ $cgi ], [ ]);
+		&flush_file_lines($server->{'file'});
+		}
+	}
 }
 
 # replace_apache_vars(string, [to-nginx])
