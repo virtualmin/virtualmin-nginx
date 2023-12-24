@@ -3278,9 +3278,9 @@ my ($d) = @_;
 return $d->{'nginx_fcgiwrap_port'} ? 'fcgiwrap' : undef;
 }
 
-# feature_save_get_domain_cgi_mode(&domain, mode)
+# feature_web_save_domain_cgi_mode(&domain, mode)
 # Enable or disable CGIs with fcgiwrap
-sub feature_save_get_domain_cgi_mode
+sub feature_web_save_domain_cgi_mode
 {
 my ($d, $mode) = @_;
 if ($mode eq 'fcgiwrap' && !$d->{'nginx_fcgiwrap_port'}) {
@@ -3288,7 +3288,10 @@ if ($mode eq 'fcgiwrap' && !$d->{'nginx_fcgiwrap_port'}) {
 	if ($ok) {
 		$d->{'nginx_fcgiwrap_port'} = $port;
 		}
-	&save_domain($d);
+	else {
+		return $port;
+		}
+	&virtual_server::save_domain($d);
 
 	# Point cgi-bin to fastcgi server
 	my $server = &find_domain_server($d);
@@ -3315,18 +3318,22 @@ if ($mode eq 'fcgiwrap' && !$d->{'nginx_fcgiwrap_port'}) {
 		}
 	&save_directive($server, [ ], [ $cloc ]);
 	&flush_file_lines($server->{'file'});
+	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
 elsif ($mode eq '' && $d->{'nginx_fcgiwrap_port'}) {
-	&delete_php_fcgi_server($d);
-	&save_domain($d);
+	&delete_fcgiwrap_server($d);
+	delete($d->{'nginx_fcgiwrap_port'});
+	&virtual_server::save_domain($d);
 	my $server = &find_domain_server($d);
 	my ($cgi) = grep { $_->{'words'}->[0] eq '/cgi-bin/' }
 			 &find("location", $server);
 	if ($cgi) {
 		&save_directive($server, [ $cgi ], [ ]);
 		&flush_file_lines($server->{'file'});
+		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
 	}
+return undef;
 }
 
 # replace_apache_vars(string, [to-nginx])
