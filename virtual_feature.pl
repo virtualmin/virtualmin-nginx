@@ -53,16 +53,6 @@ elsif (!&has_command($config{'nginx_cmd'})) {
 	return &text('feat_ecmd', "<tt>$config{'nginx_cmd'}</tt>");
 	}
 
-# Show fcgiwrap status
-if (&feature_web_supports_cgi()) {
-	&$virtual_server::second_print(
-		$virtual_server::text{'check_fcgiwrapok'});
-	}
-else {
-	&$virtual_server::second_print(
-		$virtual_server::text{'check_nocgiscript'});
-	}
-
 return undef;
 }
 
