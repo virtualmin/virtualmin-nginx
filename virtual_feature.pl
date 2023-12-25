@@ -299,7 +299,7 @@ if (!$d->{'alias'}) {
 
 	# Enable selected CGI mode
 	if (&feature_web_supports_cgi()) {
-		&feature_save_get_domain_cgi_mode($d, 'fcgiwrap');
+		&feature_web_save_domain_cgi_mode($d, 'fcgiwrap');
 		}
 
 	# Enable PHP logging
@@ -2402,7 +2402,9 @@ foreach my $l (@$lref[($server->{'line'}+1) .. ($server->{'eline'}-1)]) {
 	&print_tempfile($fh, $l."\n") if ($l);
 	}
 &virtual_server::close_tempfile_as_domain_user($d, $fh);
-if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
+my $addto = &get_add_to_file($d->{'dom'});
+if ($addto &&
+    $server->{'file'} eq $addto &&
     $config{'add_to'} && -d $config{'add_to'}) {
 	# Domain has it's own file, so save it completely for use
 	# when restoring
