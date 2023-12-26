@@ -297,8 +297,9 @@ if (!$d->{'alias'}) {
 	# Setup the selected PHP mode
 	&virtual_server::save_domain_php_mode($d, $mode);
 
-	# Enable selected CGI mode
-	if (&feature_web_supports_cgi()) {
+	# Enable selected CGI mode from template
+	my $cgimode = $tmpl->{'web_cgimode'};
+	if ($cgimode eq 'fcgiwrap' && &feature_web_supports_cgi()) {
 		&feature_web_save_domain_cgi_mode($d, 'fcgiwrap');
 		}
 
