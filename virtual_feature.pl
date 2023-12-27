@@ -2623,6 +2623,13 @@ if (!$d->{'ssl_same'}) {
 	&virtual_server::refresh_ssl_cert_expiry($d);
 	&virtual_server::sync_combined_ssl_cert($d);
 	}
+else {
+	# Make sure the config uses the correct SSL path, in case it was 
+	# changed on restore
+	&feature_save_web_ssl_file($d, 'cert', $d->{'ssl_cert'});
+	&feature_save_web_ssl_file($d, 'key', $d->{'ssl_key'});
+	&feature_save_web_ssl_file($d, 'ca', $d->{'ssl_chain'});
+	}
 
 return 1;
 }
