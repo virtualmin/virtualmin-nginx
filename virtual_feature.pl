@@ -1771,7 +1771,8 @@ foreach my $r (@rewrites) {
 			}
 		my $m = $r->{'words'}->[2];
 		$redirect->{'code'} = $m eq 'permanent' ? 301 :
-				      $m eq 'redirect' ? 302 : undef;
+				      $m eq 'redirect' ? 302 :
+				      $m eq 'break' ? 302 : undef;
 		}
 	elsif ($r->{'words'}->[0] =~ /\^\/\(\?\!\.well\-known\)(\$)?/) {
 		# Special case for / which excludes .well-known
@@ -1793,8 +1794,9 @@ foreach my $r (@rewrites) {
 						$redirect->{'dest'}, 0);
 			$redirect->{'alias'} = 0;
 			}
-		elsif ($r->{'words'}->[2] eq 'redirect' ||
-		       $r->{'words'}->[2] eq 'permanent') {
+		elsif ($r->{'words'}->[2] eq 'permanent' ||
+		       $r->{'words'}->[2] eq 'redirect' ||
+		       $r->{'words'}->[2] eq 'break') {
 			# Redirect to a URL path, which is taken as relative
 			# to the original URL
 			$redirect->{'alias'} = 0;
