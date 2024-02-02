@@ -1,6 +1,14 @@
+server_eexist=Geen Nginx-server gevonden
+
 feat_label2=Nginx-website ingeschakeld?
 feat_phpfpm=PHP pool instellen. ..
+feat_phpnone=PHP uitschakelen ..
 feat_module=Nginx Webserver (voor virtuele host)
+feat_evalidatefcgiwrapinit=Er bestaat geen opstartactie voor de FCGIwrap-server!
+feat_evalidatefcgiwraprun=De FCGIwrap-server voor dit domein is niet actief
+
+feat_addprotected=Er bestaat al een beveiliging voor directory $1 en deze is gekoppeld aan een ander $2 auth-gebruikersbestand
+feat_delprotected=Een beveiliging voor map $1 kan niet worden verwijderd omdat deze is gekoppeld aan een ander $2 auth-gebruikersbestand
 
 fcgid_ecmdexec=PHP-opdracht $1 kan niet worden uitgevoerd : $2 
 fcgid_ecmdb=PHP-opdracht $1 ondersteunt de vlag -b die nodig is om als FCGId-server te worden uitgevoerd, niet. U moet waarschijnlijk een afzonderlijk PHP CGI-pakket installeren.
@@ -9,6 +17,7 @@ links_anlog=Nginx toegangslog
 links_enlog=Nginx-foutenlogboek
 links_phpini=PHP-FPM-configuratie
 links_phpini2=PHP $1 -configuratie
+links_phplog=PHP-foutenlogboek
 
 webmin_phpini=PHP-configuratie voor $1 
 webmin_phpini2=PHP $2 -configuratie voor $1 

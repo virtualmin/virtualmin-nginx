@@ -193,6 +193,7 @@ server_settings=Virtuaalisen palvelimen asetukset
 server_server=Virtuaalisen isännän määritelmä
 server_eclash=Saman nimen virtuaalinen isäntä on jo olemassa
 server_pp=Välityspalvelin kohteelle $1 
+server_eexist=Nginx-palvelinta ei löydy
 
 slogs_title=Virtuaalisen palvelimen kirjaaminen
 slogs_header=Lokitiedoston asetukset
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx-verkkopalvelin ei ole käynnissä
 feat_setupalias=Päivitetään kohde-Nginx-virtuaalipalvelinta ..
 feat_phpfcgid=Käynnistetään PHP FastCGI -palvelin ..
 feat_phpfpm=PHP-altaan perustaminen ..
+feat_phpnone=PHP pois käytöstä ..
 feat_failed=.. epäonnistui : $1 
 feat_delete=Nginx-virtuaalisen palvelimen poistaminen ..
 feat_deletelogs=Nginx-verkkopalvelimen lokitiedostojen poistaminen ..
@@ -458,6 +460,11 @@ feat_clonealias=.. ei tarvita alias-verkkotunnuksille
 feat_eclonefind=.. kloonauksen jälkeen ei löytynyt uutta virtuaalia isäntää nimeltä $1 !
 feat_modifyproxy=Välityspalvelimen määränpään muuttaminen ..
 feat_module=Nginx Webserver (virtuaalisäntä)
+feat_evalidatefcgiwrapinit=FCGIwrap-palvelimen käynnistystoimintoa ei ole olemassa!
+feat_evalidatefcgiwraprun=Tämän toimialueen FCGIwrap-palvelin ei ole käynnissä
+
+feat_addprotected=Suojaus hakemistolle $1 on jo olemassa, ja se on linkitetty toiseen $2 auth -käyttäjätiedostoon
+feat_delprotected=Hakemiston $1 suojausta ei voida poistaa, koska se on linkitetty toiseen $2-todennuskäyttäjätiedostoon
 
 fcgid_ecmd=PHP-komentoa ei löytynyt!
 fcgid_ecmdexec=PHP-komentoa $1 ei voitu suorittaa : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx-käyttöloki
 links_enlog=Nginx-virheloki
 links_phpini=PHP-FPM-määritykset
 links_phpini2=PHP $1 -kokoonpano
+links_phplog=PHP-virheloki
 
 webmin_phpini=$1 PHP-määritykset
 webmin_phpini2=$1 : n PHP $2 -kokoonpano

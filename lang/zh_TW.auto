@@ -193,6 +193,7 @@ server_settings=虛擬主機設置
 server_server=虛擬主機定義
 server_eclash=具有相同名稱的虛擬主機已存在
 server_pp=代理 $1
+server_eexist=找不到 Nginx 伺服器
 
 slogs_title=虛擬主機記錄
 slogs_header=日誌文件選項
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx Web服務器未運行
 feat_setupalias=更新目標Nginx虛擬主機 ..
 feat_phpfcgid=正在啟動PHP FastCGI服務器 ..
 feat_phpfpm=設置PHP池 ..
+feat_phpnone=禁用 PHP ..
 feat_failed=..失敗： $1
 feat_delete=刪除Nginx虛擬主機 ..
 feat_deletelogs=刪除Nginx Web服務器日誌文件 ..
@@ -458,6 +460,11 @@ feat_clonealias=..對於別名域不是必需的
 feat_eclonefind=..克隆後找不到名為 $1的新虛擬主機！
 feat_modifyproxy=修改代理目標 ..
 feat_module=Nginx Web服務器（用於虛擬主機）
+feat_evalidatefcgiwrapinit=不存在 FCGIwrap 伺服器啟動操作！
+feat_evalidatefcgiwraprun=該網域的 FCGIwrap 伺服器未運行
+
+feat_addprotected=對目錄 $1 的保護已存在並連結到不同的 $2 驗證使用者文件
+feat_delprotected=無法刪除對目錄 $1 的保護，因為它連結到不同的 $2 身份驗證使用者文件
 
 fcgid_ecmd=找不到PHP命令！
 fcgid_ecmdexec=PHP命令 $1無法執行： $2
@@ -476,6 +483,7 @@ links_anlog=Nginx訪問日誌
 links_enlog=Nginx錯誤日誌
 links_phpini=PHP-FPM配置
 links_phpini2=PHP $1配置
+links_phplog=PHP 錯誤日誌
 
 webmin_phpini=$1的PHP配置
 webmin_phpini2=$1的PHP $2配置

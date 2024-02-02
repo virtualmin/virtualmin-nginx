@@ -193,6 +193,7 @@ server_settings=Instellings vir virtuele gasheer
 server_server=Definisie van virtuele gasheer
 server_eclash='N Virtuele gasheer met dieselfde naam bestaan reeds
 server_pp=Volmag na $1 
+server_eexist=Geen Nginx-bediener gevind nie
 
 slogs_title=Virtuele gasheer aanteken
 slogs_header=Opsies vir loglêers
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx-webbediener loop nie
 feat_setupalias=Opdatering van teiken Nginx-virtuele gasheer ..
 feat_phpfcgid=Begin met PHP FastCGI-bediener ..
 feat_phpfpm=Stel PHP-swembad op ..
+feat_phpnone=Deaktiveer PHP ..
 feat_failed=.. misluk : $1 
 feat_delete=Verwyder Nginx-virtuele gasheer ..
 feat_deletelogs=Vee Nginx-webbediener-loglêers uit ..
@@ -458,6 +460,11 @@ feat_clonealias=.. nie nodig vir aliasdomeine nie
 feat_eclonefind=.. kon nie 'n nuwe virtuele gasheer met die naam $1 vind na kloning nie!
 feat_modifyproxy=Verander die instaanbediener se bestemming ..
 feat_module=Nginx-webbediener (vir virtuele gasheer)
+feat_evalidatefcgiwrapinit=Geen FCGIwrap-bediener selflaaiaksie bestaan nie!
+feat_evalidatefcgiwraprun=Die FCGIwrap-bediener vir hierdie domein loop nie
+
+feat_addprotected='n Beskerming vir gids $1 bestaan reeds en is gekoppel aan 'n ander $2-bevoegdheidsgebruikerlêer
+feat_delprotected='n Beskerming vir gids $1 kan nie verwyder word nie, want dit is gekoppel aan 'n ander $2 outoriteit gebruikerlêer
 
 fcgid_ecmd=Geen PHP-opdrag gevind nie!
 fcgid_ecmdexec=PHP-opdrag $1 kon nie uitgevoer word nie : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx-toegangslêer
 links_enlog=Nginx-foutlogboek
 links_phpini=PHP-FPM-konfigurasie
 links_phpini2=PHP $1 -opstelling
+links_phplog=PHP foutlogboek
 
 webmin_phpini=PHP-konfigurasie vir $1 
 webmin_phpini2=PHP $2 -opstelling vir $1 

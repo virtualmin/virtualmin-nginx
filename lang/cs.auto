@@ -193,6 +193,7 @@ server_settings=Nastavení virtuálního hostitele
 server_server=Definice virtuálního hostitele
 server_eclash=Virtuální hostitel se stejným názvem již existuje
 server_pp=Proxy na $1 
+server_eexist=Nebyl nalezen žádný server Nginx
 
 slogs_title=Protokolování virtuálního hostitele
 slogs_header=Možnosti souboru protokolu
@@ -410,6 +411,7 @@ feat_notrunning=.. Webový server Nginx není spuštěn
 feat_setupalias=Aktualizace cílového virtuálního hostitele Nginx ..
 feat_phpfcgid=Spuštění serveru PHP FastCGI ..
 feat_phpfpm=Nastavení fondu PHP ..
+feat_phpnone=Vypnutí PHP ..
 feat_failed=.. selhalo : $1 
 feat_delete=Odebrání virtuálního hostitele Nginx ..
 feat_deletelogs=Mazání souborů protokolu webového serveru Nginx ..
@@ -458,6 +460,11 @@ feat_clonealias=.. není nutné pro aliasové domény
 feat_eclonefind=.. po klonování nebyl nalezen nový virtuální hostitel s názvem $1 !
 feat_modifyproxy=Změna cíle proxy serveru ..
 feat_module=Webový server Nginx (pro virtuální hostitele)
+feat_evalidatefcgiwrapinit=Neexistuje žádná akce spouštění serveru FCGIwrap!
+feat_evalidatefcgiwraprun=Server FCGIwrap pro tuto doménu není spuštěn
+
+feat_addprotected=Ochrana pro adresář $1 již existuje a je propojena s jiným uživatelským souborem $2 auth
+feat_delprotected=Ochranu pro adresář $1 nelze odstranit, protože je propojen s jiným uživatelským souborem $2 auth
 
 fcgid_ecmd=Nebyl nalezen žádný příkaz PHP!
 fcgid_ecmdexec=Příkaz PHP $1 nelze provést : $2 
@@ -476,6 +483,7 @@ links_anlog=Protokol přístupu Nginx
 links_enlog=Protokol chyb Nginx
 links_phpini=Konfigurace PHP-FPM
 links_phpini2=Konfigurace PHP $1 
+links_phplog=Protokol chyb PHP
 
 webmin_phpini=Konfigurace PHP pro $1 
 webmin_phpini2=Konfigurace PHP $2 pro $1 

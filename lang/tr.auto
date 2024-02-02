@@ -193,6 +193,7 @@ server_settings=Sanal Ana Bilgisayar Ayarları
 server_server=Sanal Ana Makine Tanımı
 server_eclash=Aynı ada sahip bir sanal ana makine zaten var
 server_pp=$1 oranında proxy
+server_eexist=Nginx sunucusu bulunamadı
 
 slogs_title=Sanal Ana Makine Günlüğü
 slogs_header=Günlük dosyası seçenekleri
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx web sunucusu çalışmıyor
 feat_setupalias=Hedef Nginx sanal ana bilgisayarı güncelleniyor ..
 feat_phpfcgid=PHP FastCGI sunucusu başlatılıyor ..
 feat_phpfpm=PHP havuzu oluşturuluyor ..
+feat_phpnone=PHP'yi devre dışı bırakmak ..
 feat_failed=.. başarısız oldu : $1 
 feat_delete=Nginx sanal ana bilgisayarı kaldırılıyor ..
 feat_deletelogs=Nginx web sunucusu günlük dosyaları siliniyor ..
@@ -458,6 +460,11 @@ feat_clonealias=.. takma ad alanları için gerekli değildir
 feat_eclonefind=.. klonlamadan sonra $1 adlı yeni sanal ana makine bulunamadı!
 feat_modifyproxy=Proxy hedefi değiştiriliyor ..
 feat_module=Nginx Web sunucusu (sanal ana bilgisayar için)
+feat_evalidatefcgiwrapinit=FCGIwrap sunucusu önyükleme eylemi mevcut değil!
+feat_evalidatefcgiwraprun=Bu etki alanı için FCGIwrap sunucusu çalışmıyor
+
+feat_addprotected=$1 dizini için bir koruma zaten mevcut ve farklı bir $2 kimlik doğrulama kullanıcı dosyasına bağlı
+feat_delprotected=$1 dizinine yönelik koruma, farklı bir $2 kimlik doğrulama kullanıcı dosyasına bağlı olduğundan kaldırılamıyor
 
 fcgid_ecmd=PHP komutu bulunamadı!
 fcgid_ecmdexec=PHP komutu $1 çalıştırılamadı : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx Erişim Günlüğü
 links_enlog=Nginx Hata Günlüğü
 links_phpini=PHP-FPM Yapılandırması
 links_phpini2=PHP $1 Yapılandırması
+links_phplog=PHP Hata Günlüğü
 
 webmin_phpini=$1 için PHP yapılandırması
 webmin_phpini2=$1 için PHP $2 yapılandırması

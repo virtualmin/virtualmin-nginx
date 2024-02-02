@@ -193,6 +193,7 @@ server_settings=Einstellungen für virtuelle Hosts
 server_server=Definition des virtuellen Hosts
 server_eclash=Ein virtueller Host mit demselben Namen ist bereits vorhanden
 server_pp=Proxy zu $1 
+server_eexist=Kein Nginx-Server gefunden
 
 slogs_title=Protokollierung des virtuellen Hosts
 slogs_header=Optionen für Protokolldateien
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx Webserver läuft nicht
 feat_setupalias=Aktualisieren des virtuellen Nginx-Zielhosts.
 feat_phpfcgid=Starten des PHP FastCGI-Servers.
 feat_phpfpm=PHP-Pool einrichten ..
+feat_phpnone=PHP deaktivieren ..
 feat_failed=.. fehlgeschlagen : $1 
 feat_delete=Entfernen des virtuellen Nginx-Hosts.
 feat_deletelogs=Löschen von Nginx-Webserver-Protokolldateien.
@@ -458,6 +460,11 @@ feat_clonealias=.. nicht erforderlich für Alias-Domains
 feat_eclonefind=.. konnte nach dem Klonen keinen neuen virtuellen Host mit dem Namen $1 finden!
 feat_modifyproxy=Proxy-Ziel ändern ..
 feat_module=Nginx Webserver (für virtuellen Host)
+feat_evalidatefcgiwrapinit=Es ist keine Startaktion für den FCGIwrap-Server vorhanden!
+feat_evalidatefcgiwraprun=Der FCGIwrap-Server für diese Domäne läuft nicht
+
+feat_addprotected=Für das Verzeichnis $1 existiert bereits ein Schutz, der mit einer anderen Authentifizierungsbenutzerdatei $2 verknüpft ist
+feat_delprotected=Ein Schutz für das Verzeichnis $1 kann nicht entfernt werden, da es mit einer anderen $2-Authentifizierungsbenutzerdatei verknüpft ist
 
 fcgid_ecmd=Kein PHP-Befehl gefunden!
 fcgid_ecmdexec=Der PHP-Befehl $1 konnte nicht ausgeführt werden : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx-Zugriffsprotokoll
 links_enlog=Nginx-Fehlerprotokoll
 links_phpini=PHP-FPM-Konfiguration
 links_phpini2=PHP $1 Konfiguration
+links_phplog=PHP-Fehlerprotokoll
 
 webmin_phpini=PHP-Konfiguration für $1 
 webmin_phpini2=PHP $2 Konfiguration für $1 

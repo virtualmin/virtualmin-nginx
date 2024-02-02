@@ -193,6 +193,7 @@ server_settings=Setări virtuale pentru gazdă
 server_server=Definiție virtuală gazdă
 server_eclash=Există deja o gazdă virtuală cu același nume
 server_pp=Proxy pentru $1 
+server_eexist=Nu a fost găsit niciun server Nginx
 
 slogs_title=Jurnal virtual de gazdă
 slogs_header=Opțiuni fișier jurnal
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx webserver nu rulează
 feat_setupalias=Actualizarea gazdei virtuale Nginx țintă ..
 feat_phpfcgid=Pornirea serverului PHP FastCGI ..
 feat_phpfpm=Configurarea bazinului PHP ..
+feat_phpnone=Se dezactivează PHP ..
 feat_failed=.. eșuat : $1 
 feat_delete=Eliminarea gazdei virtuale Nginx ..
 feat_deletelogs=Ștergerea fișierelor jurnal de server Nginx
@@ -458,6 +460,11 @@ feat_clonealias=.. nu este necesar pentru domenii alias
 feat_eclonefind=.. nu a putut găsi o nouă gazdă virtuală numită $1 după clonare!
 feat_modifyproxy=Modificarea destinației proxy ..
 feat_module=Nginx Webserver (pentru gazdă virtuală)
+feat_evalidatefcgiwrapinit=Nu există nicio acțiune de pornire a serverului FCGIwrap!
+feat_evalidatefcgiwraprun=Serverul FCGIwrap pentru acest domeniu nu rulează
+
+feat_addprotected=O protecție pentru directorul $1 există deja și este legată la un alt fișier de utilizator $2 auth
+feat_delprotected=O protecție pentru directorul $1 nu poate fi eliminată deoarece este legată la un alt fișier de utilizator $2 auth
 
 fcgid_ecmd=Nu a fost găsită nicio comandă PHP!
 fcgid_ecmdexec=Comanda PHP $1 nu a putut fi executată : $2 
@@ -476,6 +483,7 @@ links_anlog=Jgin de acces Nginx
 links_enlog=Jurnal de eroare Nginx
 links_phpini=Configurare PHP-FPM
 links_phpini2=PHP $1 Configurare
+links_phplog=Jurnal de erori PHP
 
 webmin_phpini=Configurație PHP pentru $1 
 webmin_phpini2=Configurație PHP $2 pentru $1 

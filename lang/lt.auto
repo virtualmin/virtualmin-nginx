@@ -193,6 +193,7 @@ server_settings=Virtualiojo kompiuterio nustatymai
 server_server=Virtualiojo kompiuterio apibrėžimas
 server_eclash=Virtualus kompiuteris tuo pačiu pavadinimu jau yra
 server_pp=Proxy į $1 
+server_eexist=Nginx serveris nerastas
 
 slogs_title=Virtualiojo kompiuterio registravimas
 slogs_header=Žurnalo failo parinktys
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx žiniatinklio serveris neveikia
 feat_setupalias=Atnaujinamas tikslinis „Nginx“ virtualusis kompiuteris.
 feat_phpfcgid=Paleidžiamas PHP FastCGI serveris ..
 feat_phpfpm=PHP fondo nustatymas ..
+feat_phpnone=PHP išjungimas ..
 feat_failed=.. nepavyko : $1 
 feat_delete=Pašalinamas „Nginx“ virtualusis kompiuteris.
 feat_deletelogs=Ištrinami „Nginx“ žiniatinklio serverio žurnalo failai.
@@ -458,6 +460,11 @@ feat_clonealias=.. nebūtini slapyvardžių domenams
 feat_eclonefind=.. po klonavimo nepavyko rasti naujo virtualiojo kompiuterio pavadinimu $1 !
 feat_modifyproxy=Įgaliotojo serverio paskirties keitimas
 feat_module=„Nginx“ interneto serveris (virtualiam pagrindiniam kompiuteriui)
+feat_evalidatefcgiwrapinit=Nėra FCGIwrap serverio įkrovos veiksmo!
+feat_evalidatefcgiwraprun=Šio domeno FCGIwrap serveris neveikia
+
+feat_addprotected=Katalogo $1 apsauga jau egzistuoja ir yra susieta su kitu $2 autentifikavimo vartotojo failu
+feat_delprotected=Katalogo $1 apsauga negali būti pašalinta, nes ji susieta su kitu $2 autentifikavimo vartotojo failu
 
 fcgid_ecmd=Nerasta PHP komandos!
 fcgid_ecmdexec=Nepavyko įvykdyti PHP komandos $1 : $2 
@@ -476,6 +483,7 @@ links_anlog=„Nginx“ prieigos žurnalas
 links_enlog=„Nginx“ klaidų žurnalas
 links_phpini=PHP-FPM konfigūracija
 links_phpini2=$1 PHP konfigūracija
+links_phplog=PHP klaidų žurnalas
 
 webmin_phpini=$1 PHP konfigūracija
 webmin_phpini2=$1 PHP konfigūracija

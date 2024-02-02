@@ -193,6 +193,7 @@ server_settings=Innstillinger for virtuell vert
 server_server=Definisjon av virtuell vert
 server_eclash=En virtuell vert med samme navn eksisterer allerede
 server_pp=Fullmakt til $1 
+server_eexist=Ingen Nginx-server funnet
 
 slogs_title=Virtuell vertslogging
 slogs_header=Alternativer for loggfil
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx webserver kjører ikke
 feat_setupalias=Oppdaterer målet Nginx virtual host ..
 feat_phpfcgid=Starter PHP FastCGI-server ..
 feat_phpfpm=Setter opp PHP-basseng ..
+feat_phpnone=Deaktiverer PHP ..
 feat_failed=.. mislyktes : $1 
 feat_delete=Fjerner Nginx virtuell vert ..
 feat_deletelogs=Slette Nginx loggfiler for webserver ..
@@ -458,6 +460,11 @@ feat_clonealias=.. ikke nødvendig for aliasdomener
 feat_eclonefind=.. kunne ikke finne en ny virtuell vert med navnet $1 etter kloning!
 feat_modifyproxy=Endre proxy-destinasjon ..
 feat_module=Nginx webserver (for virtuell vert)
+feat_evalidatefcgiwrapinit=Ingen FCGIwrap-serveroppstartshandling eksisterer!
+feat_evalidatefcgiwraprun=FCGIwrap-serveren for dette domenet kjører ikke
+
+feat_addprotected=En beskyttelse for katalogen $1 eksisterer allerede og er koblet til en annen $2 auth-brukerfil
+feat_delprotected=En beskyttelse for katalogen $1 kan ikke fjernes fordi den er koblet til en annen $2 autentiseringsbrukerfil
 
 fcgid_ecmd=Ingen PHP-kommando funnet!
 fcgid_ecmdexec=PHP-kommandoen $1 kunne ikke utføres : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx tilgangslogg
 links_enlog=Nginx feillogg
 links_phpini=PHP-FPM-konfigurasjon
 links_phpini2=PHP $1 -konfigurasjon
+links_phplog=PHP-feillogg
 
 webmin_phpini=PHP-konfigurasjon for $1 
 webmin_phpini2=PHP $2 -konfigurasjon for $1 

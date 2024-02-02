@@ -193,6 +193,7 @@ server_settings=Virtuālā resursdatora iestatījumi
 server_server=Virtuālā resursdatora definīcija
 server_eclash=Virtuālā resursdators ar tādu pašu nosaukumu jau pastāv
 server_pp=Starpniekserveris $1 
+server_eexist=Nav atrasts neviens Nginx serveris
 
 slogs_title=Virtuālā resursdatora reģistrēšana
 slogs_header=Žurnāla faila opcijas
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx tīmekļa serveris nedarbojas
 feat_setupalias=Notiek mērķa Nginx virtuālā resursdatora atjaunināšana.
 feat_phpfcgid=Tiek palaists PHP FastCGI serveris.
 feat_phpfpm=PHP baseina iestatīšana
+feat_phpnone=PHP atspējošana ..
 feat_failed=.. neizdevās : $1 
 feat_delete=Notiek Nginx virtuālās resursdatora noņemšana ..
 feat_deletelogs=Tiek dzēsti Nginx tīmekļa servera žurnāla faili.
@@ -458,6 +460,11 @@ feat_clonealias=.. nav nepieciešams alias domēniem
 feat_eclonefind=.. pēc klonēšanas nevarēju atrast jaunu virtuālo resursdatoru ar nosaukumu $1 !
 feat_modifyproxy=Starpniekservera mērķa mainīšana ..
 feat_module=Nginx tīmekļa serveris (virtuālajam resursdatoram)
+feat_evalidatefcgiwrapinit=FCGIwrap servera sāknēšanas darbība nepastāv!
+feat_evalidatefcgiwraprun=FCGIwrap serveris šim domēnam nedarbojas
+
+feat_addprotected=Direktorija $1 aizsardzība jau pastāv, un tā ir saistīta ar citu $2 autentifikācijas lietotāja failu
+feat_delprotected=Direktorija $1 aizsardzību nevar noņemt, jo tas ir saistīts ar citu $2 autentifikācijas lietotāja failu
 
 fcgid_ecmd=Neviena PHP komanda nav atrasta.
 fcgid_ecmdexec=PHP komandu $1 nevar izpildīt : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx piekļuves žurnāls
 links_enlog=Nginx kļūdu žurnāls
 links_phpini=PHP-FPM konfigurācija
 links_phpini2=PHP $1 konfigurācija
+links_phplog=PHP kļūdu žurnāls
 
 webmin_phpini=$1 PHP konfigurācija
 webmin_phpini2=$1 PHP konfigurācija
