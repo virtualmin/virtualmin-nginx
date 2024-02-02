@@ -3365,4 +3365,124 @@ foreach my $k (keys %vmap) {
 return $dest;
 }
 
+# feature_add_protected_dir(&domain, &opts)
+# Add a protected directory to a domain
+# unless already exists. If exists with a 
+# different auth user file return an error.
+# Returns 0 on success (added), -1 if exists
+# correctly, 1 if exists with a different
+# auth user file, -2 if no server found
+sub feature_add_protected_dir
+{
+my ($d, $opts) = @_;
+my ($err, $status);
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+if (!$server) {
+	$err = $text{'server_eexist'};
+	return wantarray ? ($err, -2) : $err;
+	}
+my $public_html_dir = &virtual_server::public_html_dir($d);
+$opts->{'protected_dir'} =~ s/^\Q$public_html_dir\E|^\Q$d->{'home'}\E//g;
+$opts->{'protected_dir'} ||= '/';
+my @locs = &find("location", $server);
+my ($loc) = grep {
+	if ($opts->{'protected_dir'} eq '/') {
+		$_->{'words'}->[0] eq $opts->{'protected_dir'}
+		}
+	else {
+		$_->{'words'}->[0] =~ /\Q$opts->{'protected_dir'}\E$/ 
+		}	
+} @locs;
+if ($loc) {
+	my ($contains_auth_basic_user_file) =
+			grep { $_->{name} eq 'auth_basic_user_file' } @{$loc->{members}};
+	if ($contains_auth_basic_user_file &&
+	    $contains_auth_basic_user_file->{'value'} &&
+	    $contains_auth_basic_user_file->{'value'} ne $opts->{'protected_user_file_path'}) {
+			$err = &text('feat_addprotected',
+				$opts->{'protected_dir'}, $contains_auth_basic_user_file->{'value'});
+			$status = 1;
+		}
+	else {
+		$status = -1;
+		}
+	}
+else {
+	my $protected = {
+		'name' => 'location',
+		'words' => [ $opts->{'protected_dir'} ],
+		'type' => 1,
+		'members' => [
+			{ 'name' => 'auth_basic',
+			'words' => [ $opts->{'protected_name'} ] },
+			{ 'name' => 'auth_basic_user_file',
+			'words' => [ $opts->{'protected_user_file_path'} ] },
+			{ 'name' => 'location',
+			  'words' => [ '~', "\/\\".$opts->{'protected_user_file'}."\$" ],
+			  'type' => 1,
+			  'members' => [
+			    { 'name' => 'deny',
+			      'words' => [ 'all' ] },
+			  ]
+			}
+		]
+	};
+	&save_directive($server, [ ], [ $protected ]);
+	&flush_config_file_lines();
+	&apply_nginx();
+	$status = 0;
+	}
+&unlock_all_config_files();
+return wantarray ? ($err, $status) : $err;
+}
+
+# feature_delete_protected_dir(&domain, &opts)
+# Delete a protected directory from a domain's
+# Nginx config. Returns 0 on success, 1 if
+# the protected directory exists with a different
+# auth user file, -2 if no server found
+sub feature_delete_protected_dir
+{
+my ($d, $opts) = @_;
+my ($err, $status);
+&lock_all_config_files();
+my $server = &find_domain_server($d);
+if (!$server) {
+	$err = $text{'server_eexist'};
+	&unlock_all_config_files();
+	return wantarray ? ($err, -2) : $err;
+	}
+my $public_html_dir = &virtual_server::public_html_dir($d);
+my $protected_dir = $opts->{'protected_dir'};
+$protected_dir = '/' if ($protected_dir eq $public_html_dir);
+my @locs = &find("location", $server);
+my ($loc) = grep { $protected_dir =~ /\Q$_->{'words'}->[0]\E$/ } @locs;
+if ($loc) {
+	my ($contains_auth_basic_user_file) =
+			grep { $_->{name} eq 'auth_basic_user_file' } @{$loc->{members}};
+	if ($contains_auth_basic_user_file &&
+	    $contains_auth_basic_user_file->{'value'}) {
+		if ($contains_auth_basic_user_file->{'value'} eq $opts->{'protected_user_file_path'}) {
+			# Can delete the location block
+			&save_directive($server, [ $loc ], [ ]);
+			&flush_config_file_lines();
+			&apply_nginx();
+			$status = 0;
+			}
+		else {
+			my $protected_dir = $opts->{'protected_dir'};
+			$protected_dir =~ s/\/.*?([^\/]+$)/$1/;
+			my $auth_basic_user_file = $contains_auth_basic_user_file->{'value'};
+			$auth_basic_user_file =~ s/^\Q$public_html_dir\E|^\Q$d->{'home'}\E//g;
+			$auth_basic_user_file =~ s/^\///;
+			$err = &text('feat_delprotected', $protected_dir, $auth_basic_user_file);
+			$status = 1;
+			}
+		}
+	}
+&unlock_all_config_files();
+return wantarray ? ($err, $status) : $err;
+}
+
 1;

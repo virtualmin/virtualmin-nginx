@@ -193,6 +193,7 @@ server_settings=Virtual Host Settings
 server_server=Virtual Host Definition
 server_eclash=A virtual host with the same name already exists
 server_pp=Proxy to $1
+server_eexist=No Nginx server found
 
 slogs_title=Virtual Host Logging
 slogs_header=Log file options
@@ -461,6 +462,9 @@ feat_modifyproxy=Modifying proxy destination ..
 feat_module=Nginx Webserver (for virtual host)
 feat_evalidatefcgiwrapinit=No FCGIwrap server bootup action exists!
 feat_evalidatefcgiwraprun=The FCGIwrap server for this domain is not running
+
+feat_addprotected=A protection for directory $1 already exists and is linked to a different $2 auth user file
+feat_delprotected=A protection for directory $1 cannot be removed because it is linked to a different $2 auth user file
 
 fcgid_ecmd=No PHP command found!
 fcgid_ecmdexec=PHP command $1 could not be executed : $2
