@@ -335,6 +335,12 @@ if (!$d->{'alias'}) {
 	# Save HTML dirs
 	&feature_find_web_html_cgi_dirs($d);
 
+	# Setup webmail redirects
+       if (&virtual_server::has_webmail_rewrite($d) &&
+	   !$d->{'nowebmailredirect'}) {
+                &virtual_server::add_webmail_redirect_directives($d, $tmpl, 0);
+                }
+
 	return 1;
 	}
 else {
@@ -696,6 +702,7 @@ if (!$d->{'alias'}) {
 	# Remove the whole server
 	&$virtual_server::first_print($text{'feat_delete'});
 	&lock_all_config_files();
+	&virtual_server::remove_webmail_redirect_directives($d);
 	my $mode = &feature_get_web_php_mode($d);
 	my $conf = &get_config();
 	my $http = &find("http", $conf);
