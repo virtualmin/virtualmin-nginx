@@ -3380,6 +3380,7 @@ my ($err, $status);
 my $server = &find_domain_server($d);
 if (!$server) {
 	$err = $text{'server_eexist'};
+	&unlock_all_config_files();
 	return wantarray ? ($err, -2) : $err;
 	}
 my $public_html_dir = &virtual_server::public_html_dir($d);
