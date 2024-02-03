@@ -193,6 +193,7 @@ server_settings=ورچوئل میزبان کی ترتیبات
 server_server=ورچوئل ہوسٹ ڈیفینیشن
 server_eclash=اسی نام کے ساتھ ایک مجازی میزبان پہلے سے موجود ہے
 server_pp=پراکسی سے$1
+server_eexist=کوئی Nginx سرور نہیں ملا
 
 slogs_title=ورچوئل ہوسٹ لاگنگ
 slogs_header=فائل کے اختیارات لاگ ان کریں
@@ -410,6 +411,7 @@ feat_notrunning=.. نینگس ویبسرور نہیں چل رہا ہے
 feat_setupalias=ہدف Nginx ورچوئل میزبان کو اپ ڈیٹ کررہا ہے ..
 feat_phpfcgid=پی ایچ پی فاسٹ سی جی آئی سرور شروع ہو رہا ہے ..
 feat_phpfpm=پی ایچ پی پول قائم کرنا ..
+feat_phpnone=پی ایچ پی کو غیر فعال کرنا ..
 feat_failed=.. ناکام :$1
 feat_delete=Nginx ورچوئل میزبان کو ہٹا رہا ہے ..
 feat_deletelogs=Nginx ویب سرور لاگ فائلوں کو حذف کیا جا رہا ہے ..
@@ -458,6 +460,11 @@ feat_clonealias=.. عرف ڈومینز کے لئے ضروری نہیں ہے
 feat_eclonefind=.. کلوننگ کے بعد$1 نامی نیا ورچوئل میزبان نہیں مل سکا!
 feat_modifyproxy=پراکسی منزل میں تبدیلی. ..
 feat_module=Nginx Webserver (ورچوئل میزبان کے لئے)
+feat_evalidatefcgiwrapinit=کوئی FCGIwrap سرور بوٹ اپ ایکشن موجود نہیں ہے!
+feat_evalidatefcgiwraprun=اس ڈومین کے لیے FCGIwrap سرور نہیں چل رہا ہے۔
+
+feat_addprotected=ڈائریکٹری $1 کے لیے تحفظ پہلے سے موجود ہے اور ایک مختلف $2 auth صارف فائل سے منسلک ہے۔
+feat_delprotected=ڈائریکٹری $1 کے تحفظ کو ہٹایا نہیں جا سکتا کیونکہ یہ ایک مختلف $2 auth صارف فائل سے منسلک ہے۔
 
 fcgid_ecmd=پی ایچ پی کی کوئی کمانڈ نہیں ملی!
 fcgid_ecmdexec=پی ایچ پی کمانڈ$1 پر عملدرآمد نہیں ہوسکا :$2
@@ -476,6 +483,7 @@ links_anlog=Nginx رسائی لاگ
 links_enlog=Nginx غلطی لاگ
 links_phpini=پی ایچ پی - ایف پی ایم کنفیگریشن
 links_phpini2=پی ایچ پی$1 کنفیگریشن
+links_phplog=پی ایچ پی کی خرابی لاگ
 
 webmin_phpini=$1 کے لئے پی ایچ پی کی تشکیل
 webmin_phpini2=$1 کے لئے پی ایچ پی$2 کنفیگریشن

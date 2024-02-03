@@ -193,6 +193,7 @@ server_settings=Virtuális állomás beállításai
 server_server=Virtuális gazdagép meghatározása
 server_eclash=Az azonos nevű virtuális gazdagép már létezik
 server_pp=Proxy a $1 -hez
+server_eexist=Nem található Nginx szerver
 
 slogs_title=Virtuális gazdagép naplózása
 slogs_header=Naplófájl-beállítások
@@ -410,6 +411,7 @@ feat_notrunning=.. Az Nginx webszerver nem fut
 feat_setupalias=A cél Nginx virtuális gazdagépének frissítése ..
 feat_phpfcgid=A PHP FastCGI szerver indítása ..
 feat_phpfpm=A PHP-medence beállítása ..
+feat_phpnone=PHP letiltása ..
 feat_failed=.. sikertelen : $1 
 feat_delete=Az Nginx virtuális gazdagép eltávolítása ..
 feat_deletelogs=Nginx webszerver naplófájlok törlése ..
@@ -458,6 +460,11 @@ feat_clonealias=.. az álnevekhez nem szükséges
 feat_eclonefind=.. a klónozás után nem található az új $1 nevű virtuális gazdagép!
 feat_modifyproxy=Proxy célállomás módosítása ..
 feat_module=Nginx Webserver (virtuális host számára)
+feat_evalidatefcgiwrapinit=Nem létezik FCGIwrap szerver indító művelet!
+feat_evalidatefcgiwraprun=A tartomány FCGIwrap-kiszolgálója nem fut
+
+feat_addprotected=A(z) $1 könyvtárhoz már létezik védelem, és egy másik $2 auth felhasználói fájlhoz kapcsolódik
+feat_delprotected=A(z) $1 könyvtár védelmét nem lehet eltávolítani, mert egy másik $2 hitelesítési felhasználói fájlhoz kapcsolódik
 
 fcgid_ecmd=Nem található PHP parancs!
 fcgid_ecmdexec=A (z) $1 PHP parancs nem hajtható végre : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx hozzáférési napló
 links_enlog=Nginx hibanapló
 links_phpini=PHP-FPM konfiguráció
 links_phpini2=$1 PHP konfiguráció
+links_phplog=PHP hibanapló
 
 webmin_phpini=$1 PHP konfigurációja
 webmin_phpini2=$1 PHP konfigurációja

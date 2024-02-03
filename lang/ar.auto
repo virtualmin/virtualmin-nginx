@@ -193,6 +193,7 @@ server_settings=إعدادات المضيف الظاهري
 server_server=تعريف المضيف الظاهري
 server_eclash=يوجد بالفعل مضيف افتراضي يحمل نفس الاسم
 server_pp=وكيل لـ$1
+server_eexist=لم يتم العثور على خادم Nginx
 
 slogs_title=تسجيل المضيف الظاهري
 slogs_header=خيارات ملف السجل
@@ -410,6 +411,7 @@ feat_notrunning=خادم Nginx لا يعمل
 feat_setupalias=تحديث المضيف Nginx الظاهري الهدف ..
 feat_phpfcgid=جارٍ بدء خادم PHP FastCGI ..
 feat_phpfpm=إنشاء تجمع PHP ..
+feat_phpnone=تعطيل PHP ..
 feat_failed=.. فشل :$1
 feat_delete=إزالة مضيف Nginx الظاهري ..
 feat_deletelogs=حذف ملفات سجل خادم Nginx. ..
@@ -458,6 +460,11 @@ feat_clonealias=.. غير ضروري لنطاقات الاسم المستعار
 feat_eclonefind=.. تعذر العثور على مضيف ظاهري جديد باسم$1 بعد الاستنساخ!
 feat_modifyproxy=تعديل وجهة الوكيل ..
 feat_module=Nginx Webserver (للمضيف الظاهري)
+feat_evalidatefcgiwrapinit=لا يوجد أي إجراء تمهيدي لخادم FCGIwrap!
+feat_evalidatefcgiwraprun=خادم FCGIwrap لهذا المجال لا يعمل
+
+feat_addprotected=الحماية للدليل $1 موجودة بالفعل وهي مرتبطة بملف مستخدم مصادقة $2 مختلف
+feat_delprotected=لا يمكن إزالة الحماية للدليل $1 لأنه مرتبط بملف مستخدم مصادقة $2 مختلف
 
 fcgid_ecmd=لم يتم العثور على أمر PHP!
 fcgid_ecmdexec=تعذر تنفيذ أمر PHP $1 : $2 
@@ -476,6 +483,7 @@ links_anlog=سجل وصول Nginx
 links_enlog=سجل أخطاء Nginx
 links_phpini=تكوين PHP-FPM
 links_phpini2=تكوين PHP$1
+links_phplog=سجل أخطاء PHP
 
 webmin_phpini=تكوين PHP لـ$1
 webmin_phpini2=تكوين PHP $2 لـ$1

@@ -193,6 +193,7 @@ server_settings=Postavke virtualnog domaćina
 server_server=Definicija virtualnog domaćina
 server_eclash=Virtualni domaćin s istim imenom već postoji
 server_pp=Proxy za $1 
+server_eexist=Nginx poslužitelj nije pronađen
 
 slogs_title=Dnevnik virtualnog domaćina
 slogs_header=Opcije datoteke za zapisnik
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx webserver se ne pokreće
 feat_setupalias=Ažuriranje ciljanog Nginx virtualnog domaćina ..
 feat_phpfcgid=Pokretanje PHP FastCGI poslužitelja ..
 feat_phpfpm=Postavljanje PHP bazena ..
+feat_phpnone=Onemogućavanje PHP-a ..
 feat_failed=.. nije uspio : $1 
 feat_delete=Uklanjanje virtualnog računala Nginx ..
 feat_deletelogs=Brisanje datoteka dnevnika dnevnika web-poslužitelja Nginx ..
@@ -458,6 +460,11 @@ feat_clonealias=.. nije neophodno za alias domene
 feat_eclonefind=.. ne mogu pronaći novi virtualni domaćin nazvan $1 nakon kloniranja!
 feat_modifyproxy=Promjena odredišta proxyja ..
 feat_module=Nginx Webserver (za virtualni domaćin)
+feat_evalidatefcgiwrapinit=Ne postoji radnja podizanja poslužitelja FCGIwrap!
+feat_evalidatefcgiwraprun=Poslužitelj FCGIwrap za ovu domenu nije pokrenut
+
+feat_addprotected=Zaštita za direktorij $1 već postoji i povezana je s drugom $2 auth korisničkom datotekom
+feat_delprotected=Zaštita za direktorij $1 ne može se ukloniti jer je povezan s drugom $2 auth korisničkom datotekom
 
 fcgid_ecmd=Nije pronađena PHP naredba!
 fcgid_ecmdexec=Nije moguće izvršiti PHP naredbu $1 : $2 
@@ -476,6 +483,7 @@ links_anlog=Dnevnik pristupa Nginx
 links_enlog=Nginx dnevnik grešaka
 links_phpini=Konfiguracija PHP-FPM
 links_phpini2=Konfiguracija PHP $1 
+links_phplog=Zapisnik PHP grešaka
 
 webmin_phpini=PHP konfiguracija za $1 
 webmin_phpini2=PHP $2 konfiguracija za $1 
