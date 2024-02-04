@@ -3438,7 +3438,11 @@ else {
 	};
 	&save_directive($server, [ ], [ $protected ]);
 	&flush_config_file_lines();
-	&apply_nginx();
+	&virtual_server::push_all_print();
+	&virtual_server::set_all_null_print();
+	&virtual_server::register_post_action(\&print_apply_nginx);
+	&virtual_server::run_post_actions();
+	&virtual_server::pop_all_print();
 	$status = 0;
 	}
 &unlock_all_config_files();
@@ -3475,7 +3479,11 @@ if ($loc) {
 			# Can delete the location block
 			&save_directive($server, [ $loc ], [ ]);
 			&flush_config_file_lines();
-			&apply_nginx();
+			&virtual_server::push_all_print();
+			&virtual_server::set_all_null_print();
+			&virtual_server::register_post_action(\&print_apply_nginx);
+			&virtual_server::run_post_actions();
+			&virtual_server::pop_all_print();
 			$status = 0;
 			}
 		else {
