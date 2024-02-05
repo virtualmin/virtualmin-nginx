@@ -3423,9 +3423,9 @@ else {
 		'type' => 1,
 		'members' => [
 			{ 'name' => 'auth_basic',
-			'words' => [ $opts->{'protected_name'} ] },
+			  'words' => [ $opts->{'protected_name'} ] },
 			{ 'name' => 'auth_basic_user_file',
-			'words' => [ $opts->{'protected_user_file_path'} ] },
+			  'words' => [ $opts->{'protected_user_file_path'} ] },
 			{ 'name' => 'location',
 			  'words' => [ '~', "\/\\".$opts->{'protected_user_file'}."\$" ],
 			  'type' => 1,
