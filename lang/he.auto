@@ -193,6 +193,7 @@ server_settings=הגדרות מארח וירטואלי
 server_server=הגדרת מארח וירטואלי
 server_eclash=מארח וירטואלי עם אותו שם כבר קיים
 server_pp=פרוקסי ל- $1 
+server_eexist=לא נמצא שרת Nginx
 
 slogs_title=רישום מארח וירטואלי
 slogs_header=אפשרויות קובץ יומן
@@ -410,6 +411,7 @@ feat_notrunning=.. שרת האינטרנט Nginx אינו פועל
 feat_setupalias=מעדכן מארח וירטואלי של Nginx יעד ..
 feat_phpfcgid=הפעלת שרת PHP FastCGI ..
 feat_phpfpm=הגדרת בריכת PHP ..
+feat_phpnone=השבתת PHP ..
 feat_failed=.. נכשל : $1 
 feat_delete=מסיר מארח וירטואלי של Nginx ..
 feat_deletelogs=מוחק קבצי יומן של שרת האינטרנט של Nginx ..
@@ -458,6 +460,11 @@ feat_clonealias=.. לא הכרחי לדומיינים של כינוי
 feat_eclonefind=.. לא הצליח למצוא מארח וירטואלי חדש בשם $1 לאחר השיבוט!
 feat_modifyproxy=שינוי יעד ה- proxy ..
 feat_module=שרת האינטרנט Nginx (למארח וירטואלי)
+feat_evalidatefcgiwrapinit=לא קיימת פעולת אתחול של שרת FCGIwrap!
+feat_evalidatefcgiwraprun=שרת FCGIwrap עבור תחום זה אינו פועל
+
+feat_addprotected=הגנה עבור הספרייה $1 כבר קיימת ומקושרת לקובץ משתמש אחר של אישור $2
+feat_delprotected=לא ניתן להסיר הגנה עבור ספריה $1 מכיוון שהיא מקושרת לקובץ משתמש אישור אחר $2
 
 fcgid_ecmd=לא נמצאה פקודת PHP!
 fcgid_ecmdexec=לא ניתן היה לבצע את פקודת PHP $1 : $2 
@@ -476,6 +483,7 @@ links_anlog=יומן הגישה של Nginx
 links_enlog=יומן שגיאות Nginx
 links_phpini=תצורת PHP-FPM
 links_phpini2=תצורת PHP $1 
+links_phplog=יומן שגיאות PHP
 
 webmin_phpini=תצורת PHP עבור $1 
 webmin_phpini2=תצורת PHP $2 עבור $1 

@@ -193,6 +193,7 @@ server_settings=가상 호스트 설정
 server_server=가상 호스트 정의
 server_eclash=같은 이름의 가상 호스트가 이미 존재합니다
 server_pp=$1 에 프록시
+server_eexist=Nginx 서버를 찾을 수 없습니다
 
 slogs_title=가상 호스트 로깅
 slogs_header=로그 파일 옵션
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx 웹 서버가 실행되고 있지 않습니다
 feat_setupalias=대상 Nginx 가상 호스트 업데이트 ..
 feat_phpfcgid=PHP FastCGI 서버 시작하기 ..
 feat_phpfpm=PHP 풀 설정하기 ..
+feat_phpnone=PHP 비활성화 ..
 feat_failed=.. 실패  : $1 
 feat_delete=Nginx 가상 호스트 제거 ..
 feat_deletelogs=Nginx 웹 서버 로그 파일 삭제하기 ..
@@ -458,6 +460,11 @@ feat_clonealias=.. 별칭 도메인에는 필요하지 않습니다
 feat_eclonefind=.. 복제 후 $1 (이)라는 새로운 가상 호스트를 찾을 수 없습니다!
 feat_modifyproxy=프록시 대상 수정 ..
 feat_module=Nginx 웹 서버 (가상 호스트 용)
+feat_evalidatefcgiwrapinit=FCGIwrap 서버 부팅 작업이 존재하지 않습니다!
+feat_evalidatefcgiwraprun=이 도메인의 FCGIwrap 서버가 실행되고 있지 않습니다
+
+feat_addprotected=디렉터리 $1에 대한 보호가 이미 존재하며 다른 $2 인증 사용자 파일에 연결되어 있습니다
+feat_delprotected=$1 디렉터리에 대한 보호는 다른 $2 인증 사용자 파일에 연결되어 있으므로 제거할 수 없습니다
 
 fcgid_ecmd=PHP 명령이 없습니다!
 fcgid_ecmdexec=PHP 명령 $1 을 (를) 실행할 수 없습니다  : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx 액세스 로그
 links_enlog=Nginx 오류 로그
 links_phpini=PHP-FPM 구성
 links_phpini2=PHP $1 구성
+links_phplog=PHP 오류 로그
 
 webmin_phpini=$1 에 대한 PHP 구성
 webmin_phpini2=$1 에 대한 PHP $2 구성

@@ -193,6 +193,7 @@ server_settings=Configuració de l'amfitrió virtual
 server_server=Definició de l'amfitrió virtual
 server_eclash=Ja existeix un host virtual amb el mateix nom
 server_pp=Proxy de $1 
+server_eexist=No s'ha trobat cap servidor Nginx
 
 slogs_title=Registre d'hostes virtuals
 slogs_header=Opcions de fitxer de registre
@@ -410,6 +411,7 @@ feat_notrunning=El servidor web de Nginx no s'està executant
 feat_setupalias=Actualització de l'amfitrió virtual de Nginx ..
 feat_phpfcgid=Iniciació del servidor PHP FastCGI ..
 feat_phpfpm=Configuració de la piscina PHP ..
+feat_phpnone=S'està desactivant PHP ..
 feat_failed=.. fallat : $1 
 feat_delete=Eliminació de l'amfitrió virtual de Nginx ..
 feat_deletelogs=Se suprimeix els fitxers de registre del servidor web Nginx ..
@@ -458,6 +460,11 @@ feat_clonealias=.. No és necessari per a dominis alias
 feat_eclonefind=.. No s'ha pogut trobar un nou host virtual anomenat $1 després de la clonació.
 feat_modifyproxy=Modificació de la destinació del servidor intermediari.
 feat_module=Nginx Webserver (per a host virtual)
+feat_evalidatefcgiwrapinit=No existeix cap acció d'arrencada del servidor FCGIwrap!
+feat_evalidatefcgiwraprun=El servidor FCGIwrap d'aquest domini no s'està executant
+
+feat_addprotected=Ja existeix una protecció per al directori $1 i està enllaçada a un fitxer d'usuari d'autenticació $2 diferent
+feat_delprotected=No es pot eliminar una protecció per al directori $1 perquè està enllaçat a un fitxer d'usuari d'autenticació $2 diferent
 
 fcgid_ecmd=No s'ha trobat cap comanda PHP.
 fcgid_ecmdexec=No s'ha pogut executar l'ordre PHP $1 : $2 
@@ -476,6 +483,7 @@ links_anlog=Registre d'accés Nginx
 links_enlog=Registre d’errors Nginx
 links_phpini=Configuració PHP-FPM
 links_phpini2=PHP $1 Configuració
+links_phplog=Registre d'errors de PHP
 
 webmin_phpini=Configuració PHP per a $1 
 webmin_phpini2=Configuració PHP $2 per a $1 

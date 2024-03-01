@@ -193,6 +193,7 @@ server_settings=Settings tal-Ospitanti Virtwali
 server_server=Definizzjoni ta 'Ospitanti Virtwali
 server_eclash=Ospitant virtwali bl-istess isem diġà jeżisti
 server_pp=Proxy għal $1 
+server_eexist=L-ebda server Nginx ma nstab
 
 slogs_title=Qtugħ tal-Ospitanti Virtwali
 slogs_header=Ġurnal għażliet tal-fajl
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx webserver mhux qed jaħdem
 feat_setupalias=Aġġornament tal-mira virtwali Nginx ospitanti ..
 feat_phpfcgid=Bidu tas-server FastPGI PHP ..
 feat_phpfpm=It-twaqqif ta 'pool PHP ..
+feat_phpnone=Jiddiżattiva PHP ..
 feat_failed=.. Falla : $1 
 feat_delete=It-tneħħija ta 'Nginx host virtwali ..
 feat_deletelogs=Tħassar il-fajls tal-ġurnal tas-sit Nginx ..
@@ -458,6 +460,11 @@ feat_clonealias=.. mhux meħtieġ għal oqsma tal-alias
 feat_eclonefind=.. ma setgħetx issib ospitanti virtwali ġdid bl-isem $1 wara l-ikklonjar!
 feat_modifyproxy=Timmodifika d-destinazzjoni tal-prokura ..
 feat_module=Nginx Webserver (għall-host virtwali)
+feat_evalidatefcgiwrapinit=Ma teżisti l-ebda azzjoni ta' bootup tas-server FCGIwrap!
+feat_evalidatefcgiwraprun=Is-server FCGIwrap għal dan id-dominju mhux qed jaħdem
+
+feat_addprotected=Protezzjoni għad-direttorju $1 diġà teżisti u hija marbuta ma' fajl ta' utent ta' awtentikazzjoni $2 differenti
+feat_delprotected=Protezzjoni għad-direttorju $1 ma tistax titneħħa minħabba li hija marbuta ma' fajl ta' utent awtentiku $2 differenti
 
 fcgid_ecmd=L-ebda kmand PHP ma nstab!
 fcgid_ecmdexec=Il-kmand PHP $1 ma setax jiġi eżegwit : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx Access Log
 links_enlog=Nginx Error Log
 links_phpini=Konfigurazzjoni PHP-FPM
 links_phpini2=Konfigurazzjoni PHP $1 
+links_phplog=Log Żbalji PHP
 
 webmin_phpini=Konfigurazzjoni PHP għal $1 
 webmin_phpini2=Konfigurazzjoni PHP $2 għal $1 

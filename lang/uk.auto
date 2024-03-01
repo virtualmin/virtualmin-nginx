@@ -193,6 +193,7 @@ server_settings=Налаштування віртуального хоста
 server_server=Визначення віртуального хоста
 server_eclash=Віртуальний хост з такою ж назвою вже існує
 server_pp=Проксі до $1 
+server_eexist=Сервер Nginx не знайдено
 
 slogs_title=Віртуальна реєстрація хостів
 slogs_header=Параметри файлу журналу
@@ -410,6 +411,7 @@ feat_notrunning=.. Веб-сервер Nginx не працює
 feat_setupalias=Оновлення цільового віртуального хоста Nginx ..
 feat_phpfcgid=Запуск сервера PHP FastCGI ..
 feat_phpfpm=Налаштування пулу PHP ..
+feat_phpnone=Вимкнення PHP ..
 feat_failed=.. не вдалося : $1 
 feat_delete=Видалення віртуального хоста Nginx ..
 feat_deletelogs=Видалення файлів журналів веб-сервера Nginx ..
@@ -458,6 +460,11 @@ feat_clonealias=.. не потрібен для псевдонімів
 feat_eclonefind=.. не вдалося знайти нового віртуального хоста на ім'я $1 після клонування!
 feat_modifyproxy=Зміна призначення проксі-сервера ..
 feat_module=Веб-сервер Nginx (для віртуального хоста)
+feat_evalidatefcgiwrapinit=Немає дій із завантаження сервера FCGIwrap!
+feat_evalidatefcgiwraprun=Сервер FCGIwrap для цього домену не працює
+
+feat_addprotected=Захист для каталогу $1 уже існує та пов’язаний з іншим файлом авторизації користувача $2
+feat_delprotected=Захист для каталогу $1 неможливо видалити, оскільки він пов’язаний з іншим файлом авторизації користувача $2
 
 fcgid_ecmd=Команда PHP не знайдена!
 fcgid_ecmdexec=Не вдалося виконати команду PHP $1 : $2 
@@ -476,6 +483,7 @@ links_anlog=Журнал доступу до Nginx
 links_enlog=Журнал помилок Nginx
 links_phpini=Конфігурація PHP-FPM
 links_phpini2=Конфігурація PHP $1 
+links_phplog=Журнал помилок PHP
 
 webmin_phpini=Конфігурація PHP для $1 
 webmin_phpini2=Конфігурація PHP $2 для $1 

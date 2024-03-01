@@ -193,6 +193,7 @@ server_settings=仮想ホストの設定
 server_server=仮想ホストの定義
 server_eclash=同じ名前の仮想ホストがすでに存在します
 server_pp=$1へのプロキシ
+server_eexist=Nginxサーバーが見つかりません
 
 slogs_title=仮想ホストのロギング
 slogs_header=ログファイルオプション
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginxウェブサーバーが実行されていません
 feat_setupalias=ターゲットNginx仮想ホストを更新しています ..
 feat_phpfcgid=PHP FastCGIサーバーを起動しています ..
 feat_phpfpm=PHPプールの設定 ..
+feat_phpnone=PHPを無効にする ..
 feat_failed=..失敗しました： $1
 feat_delete=Nginx仮想ホストの削除 ..
 feat_deletelogs=Nginxウェブサーバーのログファイルを削除しています. ..
@@ -458,6 +460,11 @@ feat_clonealias=..エイリアスドメインには不要
 feat_eclonefind=..クローン作成後に $1という名前の新しい仮想ホストが見つかりませんでした！
 feat_modifyproxy=プロキシ宛先の変更 ..
 feat_module=Nginxウェブサーバー（仮想ホスト用）
+feat_evalidatefcgiwrapinit=FCGIwrap サーバーのブートアップ アクションは存在しません。
+feat_evalidatefcgiwraprun=このドメインの FCGIwrap サーバーは実行されていません
+
+feat_addprotected=ディレクトリ $1 の保護はすでに存在しており、別の $2 認証ユーザー ファイルにリンクされています
+feat_delprotected=ディレクトリ $1 の保護は、別の $2 認証ユーザー ファイルにリンクされているため削除できません
 
 fcgid_ecmd=PHPコマンドが見つかりません！
 fcgid_ecmdexec=PHPコマンド $1を実行できませんでした： $2
@@ -476,6 +483,7 @@ links_anlog=Nginxアクセスログ
 links_enlog=Nginxエラーログ
 links_phpini=PHP-FPM構成
 links_phpini2=PHP $1の設定
+links_phplog=PHPエラーログ
 
 webmin_phpini=$1のPHP構成
 webmin_phpini2=$1のPHP $2構成

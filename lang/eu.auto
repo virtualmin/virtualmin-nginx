@@ -193,6 +193,7 @@ server_settings=Ostalari birtualaren ezarpenak
 server_server=Ostalari birtualaren definizioa
 server_eclash=Izen bera duen ostalari birtual bat dagoeneko
 server_pp=Proxy $1 era
+server_eexist=Ez da Nginx zerbitzaririk aurkitu
 
 slogs_title=Ostalari birtuala erregistratzea
 slogs_header=Eguneratu fitxategien aukerak
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx webgune zerbitzaria ez da exekutatzen
 feat_setupalias=Helburu Nginx ostalari birtuala eguneratzen ..
 feat_phpfcgid=PHP FastCGI zerbitzaria abiarazten ..
 feat_phpfpm=PHP igerilekua konfiguratzen ..
+feat_phpnone=PHP desgaitzen ..
 feat_failed=.. huts egin du : $1 
 feat_delete=Nginx ostalari birtuala kentzen ..
 feat_deletelogs=Nginx webgune zerbitzariaren erregistro fitxategiak ezabatzen ..
@@ -458,6 +460,11 @@ feat_clonealias=.. ez da beharrezkoa alias domeinuetarako
 feat_eclonefind=.. ezin izan du $1 izeneko ostalari birtual berririk aurkitu klonatu ondoren!
 feat_modifyproxy=Proxy helmuga aldatzen ..
 feat_module=Nginx Webserver (ostalari birtualarentzat)
+feat_evalidatefcgiwrapinit=Ez dago FCGIwrap zerbitzaria abiarazteko ekintzarik!
+feat_evalidatefcgiwraprun=Domeinu honen FCGIwrap zerbitzaria ez dago martxan
+
+feat_addprotected=Dagoeneko $1 direktoriorako babes bat existitzen da eta $2 autentifikazio-fitxategi ezberdin batekin lotuta dago
+feat_delprotected=Ezin da $1 direktoriorako babesa kendu, beste $2 erabiltzaile-fitxategi batekin estekatuta dagoelako
 
 fcgid_ecmd=Ez da PHP komandoik aurkitu!
 fcgid_ecmdexec=Ezin izan da $1 komandoa exekutatu : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx Sarbide Erregistroa
 links_enlog=Nginx akatsen erregistroa
 links_phpini=PHP-FPM konfigurazioa
 links_phpini2=PHP $1 Konfigurazioa
+links_phplog=PHP erroreen erregistroa
 
 webmin_phpini=$1 PHP konfigurazioa
 webmin_phpini2=PHP $2 konfigurazioa $1 erako

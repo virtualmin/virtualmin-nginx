@@ -193,6 +193,7 @@ server_settings=Inställningar för virtuell värd
 server_server=Definition av virtuell värd
 server_eclash=En virtuell värd med samma namn finns redan
 server_pp=Proxy till $1 
+server_eexist=Ingen Nginx-server hittades
 
 slogs_title=Virtuell värdloggning
 slogs_header=Loggfilalternativ
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx webbserver körs inte
 feat_setupalias=Uppdaterar målet Nginx virtuell värd ..
 feat_phpfcgid=Starta PHP FastCGI-server ..
 feat_phpfpm=Ställer in PHP-pool ..
+feat_phpnone=Inaktiverar PHP ..
 feat_failed=.. misslyckades : $1 
 feat_delete=Tar bort Nginx virtuell värd ..
 feat_deletelogs=Ta bort Nginx-serverns loggfiler ..
@@ -458,6 +460,11 @@ feat_clonealias=.. inte nödvändigt för aliasdomäner
 feat_eclonefind=.. kunde inte hitta en ny virtuell värd med namnet $1 efter kloning!
 feat_modifyproxy=Ändrar proxy-destination ..
 feat_module=Nginx webbserver (för virtuell värd)
+feat_evalidatefcgiwrapinit=Ingen FCGIwrap-serverstartåtgärd existerar!
+feat_evalidatefcgiwraprun=FCGIwrap-servern för den här domänen körs inte
+
+feat_addprotected=Ett skydd för katalogen $1 finns redan och är länkat till en annan $2 auth-användarfil
+feat_delprotected=Ett skydd för katalogen $1 kan inte tas bort eftersom den är länkad till en annan autentiseringsfil för $2
 
 fcgid_ecmd=Inget PHP-kommando hittades!
 fcgid_ecmdexec=PHP-kommandot $1 kunde inte köras : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx åtkomstlogg
 links_enlog=Nginx-fellogg
 links_phpini=PHP-FPM-konfiguration
 links_phpini2=PHP $1 -konfiguration
+links_phplog=PHP-fellogg
 
 webmin_phpini=PHP-konfiguration för $1 
 webmin_phpini2=PHP $2 -konfiguration för $1 

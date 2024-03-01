@@ -193,6 +193,7 @@ server_settings=Tetapan Host Maya
 server_server=Definisi Host Maya
 server_eclash=Host maya dengan nama yang sama sudah ada
 server_pp=Proksi kepada $1 
+server_eexist=Tiada pelayan Nginx ditemui
 
 slogs_title=Pembalakan Host Maya
 slogs_header=Pilihan fail log
@@ -410,6 +411,7 @@ feat_notrunning=.. Pelayan web Nginx tidak berjalan
 feat_setupalias=Mengemas kini hos maya Nginx sasaran ..
 feat_phpfcgid=Memulakan pelayan PHP FastCGI ..
 feat_phpfpm=Menyiapkan kolam PHP ..
+feat_phpnone=Melumpuhkan PHP ..
 feat_failed=.. gagal : $1 
 feat_delete=Mengalih keluar hos maya Nginx ..
 feat_deletelogs=Memadamkan fail log pelayan web Nginx ..
@@ -458,6 +460,11 @@ feat_clonealias=.. tidak perlu untuk domain alias
 feat_eclonefind=.. tidak dapat mencari hos maya baru bernama $1 setelah pengklonan!
 feat_modifyproxy=Mengubah tujuan proksi ..
 feat_module=Nginx Webserver (untuk hos maya)
+feat_evalidatefcgiwrapinit=Tiada tindakan but pelayan FCGIwrap wujud!
+feat_evalidatefcgiwraprun=Pelayan FCGIwrap untuk domain ini tidak berjalan
+
+feat_addprotected=Perlindungan untuk direktori $1 sudah wujud dan dipautkan kepada fail pengguna pengesahan $2 yang berbeza
+feat_delprotected=Perlindungan untuk direktori $1 tidak boleh dialih keluar kerana ia dipautkan kepada fail pengguna pengesahan $2 yang berbeza
 
 fcgid_ecmd=Tiada arahan PHP dijumpai!
 fcgid_ecmdexec=Perintah PHP $1 tidak dapat dilaksanakan : $2 
@@ -476,6 +483,7 @@ links_anlog=Log Akses Nginx
 links_enlog=Log Ralat Nginx
 links_phpini=Konfigurasi PHP-FPM
 links_phpini2=Konfigurasi PHP $1 
+links_phplog=Log Ralat PHP
 
 webmin_phpini=Konfigurasi PHP untuk $1 
 webmin_phpini2=Konfigurasi PHP $2 untuk $1 

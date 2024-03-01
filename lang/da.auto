@@ -193,6 +193,7 @@ server_settings=Indstillinger for virtuel vært
 server_server=Definition af virtuel vært
 server_eclash=En virtuel vært med samme navn findes allerede
 server_pp=Proxy til $1 
+server_eexist=Ingen Nginx-server fundet
 
 slogs_title=Logning af virtuel vært
 slogs_header=Indstillinger for logfil
@@ -410,6 +411,7 @@ feat_notrunning=.. Nginx webserver kører ikke
 feat_setupalias=Opdaterer target Nginx virtual host ..
 feat_phpfcgid=Starter PHP FastCGI-server ..
 feat_phpfpm=Opsætning af PHP-pool ..
+feat_phpnone=Deaktiverer PHP ..
 feat_failed=.. mislykkedes : $1 
 feat_delete=Fjerner den virtuelle Nginx-vært ..
 feat_deletelogs=Sletning af Nginx-webserver-logfiler ..
@@ -458,6 +460,11 @@ feat_clonealias=.. ikke nødvendigt for aliasdomæner
 feat_eclonefind=.. kunne ikke finde en ny virtuel vært ved navn $1 efter kloning!
 feat_modifyproxy=Ændring af proxy-destination ..
 feat_module=Nginx webserver (til virtuel vært)
+feat_evalidatefcgiwrapinit=Der findes ingen FCGIwrap-serverstarthandling!
+feat_evalidatefcgiwraprun=FCGIwrap-serveren for dette domæne kører ikke
+
+feat_addprotected=En beskyttelse for mappen $1 findes allerede og er knyttet til en anden $2 auth-brugerfil
+feat_delprotected=En beskyttelse for mappen $1 kan ikke fjernes, fordi den er linket til en anden $2 auth-brugerfil
 
 fcgid_ecmd=Ingen PHP-kommando fundet!
 fcgid_ecmdexec=PHP-kommandoen $1 kunne ikke udføres : $2 
@@ -476,6 +483,7 @@ links_anlog=Nginx adgangslog
 links_enlog=Nginx-fejllogg
 links_phpini=PHP-FPM-konfiguration
 links_phpini2=PHP $1 -konfiguration
+links_phplog=PHP fejllog
 
 webmin_phpini=PHP-konfiguration for $1 
 webmin_phpini2=PHP $2 -konfiguration for $1 

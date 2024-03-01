@@ -193,6 +193,7 @@ server_settings=Paramètres de l'hôte virtuel
 server_server=Définition d'hôte virtuel
 server_eclash=Un hôte virtuel portant le même nom existe déjà
 server_pp=Proxy vers $1 
+server_eexist=Aucun serveur Nginx trouvé
 
 slogs_title=Journalisation de l'hôte virtuel
 slogs_header=Options de fichier journal
@@ -410,6 +411,7 @@ feat_notrunning=.. Le serveur Web Nginx n'est pas en cours d'exécution
 feat_setupalias=Mise à jour de l'hôte virtuel Nginx cible.
 feat_phpfcgid=Démarrage du serveur PHP FastCGI ..
 feat_phpfpm=Configuration du pool PHP ..
+feat_phpnone=Désactivation de PHP ..
 feat_failed=.. a échoué : $1 
 feat_delete=Suppression de l'hôte virtuel Nginx ..
 feat_deletelogs=Suppression des fichiers journaux du serveur Web Nginx.
@@ -458,6 +460,11 @@ feat_clonealias=.. pas nécessaire pour les domaines d'alias
 feat_eclonefind=.. n'a pas pu trouver de nouvel hôte virtuel nommé $1 après le clonage!
 feat_modifyproxy=Modification de la destination du proxy ..
 feat_module=Serveur Web Nginx (pour l'hôte virtuel)
+feat_evalidatefcgiwrapinit=Aucune action de démarrage du serveur FCGIwrap n'existe !
+feat_evalidatefcgiwraprun=Le serveur FCGIwrap pour ce domaine n'est pas en cours d'exécution
+
+feat_addprotected=Une protection pour le répertoire $1 existe déjà et est liée à un autre fichier utilisateur d'authentification $2
+feat_delprotected=Une protection pour le répertoire $1 ne peut pas être supprimée car elle est liée à un autre fichier utilisateur d'authentification $2
 
 fcgid_ecmd=Aucune commande PHP trouvée!
 fcgid_ecmdexec=La commande PHP $1 n'a pas pu être exécutée : $2 
@@ -476,6 +483,7 @@ links_anlog=Journal d'accès Nginx
 links_enlog=Journal des erreurs Nginx
 links_phpini=Configuration PHP-FPM
 links_phpini2=Configuration de PHP $1 
+links_phplog=Journal des erreurs PHP
 
 webmin_phpini=Configuration PHP pour $1 
 webmin_phpini2=Configuration PHP $2 pour $1 

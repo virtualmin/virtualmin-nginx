@@ -193,6 +193,7 @@ server_settings=Cài đặt máy chủ ảo
 server_server=Định nghĩa máy chủ ảo
 server_eclash=Một máy chủ ảo có cùng tên đã tồn tại
 server_pp=Proxy cho $1 
+server_eexist=Không tìm thấy máy chủ Nginx
 
 slogs_title=Ghi nhật ký máy chủ ảo
 slogs_header=Tùy chọn tệp nhật ký
@@ -410,6 +411,7 @@ feat_notrunning=.. Máy chủ web Nginx không chạy
 feat_setupalias=Đang cập nhật máy chủ ảo Nginx ..
 feat_phpfcgid=Bắt đầu máy chủ PHP FastCGI ..
 feat_phpfpm=Thiết lập nhóm PHP ..
+feat_phpnone=Vô hiệu hóa PHP ..
 feat_failed=.. thất bại : $1 
 feat_delete=Xóa máy chủ ảo Nginx ..
 feat_deletelogs=Xóa các tệp nhật ký máy chủ web Nginx ..
@@ -458,6 +460,11 @@ feat_clonealias=.. không cần thiết cho các miền bí danh
 feat_eclonefind=.. không thể tìm thấy máy chủ ảo mới có tên $1 sau khi nhân bản!
 feat_modifyproxy=Sửa đổi đích proxy ..
 feat_module=Máy chủ web Nginx (dành cho máy chủ ảo)
+feat_evalidatefcgiwrapinit=Không có hành động khởi động máy chủ FCGIwrap nào tồn tại!
+feat_evalidatefcgiwraprun=Máy chủ FCGIwrap cho miền này không chạy
+
+feat_addprotected=Bảo vệ cho thư mục $1 đã tồn tại và được liên kết với tệp người dùng xác thực $2 khác
+feat_delprotected=Không thể xóa bảo vệ cho thư mục $1 vì nó được liên kết với tệp người dùng xác thực $2 khác
 
 fcgid_ecmd=Không tìm thấy lệnh PHP!
 fcgid_ecmdexec=Không thể thực hiện lệnh PHP $1 : $2 
@@ -476,6 +483,7 @@ links_anlog=Nhật ký truy cập Nginx
 links_enlog=Nhật ký lỗi Nginx
 links_phpini=Cấu hình PHP-FPM
 links_phpini2=Cấu hình PHP $1 
+links_phplog=Nhật ký lỗi PHP
 
 webmin_phpini=Cấu hình PHP cho $1 
 webmin_phpini2=Cấu hình PHP $2 cho $1 

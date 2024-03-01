@@ -193,6 +193,7 @@ server_settings=Impostazioni dell'host virtuale
 server_server=Definizione dell'host virtuale
 server_eclash=Un host virtuale con lo stesso nome esiste già
 server_pp=Proxy su $1 
+server_eexist=Nessun server Nginx trovato
 
 slogs_title=Registrazione host virtuale
 slogs_header=Opzioni del file di registro
@@ -410,6 +411,7 @@ feat_notrunning=.. Il server web Nginx non è in esecuzione
 feat_setupalias=Aggiornamento dell'host virtuale Nginx di destinazione.
 feat_phpfcgid=Avvio del server FastPGI PHP.
 feat_phpfpm=Impostazione del pool PHP ..
+feat_phpnone=Disabilitare PHP ..
 feat_failed=.. fallito : $1 
 feat_delete=Rimozione dell'host virtuale Nginx ..
 feat_deletelogs=Eliminazione dei file di registro del server web Nginx.
@@ -458,6 +460,11 @@ feat_clonealias=.. non necessario per i domini alias
 feat_eclonefind=.. impossibile trovare il nuovo host virtuale chiamato $1 dopo la clonazione!
 feat_modifyproxy=Modifica destinazione proxy ..
 feat_module=Nginx Webserver (per host virtuale)
+feat_evalidatefcgiwrapinit=Non esiste alcuna azione di avvio del server FCGIwrap!
+feat_evalidatefcgiwraprun=Il server FCGIwrap per questo dominio non è in esecuzione
+
+feat_addprotected=Esiste già una protezione per la directory $1 ed è collegata a un diverso file utente di autenticazione $2
+feat_delprotected=Impossibile rimuovere una protezione per la directory $1 perché è collegata a un diverso file utente di autenticazione $2
 
 fcgid_ecmd=Nessun comando PHP trovato!
 fcgid_ecmdexec=Impossibile eseguire il comando PHP $1 : $2 
@@ -476,6 +483,7 @@ links_anlog=Registro di accesso di Nginx
 links_enlog=Registro errori Nginx
 links_phpini=Configurazione PHP-FPM
 links_phpini2=Configurazione PHP $1 
+links_phplog=Registro errori PHP
 
 webmin_phpini=Configurazione PHP per $1 
 webmin_phpini2=Configurazione PHP $2 per $1 

@@ -193,6 +193,7 @@ server_settings=تنظیمات میزبان مجازی
 server_server=تعریف میزبان مجازی
 server_eclash=یک میزبان مجازی با همین نام در حال حاضر وجود دارد
 server_pp=پروکسی به$1
+server_eexist=سرور Nginx پیدا نشد
 
 slogs_title=ورود به سیستم میزبان مجازی
 slogs_header=گزینه های پرونده را وارد کنید
@@ -410,6 +411,7 @@ feat_notrunning=.. وب سرور Nginx در حال اجرا نیست
 feat_setupalias=به روزرسانی میزبان مجازی هدف Nginx ..
 feat_phpfcgid=شروع سرور PHP FastCGI ..
 feat_phpfpm=راه اندازی استخر PHP ..
+feat_phpnone=غیرفعال کردن PHP ..
 feat_failed=.. شکست خورده :$1
 feat_delete=حذف میزبان مجازی Nginx ..
 feat_deletelogs=حذف پرونده های ثبت وب سرور Nginx ..
@@ -458,6 +460,11 @@ feat_clonealias=.. برای حوزه های alias لازم نیست
 feat_eclonefind=.. بعد از کلون نتوانستید میزبان مجازی جدیدی با نام$1 پیدا کنید!
 feat_modifyproxy=تغییر مقصد پروکسی ..
 feat_module=Nginx Webserver (برای میزبان مجازی)
+feat_evalidatefcgiwrapinit=هیچ اقدام راه اندازی سرور FCGIwrap وجود ندارد!
+feat_evalidatefcgiwraprun=سرور FCGIwrap برای این دامنه در حال اجرا نیست
+
+feat_addprotected=حفاظتی برای دایرکتوری $1 از قبل وجود دارد و به فایل کاربر تأیید اعتبار $2 دیگری پیوند داده شده است
+feat_delprotected=حفاظتی برای دایرکتوری $1 نمی تواند حذف شود زیرا به فایل کاربر تأییدیه $2 دیگری پیوند داده شده است
 
 fcgid_ecmd=هیچ دستور پی اچ پی یافت نشد!
 fcgid_ecmdexec=دستور PHP $1 قابل اجرا نیست :$2
@@ -476,6 +483,7 @@ links_anlog=ورود دسترسی Nginx
 links_enlog=ورود به سیستم خطای Nginx
 links_phpini=پیکربندی PHP-FPM
 links_phpini2=پیکربندی PHP$1
+links_phplog=گزارش خطای PHP
 
 webmin_phpini=پیکربندی PHP برای$1
 webmin_phpini2=پیکربندی PHP $2 برای$1
