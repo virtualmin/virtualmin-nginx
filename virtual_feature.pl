@@ -1013,7 +1013,7 @@ if (@doms) {
 		push(@extras, &get_nginx_log($sd, 1));
 		}
 	@extras = &unique(@extras);
-	push(@rv, [ "syslog",
+	push(@rv, [ "logviewer",
 		    { 'extras' => join("\t", @extras),
 		      'any' => 0,
 		      'noconfig' => 1,
@@ -1091,9 +1091,9 @@ foreach my $log ([ 0, $text{'links_anlog'} ],
 	my $lf = &get_nginx_log($d, $log->[0]);
 	if ($lf) {
 		my $param = &virtual_server::master_admin() ? "file" : "extra";
-		push(@rv, { 'mod' => 'syslog',
+		push(@rv, { 'mod' => 'logviewer',
 			    'desc' => $log->[1],
-			    'page' => "save_log.cgi?view=1&nonavlinks=1".
+			    'page' => "view_log.cgi?view=1&nonavlinks=1".
 				      "&linktitle=".&urlize($log->[1])."&".
 				      "$param=".&urlize($lf),
 			    'cat' => 'logs',
@@ -1108,9 +1108,9 @@ if (defined(&virtual_server::get_domain_php_error_log)) {
 	}
 if ($phplog) {
         my $param = &virtual_server::master_admin() ? "file" : "extra";
-        push(@rv, { 'mod' => 'syslog',
+        push(@rv, { 'mod' => 'logviewer',
                     'desc' => $text{'links_phplog'},
-                    'page' => "save_log.cgi?view=1&nonavlinks=1".
+                    'page' => "view_log.cgi?view=1&nonavlinks=1".
                               "&linktitle=".&urlize($text{'links_phplog'})."&".
                               "$param=".&urlize($phplog),
                     'cat' => 'logs',
