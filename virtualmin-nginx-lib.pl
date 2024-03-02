@@ -1063,6 +1063,8 @@ for(my $i=0; defined(my $mode = $in->{$allow."_mode_".$i}); $i++) {
 		&check_ipaddress($addr) ||
 		   $addr =~ /^(\S+)\/(\d+)$/ &&
 		     &check_ipaddress("$1") && $2 > 0 && $2 <= 32 ||
+		&check_ip6address($addr) ||
+		   $addr =~ /^(\S+)\/(\d+)$/ && &check_ip6address("$1") ||
 			&error(&text('access_eaddr', $addr));
 		}
 	push(@obj, { 'name' => $mode,
