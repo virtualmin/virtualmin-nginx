@@ -1732,6 +1732,11 @@ sub feature_supports_web_redirects
 return 1;	# Always supported
 }
 
+sub feature_supports_web_host_redirects
+{
+return 0;	# Not implemented yet
+}
+
 # feature_list_web_redirects(&domain)
 # Finds redirects from rewrite directives in the Nginx config
 sub feature_list_web_redirects
