@@ -13,6 +13,8 @@ feat_delprotected=Een beveiliging voor map $1 kan niet worden verwijderd omdat d
 fcgid_ecmdexec=PHP-opdracht $1 kan niet worden uitgevoerd : $2 
 fcgid_ecmdb=PHP-opdracht $1 ondersteunt de vlag -b die nodig is om als FCGId-server te worden uitgevoerd, niet. U moet waarschijnlijk een afzonderlijk PHP CGI-pakket installeren.
 
+redirect_eurl=Geen geldige URL of UDS : $1
+
 links_anlog=Nginx toegangslog
 links_enlog=Nginx-foutenlogboek
 links_phpini=PHP-FPM-configuratie
