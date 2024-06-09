@@ -462,7 +462,6 @@ redirect_efind=Er is geen virtuele host voor $1 gevonden
 redirect_eobj=Omleiding word niet geassocieerd met een Nginx configuratie object
 redirect_eobj2=Proxy word niet geassocieerd met een Nginx configuratie object
 redirect_eupstream=Een balancer met de naam $1 bestaat reeds
-redirect_eurl=Is geen URL : $1
 redirect_eurlhost=Hostnaam in URL kan niet worden opgelost : $1
 redirect_eclash=Een locatie voor $1 bestaat reeds
 redirect_ephd=Nginx staat alleen alias bestemmingen directory's toe onder $1
