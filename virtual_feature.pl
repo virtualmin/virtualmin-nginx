@@ -1311,14 +1311,14 @@ if ($port) {
 				  ],
 			   };
 		&save_directive($server, [ ], [ $loc ]);
-		&flush_file_lines($server->{'file'});
+		&flush_all_config_file_lines();
 		&unlock_file($server->{'file'});
 		}
 	&lock_file($loc->{'file'});
 	&save_directive($loc, "fastcgi_pass",
 		$port =~ /^\d+$/ ? [ "127.0.0.1:".$port ]
 				 : [ "unix:".$port ]);
-	&flush_file_lines($loc->{'file'});
+	&flush_all_config_file_lines();
 	&unlock_file($loc->{'file'});
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
@@ -1340,7 +1340,7 @@ elsif ($mode eq 'none') {
 			],
 		   };
 		&save_directive($server, [ $loc ], [ $locdeftype ]);
-		&flush_file_lines($server->{'file'});
+		&flush_all_config_file_lines();
 		&unlock_file($server->{'file'});
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
@@ -3341,7 +3341,7 @@ if ($mode eq 'fcgiwrap' && !$d->{'nginx_fcgiwrap_port'}) {
 		       'words' => [ @$p ] });
 		}
 	&save_directive($server, [ ], [ $cloc ]);
-	&flush_file_lines($server->{'file'});
+	&flush_all_config_file_lines();
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
 elsif ($mode eq '' && $d->{'nginx_fcgiwrap_port'}) {
@@ -3353,7 +3353,7 @@ elsif ($mode eq '' && $d->{'nginx_fcgiwrap_port'}) {
 			 &find("location", $server);
 	if ($cgi) {
 		&save_directive($server, [ $cgi ], [ ]);
-		&flush_file_lines($server->{'file'});
+		&flush_all_config_file_lines();
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
 	}
