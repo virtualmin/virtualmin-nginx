@@ -2070,7 +2070,8 @@ return $name;
 sub url_to_upstream
 {
 my ($url) = @_;
-my ($host, $port) = &parse_http_url($url);
+my ($host, $port, $uds) = &parse_backend($url);
+return $port if ($uds);
 $port ||= 80;
 return $host.":".$port;
 }
@@ -2085,14 +2086,19 @@ return "http://".$host.($port == 80 ? "" : ":".$port);
 }
 
 # validate_balancer_urls(url, ...)
-# Checks a bunch of URLs for syntax and resolvability
+# Checks a bunch of URLs for syntax and resolvability.
+# If socket is used, it is not checked for resolvability.
 sub validate_balancer_urls
 {
 foreach my $u (@_) {
-	my ($host, $port) = &parse_http_url($u);
-	return &text('redirect_eurl', $u) if (!$host);
-	&to_ipaddress($host) || &to_ip6address($host) ||
-		return &text('redirect_eurlhost', $host);
+	my ($host, $port, $uds) = &parse_backend($u);
+	# Check for valid URL
+	if (!$uds) {
+		return &text('redirect_eurl', $u) if (!$host);
+		&to_ipaddress($host) || &to_ip6address($host) ||
+			return &text('redirect_eurlhost', $host);
+		}
+	# Socket is not checked for resolvability and already validated
 	}
 return undef;
 }
@@ -2128,6 +2134,22 @@ foreach my $e (@_) {
 		&recursive_clear_lines(@{$e->{'members'}});
 		}
 	}
+}
+
+# parse_backend(url|sock)
+# Parses a URL into host and port or unix domain socket and
+# sets a flag if it is socket
+sub parse_backend
+{
+my ($url) = @_;
+if ($url =~ /^http:\/\/(unix:\/\S+)/) {
+	return (undef, $1, 1);
+	}
+else {
+	my ($host, $port) = &parse_http_url($url);
+	return ($host, $port, 0);
+	}
+return (undef, undef, undef);
 }
 
 1;
