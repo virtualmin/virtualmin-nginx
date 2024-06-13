@@ -1297,19 +1297,19 @@ if ($port) {
 	# Update the port in the config, if changed
 	if (!$loc) {
 		&lock_file($server->{'file'});
-			$loc =
-			   { 'name' => 'location',
-				'words' => [ '~', '\.php(/|$)' ],
-				'type' => 1,
-				'members' => [
-					{ 'name' => 'default_type',
-					  'words' => [ 'application/x-httpd-php' ],
-					},
-					{ 'name' => 'try_files',
-					  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
-					},
-				  ],
-			   };
+		$loc =
+		   { 'name' => 'location',
+			'words' => [ '~', '\.php(/|$)' ],
+			'type' => 1,
+			'members' => [
+				{ 'name' => 'default_type',
+				  'words' => [ 'application/x-httpd-php' ],
+				},
+				{ 'name' => 'try_files',
+				  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+				},
+			  ],
+		   };
 		&save_directive($server, [ ], [ $loc ]);
 		&flush_all_config_file_lines();
 		&unlock_file($server->{'file'});
