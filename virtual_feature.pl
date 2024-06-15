@@ -3157,6 +3157,7 @@ if ($enable) {
 			$r = { 'path' => $p,
 			       'http' => 1,
 			       'https' => 1,
+			       'code' => 307,
 			       'dest' => "\$scheme://\$host/cgi-bin/autoconfig.cgi" };
 			my $err = &feature_create_web_redirect($d, $r);
 			return $err if ($err);
