@@ -3515,10 +3515,8 @@ my @rv = ( [ $text{'sysinfo_nginx'}, &get_nginx_version() ] );
 my @avail = &virtual_server::list_available_php_versions();
 my @vers;
 foreach my $a (grep { $_->[1] } @avail) {
-	&clean_environment();
-	my $out = &backquote_command("$a->[1] -v 2>&1 </dev/null");
-	&reset_environment();
-	if ($out =~ /PHP\s+([0-9\.]+)/) {
+	my $out = &virtual_server::get_php_version($a->[1]);
+	if ($out =~ /([0-9\.]+)/) {
 		push(@vers, $1);
 		}
 	else {
