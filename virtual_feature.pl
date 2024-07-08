@@ -3516,7 +3516,7 @@ my @avail = &virtual_server::list_available_php_versions();
 my @vers;
 foreach my $a (grep { $_->[1] } @avail) {
 	my $out = &virtual_server::get_php_version($a->[1]);
-	if ($out =~ /([0-9\.]+)/) {
+	if ($out) {
 		push(@vers, $1);
 		}
 	else {
