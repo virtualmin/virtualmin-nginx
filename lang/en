@@ -496,4 +496,6 @@ tmpl_default=Default (from parent template)
 tmpl_none=None
 tmpl_below=Listed below ..
 
+sysinfo_nginx=Nginx version
+
 __norefs=1
