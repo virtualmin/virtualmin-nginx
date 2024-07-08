@@ -3517,7 +3517,7 @@ my @vers;
 foreach my $a (grep { $_->[1] } @avail) {
 	my $out = &virtual_server::get_php_version($a->[1]);
 	if ($out) {
-		push(@vers, $1);
+		push(@vers, $out);
 		}
 	else {
 		push(@vers, $a->[0]);
