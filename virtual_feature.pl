@@ -3507,4 +3507,27 @@ if ($loc) {
 return wantarray ? ($err, $status) : $err;
 }
 
+# feature_sysinfo()
+# Returns Nginx and available PHP version
+sub feature_sysinfo
+{
+my @rv = ( [ $text{'sysinfo_nginx'}, &get_nginx_version() ] );
+my @avail = &virtual_server::list_available_php_versions();
+my @vers;
+foreach my $a (grep { $_->[1] } @avail) {
+	my $out = &virtual_server::get_php_version($a->[1]);
+	if ($out) {
+		push(@vers, $out);
+		}
+	else {
+		push(@vers, $a->[0]);
+		}
+	}
+if (@vers) {
+	push(@rv, [ $virtual_server::text{'sysinfo_php'},
+			join(", ", @vers) ]);
+	}
+return @rv;
+}
+
 1;
