@@ -1201,10 +1201,11 @@ return &has_command("fcgiwrap") ? 1 : 0;
 
 sub feature_web_supported_php_modes
 {
-my @rv = ('none', 'fcgid');
+my @rv = ('none');
 if (&virtual_server::get_php_fpm_config()) {
 	push(@rv, 'fpm');
 	}
+push(@rv, 'fcgid');
 return @rv;
 }
 
