@@ -302,6 +302,9 @@ if (!$d->{'alias'}) {
 	if ($cgimode eq 'fcgiwrap' && &feature_web_supports_cgi()) {
 		&feature_web_save_domain_cgi_mode($d, 'fcgiwrap');
 		}
+	elsif ($cgimode eq 'none') {
+		&feature_web_save_domain_cgi_mode($d, '');
+		}
 
 	# Enable PHP logging
 	if ($d->{'php_error_log'}) {
