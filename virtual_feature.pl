@@ -1204,10 +1204,11 @@ return &has_command("fcgiwrap") ? 1 : 0;
 
 sub feature_web_supported_php_modes
 {
-my @rv = ('none', 'fcgid');
+my @rv = ('none');
 if (&virtual_server::get_php_fpm_config()) {
 	push(@rv, 'fpm');
 	}
+push(@rv, 'fcgid');
 return @rv;
 }
 
@@ -3508,6 +3509,29 @@ if ($loc) {
 	}
 &unlock_all_config_files();
 return wantarray ? ($err, $status) : $err;
+}
+
+# feature_sysinfo()
+# Returns Nginx and available PHP version
+sub feature_sysinfo
+{
+my @rv = ( [ $text{'sysinfo_nginx'}, &get_nginx_version() ] );
+my @avail = &virtual_server::list_available_php_versions();
+my @vers;
+foreach my $a (grep { $_->[1] } @avail) {
+	my $out = &virtual_server::get_php_version($a->[1]);
+	if ($out) {
+		push(@vers, $out);
+		}
+	else {
+		push(@vers, $a->[0]);
+		}
+	}
+if (@vers) {
+	push(@rv, [ $virtual_server::text{'sysinfo_php'},
+			join(", ", @vers) ]);
+	}
+return @rv;
 }
 
 1;
