@@ -2325,7 +2325,13 @@ my ($d, $mode) = @_;
 my $server = &find_domain_server($d);
 return undef if (!$server);
 if ($mode eq 'cert') {
-	return &find_value("ssl_certificate", $server);
+	my $rv = &find_value("ssl_certificate", $server);
+	if ($rv eq $d->{'ssl_combined'} && $d->{'ssl_cert'}) {
+		# The Nginx directive points to the combined file, but the
+		# cert-only file is what we really want to return
+		return $d->{'ssl_cert'};
+		}
+	return $rv;
 	}
 elsif ($mode eq 'key') {
 	return &find_value("ssl_certificate_key", $server);
@@ -2354,37 +2360,17 @@ elsif ($mode eq 'key') {
 			$file ? [ $file ] : [ ]);
 	}
 elsif ($mode eq 'ca') {
-	# Dovecot needs cert and CA in the same file!
-	if ($d->{'ssl_combined'} && -r $d->{'ssl_combined'}) {
-		# Combined file already exists
-		if ($file) {
-			# Use the combined file
-			&save_directive($server, "ssl_certificate", [ $d->{'ssl_combined'} ]);
+	# Nginx needs cert and CA in the same file!
+	if ($file) {
+		# Use the combined file
+		if (!$d->{'ssl_combined'} || !-r $d->{'ssl_combined'}) {
+			&virtual_server::sync_combined_ssl_cert($d);
 			}
-		else {
-			# Revert to just the cert file
-			&save_directive($server, "ssl_certificate", [ $d->{'ssl_cert'} ]);
-			}
+		&save_directive($server, "ssl_certificate", [ $d->{'ssl_combined'} ]);
 		}
 	else {
-		# Append to cert file as well
-		my $certfile = &find_value("ssl_certificate", $server);
-		$certfile || return $text{'feat_echainfile'};
-		my @certs = &split_ssl_certs(&read_file_contents($certfile));
-		my $fh = "CERT";
-		if ($file) {
-			# Append chained cert to main cert
-			my $chain = &read_file_contents($file);
-			&open_tempfile($fh, ">$certfile");
-			&print_tempfile($fh, join("", $certs[0], $chain));
-			&close_tempfile($fh);
-			}
-		else {
-			# Use only main cert
-			&open_tempfile($fh, ">$certfile");
-			&print_tempfile($fh, $certs[0]);
-			&close_tempfile($fh);
-			}
+		# Revert to just the cert file
+		&save_directive($server, "ssl_certificate", [ $d->{'ssl_cert'} ]);
 		}
 	}
 &flush_config_file_lines();
