@@ -161,6 +161,9 @@ if (!$d->{'alias'}) {
 		push(@{$server->{'members'}},
 			{ 'name' => 'listen',
 			  'words' => [ $d->{'web_port'} ] });
+		push(@{$server->{'members'}},
+			{ 'name' => 'listen',
+			'words' => [ '[::]:'. $d->{'web_port'} ] });
 		}
 	else {
 		# Use IP and port
