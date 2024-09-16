@@ -1954,6 +1954,11 @@ foreach my $l (@locations) {
 		# Just one URL
 		$b->{'urls'} = [ $pp ];
 		}
+	foreach my $u (@{$b->{'urls'}}) {
+		if ($u =~ /^http:\/\/unix:(.*)$/) {
+			$u = "unix:".$1."|http://127.0.0.1";
+			}
+		}
 	push(@rv, $b);
 	}
 return @rv;
@@ -1974,6 +1979,11 @@ my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
 my $err = &validate_balancer_urls(@urls);
 return $err if ($err);
 my $url;
+foreach my $u (@urls) {
+	if ($u =~ /^unix:(\/[^\|]*)$/) {
+		$u = "http://unix:".$1;
+		}
+	}
 if (@urls > 1) {
 	$balancer->{'balancer'} ||= 'virtualmin_'.time().'_'.$$;
 	$url = 'http://'.$balancer->{'balancer'};
@@ -2080,6 +2090,11 @@ if ($balancer->{'path'} ne $oldbalancer->{'path'}) {
 my $u = $oldbalancer->{'upstream'};
 my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
 my $err = &validate_balancer_urls(@urls);
+foreach my $u (@urls) {
+	if ($u =~ /^unix:(\/[^\|]*)$/) {
+		$u = "http://unix:".$1;
+		}
+	}
 return $err if ($err);
 my $url;
 if ($u) {
@@ -3248,6 +3263,10 @@ if ($d->{'virtualmin-nginx-ssl'}) {
 		if (&indexof("ssl", @w) >= 0 && &indexof("http2", @w) >= 0) {
 			return ['http/1.1', 'h2']
 			}
+		}
+	my $http2 = &find_value("http2", $s);
+	if ($http2 && lc($http2) eq 'on') {
+		return ['http/1.1', 'h2']
 		}
 	return ['http/1.1'];
 	}
