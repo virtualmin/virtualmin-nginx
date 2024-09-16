@@ -1979,14 +1979,14 @@ my ($clash) = grep { $_->{'words'}->[0] eq $balancer->{'path'} }
 $clash && return &text('redirect_eclash', $balancer->{'path'});
 &lock_all_config_files();
 my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
-my $err = &validate_balancer_urls(@urls);
-return $err if ($err);
 my $url;
 foreach my $u (@urls) {
-	if ($u =~ /^unix:(\/[^\|]*)$/) {
+	if ($u =~ /^unix:(\/[^\|]*)/) {
 		$u = "http://unix:".$1;
 		}
 	}
+my $err = &validate_balancer_urls(@urls);
+return $err if ($err);
 if (@urls > 1) {
 	$balancer->{'balancer'} ||= 'virtualmin_'.time().'_'.$$;
 	$url = 'http://'.$balancer->{'balancer'};
@@ -2092,12 +2092,12 @@ if ($balancer->{'path'} ne $oldbalancer->{'path'}) {
 	}
 my $u = $oldbalancer->{'upstream'};
 my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
-my $err = &validate_balancer_urls(@urls);
 foreach my $u (@urls) {
-	if ($u =~ /^unix:(\/[^\|]*)$/) {
+	if ($u =~ /^unix:(\/[^\|]*)/) {
 		$u = "http://unix:".$1;
 		}
 	}
+my $err = &validate_balancer_urls(@urls);
 return $err if ($err);
 my $url;
 if ($u) {
