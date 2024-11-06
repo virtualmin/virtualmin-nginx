@@ -2,6 +2,8 @@
 
 use strict;
 use warnings;
+no warnings 'uninitialized';
+
 use Time::Local;
 require 'virtualmin-nginx-lib.pl';
 our (%text, %config, $module_name, %access);
