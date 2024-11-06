@@ -1556,7 +1556,8 @@ elsif ($mode eq "fpm") {
 	return -1 if (!$conf);
 	my $childs = &virtual_server::get_php_fpm_pool_config_value(
 			$conf, $d->{'id'}, "pm.max_children");
-	return $childs == $childrenmax ? 0 : $childs;
+	return !$childs ? $childs :
+	       $childs == $childrenmax ? 0 : $childs;
 	}
 else {
 	return undef;
