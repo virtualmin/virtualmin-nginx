@@ -171,9 +171,11 @@ if (!$d->{'alias'}) {
 		# Use IP and port
 		my $portstr = $d->{'web_port'} == 80 ? ''
 						     : ':'.$d->{'web_port'};
-		push(@{$server->{'members'}},
-			{ 'name' => 'listen',
-			  'words' => [ $d->{'ip'}.$portstr ] });
+		if ($d->{'ip'}) {
+			push(@{$server->{'members'}},
+				{ 'name' => 'listen',
+				  'words' => [ $d->{'ip'}.$portstr ] });
+			}
 		if ($d->{'ip6'}) {
 			my $def = &get_default_server_param();
 			push(@{$server->{'members'}},
