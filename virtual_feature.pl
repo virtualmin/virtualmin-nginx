@@ -1438,7 +1438,7 @@ else {
 		}
 
 	# Change if needed
-	if ($defver ne $ver || !$d->{'nginx_php_version'}) {
+	if ($defver && $defver ne $ver || !$d->{'nginx_php_version'}) {
 		$d->{'nginx_php_version'} = $ver;
 		&virtual_server::save_domain($d);
 		&delete_php_fcgi_server($d);
