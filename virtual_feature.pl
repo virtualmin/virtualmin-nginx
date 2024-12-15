@@ -3547,4 +3547,12 @@ if (@vers) {
 return @rv;
 }
 
+# feature_reset_also(&domain)
+# Chain reset SSL if enabled on full reset
+sub feature_reset_also
+{
+my ($d) = @_;
+return $d->{'virtualmin-nginx-ssl'} ? ('virtualmin-nginx-ssl') : ( );
+}
+
 1;
