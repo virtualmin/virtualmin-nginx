@@ -1556,7 +1556,7 @@ if ($mode eq "fcgid") {
 	}
 elsif ($mode eq "fpm") {
 	# Read from FPM config file
-	my $conf = &virtual_server::get_php_fpm_config();
+	my $conf = &virtual_server::get_php_fpm_config($d);
 	return -1 if (!$conf);
 	my $childs = &virtual_server::get_php_fpm_pool_config_value(
 			$conf, $d->{'id'}, "pm.max_children");
@@ -1588,7 +1588,7 @@ if ($children != $d->{'nginx_php_children'}) {
 		}
 	elsif ($mode eq "fpm") {
 		# Set in the FPM config
-		my $conf = &virtual_server::get_php_fpm_config();
+		my $conf = &virtual_server::get_php_fpm_config($d);
 		return 0 if (!$conf);
 		$children = $childrenmax if ($children == 0);   # Recommended default
 		my $fpmstartservers =
