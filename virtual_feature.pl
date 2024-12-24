@@ -1419,7 +1419,9 @@ if ($mode eq "fpm") {
 	if ($ver ne $d->{'php_fpm_version'}) {
 		&virtual_server::delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
+		&virtual_server::lock_domain($d);
 		&virtual_server::save_domain($d);
+		&virtual_server::unlock_domain($d);
 		&virtual_server::create_php_fpm_pool($d);
 		}
 	}
@@ -1432,7 +1434,9 @@ else {
 	# Change if needed
 	if (!$phpver_curr || $phpver_curr ne $ver || !$d->{'nginx_php_version'}) {
 		$d->{'nginx_php_version'} = $ver;
+		&virtual_server::lock_domain($d);
 		&virtual_server::save_domain($d);
+		&virtual_server::unlock_domain($d);
 		&delete_php_fcgi_server($d);
 		&setup_php_fcgi_server($d);
 		}
@@ -1598,7 +1602,9 @@ if ($children != $d->{'nginx_php_children'}) {
 		&virtual_server::save_php_fpm_pool_config_value(
 			$conf, $d->{'id'}, "pm.max_spare_servers", $fpmmaxspare);
 		}
+	&virtual_server::lock_domain($d);
 	&virtual_server::save_domain($d);
+	&virtual_server::unlock_domain($d);
 	}
 return undef;
 }
@@ -3326,7 +3332,9 @@ if ($mode eq 'fcgiwrap' && !$d->{'nginx_fcgiwrap_port'}) {
 	else {
 		return $port;
 		}
+	&virtual_server::lock_domain($d);
 	&virtual_server::save_domain($d);
+	&virtual_server::unlock_domain($d);
 
 	# Point cgi-bin to fastcgi server
 	my $server = &find_domain_server($d);
@@ -3358,7 +3366,9 @@ if ($mode eq 'fcgiwrap' && !$d->{'nginx_fcgiwrap_port'}) {
 elsif ($mode eq '' && $d->{'nginx_fcgiwrap_port'}) {
 	&delete_fcgiwrap_server($d);
 	delete($d->{'nginx_fcgiwrap_port'});
+	&virtual_server::lock_domain($d);
 	&virtual_server::save_domain($d);
+	&virtual_server::unlock_domain($d);
 	my $server = &find_domain_server($d);
 	my ($cgi) = grep { $_->{'words'}->[0] eq '/cgi-bin/' }
 			 &find("location", $server);
