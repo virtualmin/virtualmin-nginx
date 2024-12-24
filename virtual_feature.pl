@@ -1446,6 +1446,7 @@ else {
 		}
 	}
 
+&virtual_server::create_php_ini_link($d, $mode);
 &virtual_server::create_php_bin_links($d, $mode);
 
 return undef;
