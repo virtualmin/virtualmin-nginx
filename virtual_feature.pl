@@ -1427,18 +1427,10 @@ else {
 	# Assume this is FCGId mode
 
 	# Get the current version
-	my $phpcmd = &find_php_fcgi_server($d);
-	my $defver;
-	if ($phpcmd) {
-		foreach my $vers (@avail) {
-			if ($vers->[1] && $vers->[1] eq $phpcmd) {
-				$defver = $vers->[0];
-				}
-			}
-		}
-
+	my @dirs = &virtual_server::list_domain_php_directories($d);
+	my $phpver_curr = $dirs[0]->{'version'};
 	# Change if needed
-	if ($defver && $defver ne $ver || !$d->{'nginx_php_version'}) {
+	if (!$phpver_curr || $phpver_curr ne $ver || !$d->{'nginx_php_version'}) {
 		$d->{'nginx_php_version'} = $ver;
 		&virtual_server::save_domain($d);
 		&delete_php_fcgi_server($d);
