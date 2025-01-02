@@ -1,4 +1,4 @@
-name: "virtualmin.dev: ${{ github.repository }}"
+name: "virtualmin.dev: virtualmin/virtualmin-nginx"
 
 on:
   push:
