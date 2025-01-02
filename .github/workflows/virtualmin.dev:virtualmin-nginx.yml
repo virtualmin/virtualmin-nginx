@@ -1,0 +1,19 @@
+name: "virtualmin.dev: ${{ github.event.repository }}"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    uses: webmin/webmin-ci-cd/.github/workflows/testing-master-workflow.yml@main
+    with:
+      build-type: module
+      project-name: ${{ github.event.repository.name }}
+    secrets:
+      DEV_GPG_PH: ${{ secrets.DEV_GPG_PH }}
+      DEV_IP_ADDR: ${{ secrets.DEV_IP_ADDR }}
+      DEV_UPLOAD_SSH_USER: ${{ secrets.DEV_UPLOAD_SSH_USER }}
+      DEV_UPLOAD_SSH_DIR: ${{ secrets.DEV_UPLOAD_SSH_DIR }}
+      DEV_SSH_PRV_KEY: ${{ secrets.DEV_SSH_PRV_KEY }}
