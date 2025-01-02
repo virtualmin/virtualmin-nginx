@@ -1,4 +1,4 @@
-name: "virtualmin.dev: ${{ github.event.repository }}"
+name: "virtualmin.dev: ${{ github.repository }}"
 
 on:
   push:
