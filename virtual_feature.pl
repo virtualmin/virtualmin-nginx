@@ -2817,6 +2817,11 @@ my $out = &backquote_command("$config{'nginx_cmd'} -V 2>&1 </dev/null");
 return $out =~ /TLS\s+SNI\s+support\s+enabled/i ? 1 : 0;
 }
 
+sub template_section
+{
+return ($module_name, $text{'tmpl_section'});
+}
+
 # template_input(&template)
 # Returns HTML for editing per-template options for this plugin
 sub template_input
