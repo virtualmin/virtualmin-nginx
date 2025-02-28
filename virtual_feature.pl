@@ -2818,7 +2818,7 @@ return $out =~ /TLS\s+SNI\s+support\s+enabled/i ? 1 : 0;
 
 sub template_section
 {
-return ($module_name, $text{'tmpl_section'});
+return ("web", $text{'tmpl_section'});
 }
 
 # template_input(&template)
