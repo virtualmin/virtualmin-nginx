@@ -7,8 +7,11 @@ require './virtualmin-nginx-lib.pl';
 our (%text, %access);
 &error_setup($text{'restart_err'});
 
-my $test = &test_config();
-$test && &error(&text('restart_etest', "<tt>".&html_escape($test)."</tt>"));
+if ($virtual_server;:config{'check_apache'})) {
+	my $test = &test_config();
+	$test && &error(&text('restart_etest',
+			"<tt>".&html_escape($test)."</tt>"));
+	}
 
 my $err = &apply_nginx();
 $err && &error("<tt>".&html_escape($err)."</tt>");
