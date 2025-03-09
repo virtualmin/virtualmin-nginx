@@ -1166,7 +1166,7 @@ sub print_apply_nginx
 &$virtual_server::first_print($text{'feat_apply'});
 if (&is_nginx_running()) {
 	my $test;
-	if ($virtual_server::config{'check_apache'})) {
+	if ($virtual_server::config{'check_apache'}) {
 		$test = &test_config();
 		if ($test && $test =~ /Cannot\s+assign/i) {
 			# Maybe new address has just come up .. wait 5 seconds
