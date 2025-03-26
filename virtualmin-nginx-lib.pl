@@ -54,6 +54,22 @@ undef($get_config_parent_cache);
 undef($get_config_cache);
 }
 
+# remove_hash_comment(line)
+# Returns the line with comments removed
+sub remove_hash_comment
+{
+my ($l) = @_;
+if ($l =~ /".*#.*"/) {
+	# Comment inside quotes, so only remove any comment outside quotes
+	$l =~ s/#[^"]*$//;
+	}
+else {
+	# Remove all comments
+	$l =~ s/#.*$//;
+	}
+return $l;
+}
+
 # read_config_file(file, [preserve-includes])
 # Returns an array ref of nginx config objects
 sub read_config_file
@@ -72,7 +88,7 @@ my @lines = <$fh>;
 close($fh);
 while(@lines) {
 	my $l = shift(@lines);
-	$l =~ s/#.*$//;
+	$l = &remove_hash_comment($l);
 	my $slnum = $lnum;
 
 	# If line doesn't end with { } or ; , it must be continued on the
@@ -80,7 +96,7 @@ while(@lines) {
 	while($l =~ /\S/ && $l !~ /[\{\}\;]\s*$/ && @lines) {
 		my $nl = shift(@lines);
 		if ($nl =~ /\S/) {
-			$nl =~ s/#.*$//;
+			$nl = &remove_hash_comment($nl);
 			$l .= " ".$nl;
 			}
 		$lnum++;
