@@ -2540,8 +2540,8 @@ if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
 	}
 
 # Change IPv4 in listen directive if changed
+my @listen = &find("listen", $server);
 if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
-	my @listen = &find("listen", $server);
 	foreach my $l (@listen) {
 		if ($l->{'words'}->[0] eq $oldd->{'ip'}) {
 			$l->{'words'}->[0] = $d->{'ip'};
@@ -2551,13 +2551,10 @@ if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
 			$l->{'words'}->[0] = $d->{'ip'}.":".$2;
 			}
 		}
-	&save_directive($server, "listen", \@listen);
 	}
 
 # Change IPv6 in listen directive if changed
-# XXX
 if ($oldd && $d->{'ip6'} && $oldd->{'ip6'} ne $d->{'ip6'}) {
-	my @listen = &find("listen", $server);
 	foreach my $l (@listen) {
 		if ($l->{'words'}->[0] eq "[".$oldd->{'ip6'}."]") {
 			$l->{'words'}->[0] = "[".$d->{'ip6'}."]";
@@ -2567,8 +2564,31 @@ if ($oldd && $d->{'ip6'} && $oldd->{'ip6'} ne $d->{'ip6'}) {
 			$l->{'words'}->[0] = "[".$d->{'ip6'}."]:".$2;
 			}
 		}
-	&save_directive($server, "listen", \@listen);
 	}
+
+# Make sure the listen directives match this system
+foreach my $l (@listen) {
+	if ($config{'listen_mode'} eq '0') {
+		# Remove any IP address
+		if ($l->{'words'}->[0] =~ /^([0-9\.]+):(\d+)$/) {
+			$l->{'words'}->[0] = $2;
+			}
+		elsif ($l->{'words'}->[0] =~ /^\[(\S+)\]:(\d+)$/) {
+			$l->{'words'}->[0] = '[::]'.$2;
+			}
+		}
+	else {
+		# Add IP address
+		if ($l->{'words'}->[0] =~ /^(\d+)$/) {
+			$l->{'words'}->[0] = $d->{'ip'}.":".$1;
+			}
+		elsif ($l->{'words'}->[0] =~ /^\[::\]:(\d+)$/) {
+			$l->{'words'}->[0] = "[".$d->{'ip6'}."]:".$1;
+			}
+		}
+	}
+
+&save_directive($server, "listen", \@listen);
 
 # Fix up home directory if changed
 if ($oldd && $d->{'home'} && $oldd->{'home'} &&
