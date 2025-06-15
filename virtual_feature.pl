@@ -3340,6 +3340,35 @@ if ($d->{'virtualmin-nginx-ssl'}) {
 return undef;
 }
 
+# feature_get_web_server_names(&domain)
+# Returns a list of HTTP hostnames that Nginx accepts for this domain
+sub feature_get_web_server_names
+{
+my ($d) = @_;
+my $s = &find_domain_server($d);
+return "No Nginx server found!" if (!$s);
+my $obj = &find("server_name", $s);
+return $obj ? $obj->{'words'} : [ ];
+}
+
+# feature_save_web_server_names(&domain, &hostnames)
+# Updates the list of HTTP hostnames that Nginx accepts for this domain
+sub feature_save_web_server_names
+{
+my ($d, $sn) = @_;
+my $s = &find_domain_server($d);
+return "No Nginx server found!" if (!$s);
+&lock_all_config_files();
+my $obj = &find("server_name", $s);
+$obj ||= { 'name' => 'server_name' };
+$obj->{'words'} = $sn;
+&save_directive($s, "server_name", [ $obj ]);
+&flush_config_file_lines();
+&unlock_all_config_files();
+&virtual_server::register_post_action(\&print_apply_nginx);
+return undef;
+}
+
 # feature_web_get_domain_cgi_mode(&domain)
 # Returns 'fcgiwrap' if enabled for a domain, undef otherwise
 sub feature_web_get_domain_cgi_mode
