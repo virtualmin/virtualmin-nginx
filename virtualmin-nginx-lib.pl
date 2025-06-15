@@ -1,4 +1,4 @@
-# Common functions for NginX config file
+# Common functions for Nginx config file
 
 use strict;
 use warnings;
