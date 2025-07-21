@@ -27,5 +27,21 @@ $in{'root_def'} || &can_directory($in{'root'}) ||
 &unlock_all_config_files();
 my $name = &find_value("server_name", $server);
 &webmin_log("sdocs", "server", $name);
-&redirect("edit_server.cgi?id=".&urlize($in{'id'}));
+
+# Redirect with the the new root directory if it was changed
+my ($dom, $domroot_curr) = split(/;/, $in{'id'});
+my $domroot_new = $in{'root'} ? $in{'root'} : undef;
+my ($return_id, $return_query) = ($in{'id'}, "");
+if ($domroot_new && $domroot_new ne $domroot_curr) {
+	&foreign_require("virtual-server");
+	my $d = &virtual_server::get_domain_by('dom', $dom);
+	if ($d) {
+		&virtual_server::clear_links_cache($d);
+		$return_id = "$dom;$domroot_new";
+		$return_query = "refresh=1";
+		}
+	}
+
+&redirect("edit_server.cgi?id=".&urlize($return_id).
+	  ($return_query ? "&$return_query" : ""));
 
