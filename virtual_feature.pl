@@ -1580,6 +1580,8 @@ my $childrenmax =
 	$virtual_server::max_php_fcgid_children;
 $d->{'nginx_php_children'} ||= 0;
 if ($children != $d->{'nginx_php_children'}) {
+	my $children_curr = $d->{'nginx_php_children'} ||
+						&virtual_server::get_domain_php_children($d);
 	$d->{'nginx_php_children'} = $children;
 	my $mode = &feature_get_web_php_mode($d);
 	if ($mode eq "fcgid") {
@@ -1595,16 +1597,18 @@ if ($children != $d->{'nginx_php_children'}) {
 		my $fpmstartservers =
 		       defined(&virtual_server::get_php_start_servers) ? 
 		       &virtual_server::get_php_start_servers($children) : 1;
-		my $fpmmaxspare =
-		       defined(&virtual_server::get_php_max_spare_servers) ? 
-		       &virtual_server::get_php_max_spare_servers($children) :
-		       int($children / 2) || $children;
 		&virtual_server::save_php_fpm_pool_config_value(
 			$conf, $d->{'id'}, "pm.max_children", $children);
 		&virtual_server::save_php_fpm_pool_config_value(
 			$conf, $d->{'id'}, "pm.start_servers", $fpmstartservers);
-		&virtual_server::save_php_fpm_pool_config_value(
-			$conf, $d->{'id'}, "pm.max_spare_servers", $fpmmaxspare);
+		if ($children != $children_curr) {
+			my $fpmmaxspare =
+				defined(&virtual_server::get_php_max_spare_servers)
+					? &virtual_server::get_php_max_spare_servers($children)
+					: int($children / 2) || $children;
+			&virtual_server::save_php_fpm_pool_config_value(
+				$conf, $d->{'id'}, "pm.max_spare_servers", $fpmmaxspare);
+			}
 		}
 	&virtual_server::lock_domain($d);
 	&virtual_server::save_domain($d);
