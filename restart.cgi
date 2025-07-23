@@ -7,7 +7,8 @@ require './virtualmin-nginx-lib.pl';
 our (%text, %access);
 &error_setup($text{'restart_err'});
 
-if ($virtual_server;:config{'check_apache'})) {
+&foreign_require("virtual-server");
+if ($virtual_server::config{'check_apache'}) {
 	my $test = &test_config();
 	$test && &error(&text('restart_etest',
 			"<tt>".&html_escape($test)."</tt>"));
