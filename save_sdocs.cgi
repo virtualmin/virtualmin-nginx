@@ -30,11 +30,11 @@ if (!&foreign_check("virtual-server")) {
 my $name = &find_value("server_name", $server);
 &webmin_log("sdocs", "server", $name);
 
+my ($return_id, $return_query) = ($in{'id'}, "");
 if (!&foreign_check("virtual-server")) {
 	# Redirect with the the new root directory if it was changed
 	my ($dom, $domroot_curr) = split(/;/, $in{'id'});
 	my $domroot_new = $in{'root'} ? $in{'root'} : undef;
-	my ($return_id, $return_query) = ($in{'id'}, "");
 	if ($domroot_new && $domroot_new ne $domroot_curr) {
 		&foreign_require("virtual-server");
 		my $d = &virtual_server::get_domain_by('dom', $dom);
