@@ -3561,6 +3561,7 @@ my ($loc) = grep { $protected_dir =~ /\Q$_->{'words'}->[0]\E$/ } @locs;
 if ($loc) {
 	my ($contains_auth_basic_user_file) =
 			grep { $_->{name} eq 'auth_basic_user_file' } @{$loc->{members}};
+	var_dump($contains_auth_basic_user_file, 'contains_auth_basic_user_file');
 	if ($contains_auth_basic_user_file &&
 	    $contains_auth_basic_user_file->{'value'}) {
 		if ($contains_auth_basic_user_file->{'value'} eq $opts->{'protected_user_file_path'}) {
