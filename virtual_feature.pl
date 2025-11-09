@@ -2858,7 +2858,7 @@ my $dirs = $tmpl->{$module_name};
 return &ui_table_row($text{'tmpl_directives'},
 	&ui_radio($module_name."_mode",
 		  $dirs eq "" ? 0 : $dirs eq "none" ? 1 : 2,
-		  [ [ 0, $text{'tmpl_default'} ],
+		  [ $tmpl->{'default'} ? ( ) : ( [ 0, $text{'tmpl_default'} ] ),
 		    [ 1, $text{'tmpl_none'} ],
 		    [ 2, $text{'tmpl_below'} ] ])."<br>\n".
 	&ui_textarea($module_name."_dirs",
