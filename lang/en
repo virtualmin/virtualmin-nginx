@@ -491,7 +491,7 @@ webmin_phpini2=PHP $2 configuration for $1
 monitor_missing=Nginx is not installed
 monitor_type=Nginx Webserver
 
-tmpl_directives=Adding Nginx config directives
+tmpl_directives=Extra directives for new Nginx websites
 tmpl_default=Default (from parent template)
 tmpl_none=None
 tmpl_below=Listed below ..
