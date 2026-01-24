@@ -1547,10 +1547,7 @@ sub feature_get_web_php_children
 {
 my ($d) = @_;
 my $mode = &feature_get_web_php_mode($d);
-my $childrenmax = 
-	defined(&virtual_server::get_php_max_childred_allowed) ? 
-	&virtual_server::get_php_max_childred_allowed() :
-	$virtual_server::max_php_fcgid_children;
+my $childrenmax = &virtual_server::get_php_max_children_allowed();
 if ($mode eq "fcgid") {
 	# Stored in the domain's config
 	return $d->{'nginx_php_children'} || 0;
@@ -1574,10 +1571,7 @@ else {
 sub feature_save_web_php_children
 {
 my ($d, $children) = @_;
-my $childrenmax = 
-	defined(&virtual_server::get_php_max_childred_allowed) ? 
-	&virtual_server::get_php_max_childred_allowed() :
-	$virtual_server::max_php_fcgid_children;
+my $childrenmax = &virtual_server::get_php_max_children_allowed();
 $d->{'nginx_php_children'} ||= 0;
 if ($children != $d->{'nginx_php_children'}) {
 	my $children_curr = $d->{'nginx_php_children'} ||
@@ -1593,21 +1587,23 @@ if ($children != $d->{'nginx_php_children'}) {
 		# Set in the FPM config
 		my $conf = &virtual_server::get_php_fpm_config($d);
 		return 0 if (!$conf);
-		$children = $childrenmax if ($children == 0);   # Recommended default
-		my $fpmstartservers =
-		       defined(&virtual_server::get_php_start_servers) ? 
-		       &virtual_server::get_php_start_servers($children) : 1;
+		$children = $childrenmax if ($children == 0);  # Use recommended default
+		
 		&virtual_server::save_php_fpm_pool_config_value(
 			$conf, $d->{'id'}, "pm.max_children", $children);
-		&virtual_server::save_php_fpm_pool_config_value(
-			$conf, $d->{'id'}, "pm.start_servers", $fpmstartservers);
+
 		if ($children != $children_curr) {
-			my $fpmmaxspare =
-				defined(&virtual_server::get_php_max_spare_servers)
-					? &virtual_server::get_php_max_spare_servers($children)
-					: int($children / 2) || $children;
 			&virtual_server::save_php_fpm_pool_config_value(
-				$conf, $d->{'id'}, "pm.max_spare_servers", $fpmmaxspare);
+				$conf, $d->{'id'}, "pm.start_servers",
+					&virtual_server::get_php_start_servers($children));
+
+			&virtual_server::save_php_fpm_pool_config_value(
+				$conf, $d->{'id'}, "pm.min_spare_servers",
+					&virtual_server::get_php_min_spare_servers($children));
+
+			&virtual_server::save_php_fpm_pool_config_value(
+				$conf, $d->{'id'}, "pm.max_spare_servers",
+					&virtual_server::get_php_max_spare_servers($children));
 			}
 		}
 	&virtual_server::lock_domain($d);
