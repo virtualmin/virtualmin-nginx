@@ -1,4 +1,5 @@
 desc=Nginx Webserver
 category=servers
-version=2.37
+depends=virtual-server/8.0.1
+version=2.38
 readonly=1
