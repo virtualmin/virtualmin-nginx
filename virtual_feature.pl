@@ -1547,7 +1547,7 @@ sub feature_get_web_php_children
 {
 my ($d) = @_;
 my $mode = &feature_get_web_php_mode($d);
-my $childrenmax = &virtual_server::get_php_max_children_allowed();
+my $childrenmax = &virtual_server::get_php_max_childred_allowed();
 if ($mode eq "fcgid") {
 	# Stored in the domain's config
 	return $d->{'nginx_php_children'} || 0;
@@ -1571,7 +1571,7 @@ else {
 sub feature_save_web_php_children
 {
 my ($d, $children) = @_;
-my $childrenmax = &virtual_server::get_php_max_children_allowed();
+my $childrenmax = &virtual_server::get_php_max_childred_allowed();
 $d->{'nginx_php_children'} ||= 0;
 if ($children != $d->{'nginx_php_children'}) {
 	my $children_curr = $d->{'nginx_php_children'} ||
@@ -1599,7 +1599,8 @@ if ($children != $d->{'nginx_php_children'}) {
 
 			&virtual_server::save_php_fpm_pool_config_value(
 				$conf, $d->{'id'}, "pm.min_spare_servers",
-					&virtual_server::get_php_min_spare_servers($children));
+					&virtual_server::get_php_min_spare_servers($children))
+						if (defined(&virtual_server::get_php_min_spare_servers));
 
 			&virtual_server::save_php_fpm_pool_config_value(
 				$conf, $d->{'id'}, "pm.max_spare_servers",
