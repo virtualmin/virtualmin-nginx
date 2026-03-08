@@ -2388,10 +2388,8 @@ elsif ($mode eq 'key') {
 elsif ($mode eq 'ca') {
 	# Nginx needs cert and CA in the same file!
 	if ($file) {
-		# Use the combined file
-		if (!$d->{'ssl_combined'} || !-r $d->{'ssl_combined'}) {
-			&virtual_server::sync_combined_ssl_cert($d);
-			}
+		# Always re-sync here because linkage may have changed
+		&virtual_server::sync_combined_ssl_cert($d);
 		&save_directive($server, "ssl_certificate", [ $d->{'ssl_combined'} ]);
 		}
 	else {
