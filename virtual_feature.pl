@@ -281,22 +281,19 @@ if (!$d->{'alias'}) {
 		     'type' => 1,
 		     'members' => [
 				{ 'name' => 'try_files',
-				  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+				  'words' => [ '$uri', '$fastcgi_script_name',
+				               '=404' ],
 				},
 				{ 'name' => 'default_type',
 				  'words' => [ 'application/x-httpd-php' ],
-				}
+				},
+				{ 'name' => 'fastcgi_split_path_info',
+				  'words' => [ &split_quoted_string(
+				                 '^(.+\.php)(/.+)$') ],
+				},
 		     ],
 		   };
 	&save_directive($server, [ ], [ $ploc ]);
-
-	# Add extra directive
-	&save_directive($server, "fastcgi_split_path_info",
-		[
-		  {  'name'  => 'fastcgi_split_path_info',
-		     'words' => [ &split_quoted_string('^(.+\.php)(/.+)$') ]
-		  },
-		]);
 
 	&flush_config_file_lines();
 	&unlock_all_config_files();
@@ -1309,6 +1306,7 @@ sub feature_save_web_php_mode
 my ($d, $mode) = @_;
 my $tmpl = &virtual_server::get_template($d->{'template'});
 my $server = &find_domain_server($d);
+my $splitre = '^(.+\.php)(/.+)$';
 my $oldmode = &feature_get_web_php_mode($d) || "";
 if ($oldmode eq "fpm" && $mode ne "fpm") {
 	# Shut down FPM pool
@@ -1367,7 +1365,11 @@ if ($port) {
 				  'words' => [ 'application/x-httpd-php' ],
 				},
 				{ 'name' => 'try_files',
-				  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+				  'words' => [ '$uri', '$fastcgi_script_name',
+				               '=404' ],
+				},
+				{ 'name' => 'fastcgi_split_path_info',
+				  'words' => [ &split_quoted_string($splitre) ],
 				},
 			  ],
 		   };
@@ -1376,6 +1378,17 @@ if ($port) {
 		&unlock_file($server->{'file'});
 		}
 	&lock_file($loc->{'file'});
+	# Old configs may have this directive at server scope. Move it into the
+	# PHP location where nginx expects it, and restore PHP defaults if a
+	# temporary switch to 'none' left text/plain behind.
+	&save_directive($server, "fastcgi_split_path_info", [ ]);
+	&save_directive($loc, "default_type", [ "application/x-httpd-php" ]);
+	&save_directive($loc, "try_files",
+		[ { 'name' => 'try_files',
+		    'words' => [ '$uri', '$fastcgi_script_name', '=404' ] } ]);
+	&save_directive($loc, "fastcgi_split_path_info",
+		[ &split_quoted_string($splitre) ]);
+	# Update the fastcgi_pass directive
 	&save_directive($loc, "fastcgi_pass",
 		$port =~ /^\d+$/ ? [ "127.0.0.1:".$port ]
 				 : [ "unix:".$port ]);
@@ -1387,6 +1400,7 @@ elsif ($mode eq 'none') {
 	# Remove the location block
 	if ($loc) {
 		&lock_file($server->{'file'});
+		&save_directive($server, "fastcgi_split_path_info", [ ]);
 		my $locdeftype =
 		   { 'name' => 'location',
 			'words' => [ '~', '\.php(/|$)' ],
@@ -1396,7 +1410,8 @@ elsif ($mode eq 'none') {
 				  'words' => [ 'text/plain' ],
 				},
 				{ 'name' => 'try_files',
-				  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+				  'words' => [ '$uri', '$fastcgi_script_name',
+				               '=404' ],
 				},
 			],
 		   };
