@@ -1300,6 +1300,71 @@ if ($loc) {
 return 'none';
 }
 
+# feature_php_location_custom_members([&existing])
+# Returns directives in the PHP location block that Virtualmin does not
+# manage directly
+sub feature_php_location_custom_members
+{
+my ($loc) = @_;
+my %managed = map { $_, 1 }
+	('default_type', 'try_files', 'fastcgi_split_path_info',
+	 'fastcgi_pass');
+return $loc ? grep { !$managed{$_->{'name'}} } @{$loc->{'members'}} : ();
+}
+
+# feature_php_location_struct([&existing], port|socket, split-path-regexp)
+# Builds the standard PHP location block for an active handler, while keeping
+# any unrelated custom directives from the existing block
+sub feature_php_location_struct
+{
+my ($loc, $port, $splitre) = @_;
+my @keep = &feature_php_location_custom_members($loc);
+my $pass = $port =~ /^\d+$/ ? "127.0.0.1:".$port : "unix:".$port;
+return {
+	'name' => 'location',
+	'words' => $loc ? [ @{$loc->{'words'}} ] : [ '~', '\.php(/|$)' ],
+	'type' => 1,
+	'members' => [
+		{ 'name' => 'default_type',
+		  'words' => [ 'application/x-httpd-php' ],
+		},
+		{ 'name' => 'try_files',
+		  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+		},
+		{ 'name' => 'fastcgi_split_path_info',
+		  'words' => [ &split_quoted_string($splitre) ],
+		},
+		{ 'name' => 'fastcgi_pass',
+		  'words' => [ $pass ],
+		},
+		@keep,
+	],
+};
+}
+
+# feature_php_disabled_location_struct([&existing])
+# Builds the PHP location block for disabled PHP, while keeping any unrelated
+# custom directives from the existing block
+sub feature_php_disabled_location_struct
+{
+my ($loc) = @_;
+my @keep = &feature_php_location_custom_members($loc);
+return {
+	'name' => 'location',
+	'words' => $loc ? [ @{$loc->{'words'}} ] : [ '~', '\.php(/|$)' ],
+	'type' => 1,
+	'members' => [
+		{ 'name' => 'default_type',
+		  'words' => [ 'text/plain' ],
+		},
+		{ 'name' => 'try_files',
+		  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+		},
+		@keep,
+	],
+};
+}
+
 # feature_save_web_php_mode(&domain, mode)
 sub feature_save_web_php_mode
 {
@@ -1353,71 +1418,52 @@ my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
 		    $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 
 if ($port) {
-	# Update the port in the config, if changed
-	if (!$loc) {
-		&lock_file($server->{'file'});
-		$loc =
-		   { 'name' => 'location',
-			'words' => [ '~', '\.php(/|$)' ],
-			'type' => 1,
-			'members' => [
-				{ 'name' => 'default_type',
-				  'words' => [ 'application/x-httpd-php' ],
-				},
-				{ 'name' => 'try_files',
-				  'words' => [ '$uri', '$fastcgi_script_name',
-				               '=404' ],
-				},
-				{ 'name' => 'fastcgi_split_path_info',
-				  'words' => [ &split_quoted_string($splitre) ],
-				},
-			  ],
-		   };
-		&save_directive($server, [ ], [ $loc ]);
-		&flush_config_file_lines();
-		&unlock_file($server->{'file'});
-		}
-	&lock_file($loc->{'file'});
-	# Old configs may have this directive at server scope. Move it into the
-	# PHP location where nginx expects it, and restore PHP defaults if a
-	# temporary switch to 'none' left text/plain behind.
+	# Keep fastcgi_split_path_info inside the PHP location block, and
+	# replace that block with the standard handler configuration
+	my $newloc = &feature_php_location_struct($loc, $port, $splitre);
+	&lock_all_config_files($server);
 	&save_directive($server, "fastcgi_split_path_info", [ ]);
-	&save_directive($loc, "default_type", [ "application/x-httpd-php" ]);
-	&save_directive($loc, "try_files",
-		[ { 'name' => 'try_files',
-		    'words' => [ '$uri', '$fastcgi_script_name', '=404' ] } ]);
-	&save_directive($loc, "fastcgi_split_path_info",
-		[ &split_quoted_string($splitre) ]);
-	# Update the fastcgi_pass directive
-	&save_directive($loc, "fastcgi_pass",
-		$port =~ /^\d+$/ ? [ "127.0.0.1:".$port ]
-				 : [ "unix:".$port ]);
+	if ($loc) {
+		my $idx = &indexof($loc, @{$server->{'members'}});
+		my $before = $idx >= 0 ? $server->{'members'}->[$idx+1] : undef;
+		&save_directive($server, [ $loc ], [ ]);
+		&save_directive($server, [ ], [ $newloc ], $before);
+		}
+	else {
+		&save_directive($server, [ ], [ $newloc ]);
+		}
 	&flush_config_file_lines();
-	&unlock_file($loc->{'file'});
+	&flush_config_cache();
+	&unlock_all_config_files($server);
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
 elsif ($mode eq 'none') {
-	# Remove the location block
+	# Replace the PHP location block with its disabled form
 	if ($loc) {
-		&lock_file($server->{'file'});
+		# Rebuild the whole location block instead of editing directives
+		# in place, and put the disabled block back in the same position
+		&lock_all_config_files($server);
+
+		# Keep this directive inside the PHP location block only
 		&save_directive($server, "fastcgi_split_path_info", [ ]);
-		my $locdeftype =
-		   { 'name' => 'location',
-			'words' => [ '~', '\.php(/|$)' ],
-			'type' => 1,
-			'members' => [
-				{ 'name' => 'default_type',
-				  'words' => [ 'text/plain' ],
-				},
-				{ 'name' => 'try_files',
-				  'words' => [ '$uri', '$fastcgi_script_name',
-				               '=404' ],
-				},
-			],
-		   };
-		&save_directive($server, [ $loc ], [ $locdeftype ]);
+
+		# Build the disabled PHP block while preserving any unrelated
+		# custom directives that already exist in this location
+		my $locdeftype = &feature_php_disabled_location_struct($loc);
+		my $idx = &indexof($loc, @{$server->{'members'}});
+		my $before = $idx >= 0 ? $server->{'members'}->[$idx+1] : undef;
+
+		# Remove the old PHP location and insert the disabled one before
+		# the next sibling, so surrounding locations and if blocks stay
+		# put
+		&save_directive($server, [ $loc ], [ ]);
+		&save_directive($server, [ ], [ $locdeftype ], $before);
 		&flush_config_file_lines();
-		&unlock_file($server->{'file'});
+
+		# Drop the parsed config cache so the next save re-reads the
+		# updated config tree from disk
+		&flush_config_cache();
+		&unlock_all_config_files($server);
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
 	}
