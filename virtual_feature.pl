@@ -1044,8 +1044,8 @@ if (@doms) {
 			}
 		elsif ($mode eq "fpm") {
 			# Allow access to FPM configs for PHP overrides
-			$d->{'php_fpm_version'} = &feature_resolve_php_fpm_version($d);
-			my $conf = &virtual_server::get_php_fpm_config($d);
+			$sd->{'php_fpm_version'} = &feature_resolve_php_fpm_version($sd);
+			my $conf = &virtual_server::get_php_fpm_config($sd);
 			if ($conf) {
 				my $file = $conf->{'dir'}."/".$sd->{'id'}.".conf";
 				push(@pconfs, $file."=".&text('webmin_phpini', $sd->{'dom'}));
