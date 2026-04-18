@@ -1352,6 +1352,115 @@ foreach my $l (&find("location", $server)) {
 return undef;
 }
 
+# resolve_php_fpm_version(&domain, [&available], [save])
+# Returns a usable PHP-FPM version for an Nginx domain
+sub resolve_php_fpm_version
+{
+my ($d, $avail, $save) = @_;
+my @avail = $avail ? @$avail
+		   : &virtual_server::list_available_php_versions($d, "fpm");
+@avail = sort {
+	&virtual_server::compare_version_numbers($a->[0], $b->[0])
+	} @avail;
+return undef if (!@avail);
+
+my $stored = $d->{'php_fpm_version'};
+my $resolved;
+if ($stored) {
+	# Only trust the saved version if the matching pool file exists.
+	my ($match) = grep { $_->[0] eq $stored } @avail;
+	if ($match) {
+		my $conf = &virtual_server::get_php_fpm_config($stored);
+		my $file = $conf ? $conf->{'dir'}."/".$d->{'id'}.".conf" : undef;
+		$resolved = $stored if ($file && -r $file);
+		}
+	}
+
+$resolved ||= &virtual_server::detect_php_fpm_version($d);
+if (!$resolved) {
+	my $tmpl = &virtual_server::get_template($d->{'template'});
+	if ($tmpl->{'web_phpver'}) {
+		my ($match) = grep { $_->[0] eq $tmpl->{'web_phpver'} } @avail;
+		$resolved = $match ? $match->[0] : undef;
+		}
+	}
+$resolved ||= $avail[$#avail]->[0];
+
+if ($resolved && $resolved ne $stored) {
+	$d->{'php_fpm_version'} = $resolved;
+	if ($save) {
+		&virtual_server::lock_domain($d);
+		&virtual_server::save_domain($d);
+		&virtual_server::unlock_domain($d);
+		}
+	}
+return $resolved;
+}
+
+# get_php_location_custom_members([&existing])
+# Returns directives in the PHP location block that Virtualmin does not
+# manage directly
+sub get_php_location_custom_members
+{
+my ($loc) = @_;
+my %managed = map { $_, 1 }
+	('default_type', 'try_files', 'fastcgi_split_path_info',
+	 'fastcgi_pass');
+return $loc ? grep { !$managed{$_->{'name'}} } @{$loc->{'members'}} : ();
+}
+
+# get_php_location_struct([&existing], port|socket, split-path-regexp)
+# Builds the standard PHP location block for an active handler, while keeping
+# any unrelated custom directives from the existing block
+sub get_php_location_struct
+{
+my ($loc, $port, $splitre) = @_;
+my @keep = &get_php_location_custom_members($loc);
+my $pass = $port =~ /^\d+$/ ? "127.0.0.1:".$port : "unix:".$port;
+return {
+	'name' => 'location',
+	'words' => $loc ? [ @{$loc->{'words'}} ] : [ '~', '\.php(/|$)' ],
+	'type' => 1,
+	'members' => [
+		{ 'name' => 'default_type',
+		  'words' => [ 'application/x-httpd-php' ],
+		},
+		{ 'name' => 'try_files',
+		  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+		},
+		{ 'name' => 'fastcgi_split_path_info',
+		  'words' => [ &split_quoted_string($splitre) ],
+		},
+		{ 'name' => 'fastcgi_pass',
+		  'words' => [ $pass ],
+		},
+		@keep,
+	],
+};
+}
+
+# get_php_disabled_location_struct([&existing])
+# Builds the PHP location block for disabled PHP, while keeping any unrelated
+# custom directives from the existing block
+sub get_php_disabled_location_struct
+{
+my ($loc) = @_;
+my @keep = &get_php_location_custom_members($loc);
+return {
+	'name' => 'location',
+	'words' => $loc ? [ @{$loc->{'words'}} ] : [ '~', '\.php(/|$)' ],
+	'type' => 1,
+	'members' => [
+		{ 'name' => 'default_type',
+		  'words' => [ 'text/plain' ],
+		},
+		{ 'name' => 'try_files',
+		  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+		},
+		@keep,
+	] };
+}
+
 # split_ip_port(string)
 # Given an ip:port pair as used in a listen directive, split them up
 sub split_ip_port

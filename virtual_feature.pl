@@ -1044,7 +1044,7 @@ if (@doms) {
 			}
 		elsif ($mode eq "fpm") {
 			# Allow access to FPM configs for PHP overrides
-			$sd->{'php_fpm_version'} = &feature_resolve_php_fpm_version($sd);
+			$sd->{'php_fpm_version'} = &resolve_php_fpm_version($sd);
 			my $conf = &virtual_server::get_php_fpm_config($sd);
 			if ($conf) {
 				my $file = $conf->{'dir'}."/".$sd->{'id'}.".conf";
@@ -1141,7 +1141,7 @@ if ($mode eq "fcgid") {
 	}
 elsif ($mode eq "fpm") {
 	# Link to edit FPM configs with PHP settings
-	$d->{'php_fpm_version'} = &feature_resolve_php_fpm_version($d);
+	$d->{'php_fpm_version'} = &resolve_php_fpm_version($d);
 	my $conf = &virtual_server::get_php_fpm_config($d);
 	if ($conf) {
 		my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
@@ -1220,61 +1220,6 @@ push(@rv, 'fcgid');
 return @rv;
 }
 
-# feature_resolve_php_fpm_version(&domain, [&available], [save])
-# Returns a usable PHP-FPM version for an Nginx domain.
-# Recovery order is :
-# 1. Keep the stored version, but only if that version's pool file exists
-#    for this domain.
-# 2. Detect the version from the real pool file already on disk.
-# 3. Fall back to the template preference, or finally the highest installed
-#    FPM version.
-# If save is set, persist the repaired version back to the domain config.
-sub feature_resolve_php_fpm_version
-{
-my ($d, $avail, $save) = @_;
-my @avail = $avail ? @$avail
-		   : &virtual_server::list_available_php_versions($d, "fpm");
-@avail = sort {
-	&virtual_server::compare_version_numbers($a->[0], $b->[0])
-	} @avail;
-return undef if (!@avail);
-
-my $stored = $d->{'php_fpm_version'};
-my $resolved;
-if ($stored) {
-	# Only trust the saved version if we can see the matching pool file.
-	my ($match) = grep { $_->[0] eq $stored } @avail;
-	if ($match) {
-		my $conf = &virtual_server::get_php_fpm_config($stored);
-		my $file = $conf ? $conf->{'dir'}."/".$d->{'id'}.".conf" : undef;
-		$resolved = $stored if ($file && -r $file);
-		}
-	}
-
-# If the saved version is stale or missing, inspect the real pool file.
-$resolved ||= &virtual_server::detect_php_fpm_version($d);
-if (!$resolved) {
-	# Next prefer the template's PHP version, if it is still installed.
-	my $tmpl = &virtual_server::get_template($d->{'template'});
-	if ($tmpl->{'web_phpver'}) {
-		my ($match) = grep { $_->[0] eq $tmpl->{'web_phpver'} } @avail;
-		$resolved = $match ? $match->[0] : undef;
-		}
-	}
-# Final fallback is the highest installed FPM version.
-$resolved ||= $avail[$#avail]->[0];
-
-if ($resolved && $resolved ne $stored) {
-	$d->{'php_fpm_version'} = $resolved;
-	if ($save) {
-		&virtual_server::lock_domain($d);
-		&virtual_server::save_domain($d);
-		&virtual_server::unlock_domain($d);
-		}
-	}
-return $resolved;
-}
-
 # feature_get_web_php_mode(&domain)
 sub feature_get_web_php_mode
 {
@@ -1298,71 +1243,6 @@ if ($loc) {
 		}
 	}
 return 'none';
-}
-
-# feature_php_location_custom_members([&existing])
-# Returns directives in the PHP location block that Virtualmin does not
-# manage directly
-sub feature_php_location_custom_members
-{
-my ($loc) = @_;
-my %managed = map { $_, 1 }
-	('default_type', 'try_files', 'fastcgi_split_path_info',
-	 'fastcgi_pass');
-return $loc ? grep { !$managed{$_->{'name'}} } @{$loc->{'members'}} : ();
-}
-
-# feature_php_location_struct([&existing], port|socket, split-path-regexp)
-# Builds the standard PHP location block for an active handler, while keeping
-# any unrelated custom directives from the existing block
-sub feature_php_location_struct
-{
-my ($loc, $port, $splitre) = @_;
-my @keep = &feature_php_location_custom_members($loc);
-my $pass = $port =~ /^\d+$/ ? "127.0.0.1:".$port : "unix:".$port;
-return {
-	'name' => 'location',
-	'words' => $loc ? [ @{$loc->{'words'}} ] : [ '~', '\.php(/|$)' ],
-	'type' => 1,
-	'members' => [
-		{ 'name' => 'default_type',
-		  'words' => [ 'application/x-httpd-php' ],
-		},
-		{ 'name' => 'try_files',
-		  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
-		},
-		{ 'name' => 'fastcgi_split_path_info',
-		  'words' => [ &split_quoted_string($splitre) ],
-		},
-		{ 'name' => 'fastcgi_pass',
-		  'words' => [ $pass ],
-		},
-		@keep,
-	],
-};
-}
-
-# feature_php_disabled_location_struct([&existing])
-# Builds the PHP location block for disabled PHP, while keeping any unrelated
-# custom directives from the existing block
-sub feature_php_disabled_location_struct
-{
-my ($loc) = @_;
-my @keep = &feature_php_location_custom_members($loc);
-return {
-	'name' => 'location',
-	'words' => $loc ? [ @{$loc->{'words'}} ] : [ '~', '\.php(/|$)' ],
-	'type' => 1,
-	'members' => [
-		{ 'name' => 'default_type',
-		  'words' => [ 'text/plain' ],
-		},
-		{ 'name' => 'try_files',
-		  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
-		},
-		@keep,
-	],
-};
 }
 
 # feature_save_web_php_mode(&domain, mode)
@@ -1399,7 +1279,7 @@ elsif ($mode eq "fpm" && ($oldmode ne "fpm" || !$d->{'php_fpm_port'})) {
 	my @avail = &virtual_server::list_available_php_versions($d, "fpm");
 	@avail || &error("No FPM versions found!");
 	$d->{'php_fpm_version'} =
-		&feature_resolve_php_fpm_version($d, \@avail, 1);
+		&resolve_php_fpm_version($d, \@avail, 1);
 	&virtual_server::create_php_fpm_pool($d);
 	my $listen = &virtual_server::get_php_fpm_config_value($d, "listen");
 	if ($listen =~ /^\S+:(\d+)$/ ||
@@ -1420,7 +1300,7 @@ my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
 if ($port) {
 	# Keep fastcgi_split_path_info inside the PHP location block, and
 	# replace that block with the standard handler configuration
-	my $newloc = &feature_php_location_struct($loc, $port, $splitre);
+	my $newloc = &get_php_location_struct($loc, $port, $splitre);
 	&lock_all_config_files($server);
 	&save_directive($server, "fastcgi_split_path_info", [ ]);
 	if ($loc) {
@@ -1449,7 +1329,7 @@ elsif ($mode eq 'none') {
 
 		# Build the disabled PHP block while preserving any unrelated
 		# custom directives that already exist in this location
-		my $locdeftype = &feature_php_disabled_location_struct($loc);
+		my $locdeftype = &get_php_disabled_location_struct($loc);
 		my $idx = &indexof($loc, @{$server->{'members'}});
 		my $before = $idx >= 0 ? $server->{'members'}->[$idx+1] : undef;
 
@@ -1496,7 +1376,7 @@ elsif ($mode eq 'fpm') {
 	return ( ) if (!@avail);
 
 	# Prefer the real pool version over a stale saved version
-	my $ver = &feature_resolve_php_fpm_version($d, \@avail);
+	my $ver = &resolve_php_fpm_version($d, \@avail);
 	my ($a) = grep { $_->[0] eq $ver } @avail;
 	if (!$a) {
 		# Selected version doesn't exist .. assume highest available
@@ -1520,7 +1400,7 @@ my $mode = &feature_get_web_php_mode($d);
 my @avail = &virtual_server::list_available_php_versions($d, $mode);
 if ($mode eq "fpm") {
 	# If the FPM version changed, just reset up
-	my $currver = &feature_resolve_php_fpm_version($d, \@avail, 1);
+	my $currver = &resolve_php_fpm_version($d, \@avail, 1);
 	if ($ver ne $currver) {
 		&virtual_server::delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
@@ -1655,7 +1535,7 @@ if ($mode eq "fcgid") {
 	}
 elsif ($mode eq "fpm") {
 	# Read from FPM config file
-	$d->{'php_fpm_version'} = &feature_resolve_php_fpm_version($d);
+	$d->{'php_fpm_version'} = &resolve_php_fpm_version($d);
 	my $conf = &virtual_server::get_php_fpm_config($d);
 	return -1 if (!$conf);
 	my $childs = &virtual_server::get_php_fpm_pool_config_value(
@@ -1688,7 +1568,7 @@ if ($children != $d->{'nginx_php_children'}) {
 	elsif ($mode eq "fpm") {
 		# Set in the FPM config
 		$d->{'php_fpm_version'} =
-			&feature_resolve_php_fpm_version($d, undef, 1);
+			&resolve_php_fpm_version($d, undef, 1);
 		my $conf = &virtual_server::get_php_fpm_config($d);
 		return 0 if (!$conf);
 		$children = $childrenmax if ($children == 0);  # Use recommended default
@@ -3211,7 +3091,7 @@ else {
 
 # Get the Nginx listen directive
 my $fpmport;
-$d->{'php_fpm_version'} = &feature_resolve_php_fpm_version($d);
+$d->{'php_fpm_version'} = &resolve_php_fpm_version($d);
 my $listen = &virtual_server::get_php_fpm_config_value($d, "listen");
 if ($listen =~ /^\S+:(\d+)$/ ||
     $listen =~ /^(\d+)$/ ||
@@ -3248,7 +3128,7 @@ return "No location block for .php files found" if (!$loc);
 &virtual_server::register_post_action(\&print_apply_nginx);
 
 # Second update the FPM server port
-$d->{'php_fpm_version'} = &feature_resolve_php_fpm_version($d, undef, 1);
+$d->{'php_fpm_version'} = &resolve_php_fpm_version($d, undef, 1);
 my $conf = &virtual_server::get_php_fpm_config($d);
 &virtual_server::save_php_fpm_config_value($d, "listen", $socket);
 &virtual_server::register_post_action(
