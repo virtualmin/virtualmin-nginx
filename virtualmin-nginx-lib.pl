@@ -1411,7 +1411,8 @@ return $loc ? grep { !$managed{$_->{'name'}} } @{$loc->{'members'}} : ();
 
 # get_php_location_struct([&existing], port|socket, split-path-regexp)
 # Builds the standard PHP location block for an active handler, while keeping
-# any unrelated custom directives from the existing block
+# any unrelated custom directives from the existing block; keeping this in one
+# builder lets PHP mode changes replace the whole location consistently
 sub get_php_location_struct
 {
 my ($loc, $port, $splitre) = @_;

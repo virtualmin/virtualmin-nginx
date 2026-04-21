@@ -1299,7 +1299,9 @@ my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
 
 if ($port) {
 	# Keep fastcgi_split_path_info inside the PHP location block, and
-	# replace that block with the standard handler configuration
+	# replace that block with the standard handler configuration;
+	# replacing the whole block avoids partial section updates that can
+	# otherwise pull following sibling blocks into the PHP location
 	my $newloc = &get_php_location_struct($loc, $port, $splitre);
 	&lock_all_config_files($server);
 	&save_directive($server, "fastcgi_split_path_info", [ ]);
