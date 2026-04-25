@@ -1,5 +1,5 @@
 desc=Nginx Webserver
 category=servers
 depends=virtual-server/8.0.1
-version=2.40
+version=2.50
 readonly=1
