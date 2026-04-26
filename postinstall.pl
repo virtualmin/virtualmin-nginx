@@ -7,6 +7,8 @@ eval "use WebminCore;";
 our (%config, $config_directory, $module_config_file);
 &init_config();
 
+# module_install()
+# Entry point called by Webmin after module install or upgrade
 sub module_install
 {
 &migrate_to_stock_nginx_module();
@@ -32,6 +34,9 @@ $config{'stock_nginx_migrated'} = 1;
 &unlock_file($module_config_file);
 }
 
+# migrate_to_stock_nginx_config(old-module, new-module)
+# Copies shared Nginx service/config paths into the stock nginx module config,
+# then removes those shared keys from this wrapper module
 sub migrate_to_stock_nginx_config
 {
 my ($oldmod, $newmod) = @_;
@@ -57,6 +62,9 @@ if ($changed_nginx) {
 	}
 }
 
+# migrate_to_stock_nginx_virtualmin_config(old-module, new-module)
+# Re-points Virtualmin global, template and domain-owner module references from
+# the wrapper module to the stock nginx module
 sub migrate_to_stock_nginx_virtualmin_config
 {
 my ($oldmod, $newmod) = @_;
@@ -153,6 +161,9 @@ if (opendir(my $dir, $domains_dir)) {
 	}
 }
 
+# migrate_to_stock_nginx_acls(old-module, new-module)
+# Keeps the wrapper module enabled where it was already granted, adds the stock
+# nginx module beside it, and migrates shared ACL values to the stock module
 sub migrate_to_stock_nginx_acls
 {
 my ($oldmod, $newmod) = @_;
@@ -190,6 +201,9 @@ foreach my $group (&acl::list_groups()) {
 	}
 }
 
+# add_acl_module(&modules, old-module, new-module)
+# If old-module is present in a Webmin ACL list, add new-module too without
+# changing the original grant
 sub add_acl_module
 {
 my ($mods, $oldmod, $newmod) = @_;
@@ -212,6 +226,9 @@ $changed = 1 if (&indexof($newmod, @old) < 0);
 return (\@new, $changed);
 }
 
+# replace_acl_module(&modules, old-module, new-module)
+# Replaces old-module with new-module in an array-style module list and dedupes
+# entries. Used by space-separated Virtualmin config lists via replace_module_list
 sub replace_acl_module
 {
 my ($mods, $oldmod, $newmod) = @_;
@@ -237,6 +254,8 @@ foreach my $m (@old) {
 return (\@new, $changed);
 }
 
+# replace_module_list(modules-string, old-module, new-module)
+# Replaces a module name in Virtualmin's space-separated webmin_modules values
 sub replace_module_list
 {
 my ($mods, $oldmod, $newmod) = @_;
@@ -245,6 +264,9 @@ my ($list, $changed) =
 return (join(" ", @$list), $changed);
 }
 
+# replace_avail_module(avail-string, old-module, new-module)
+# Replaces a module name in template availability entries like module=value,
+# preserving the existing availability value
 sub replace_avail_module
 {
 my ($avail, $oldmod, $newmod) = @_;
@@ -274,6 +296,10 @@ foreach my $entry (@old) {
 return (join(" ", @new), $changed);
 }
 
+# migrate_to_stock_nginx_acl(user-or-group, is-group, old-module, new-module,
+#                            module-granted)
+# Copies explicit legacy ACL values into the stock nginx ACL, while preserving
+# any values already customized on the stock nginx module
 sub migrate_to_stock_nginx_acl
 {
 my ($name, $group, $oldmod, $newmod, $granted) = @_;
@@ -284,7 +310,7 @@ return if (!%oldacl && !$granted);
 my %newacl = $group ? &get_group_module_acl($name, $newmod, 1)
 		    : &get_module_acl($name, $newmod, 0, 1);
 # Keep any explicit stock nginx ACL customizations, but seed missing values
-# from the legacy Virtualmin Nginx ACL.
+# from the legacy Virtualmin Nginx ACL
 my %merged = (%oldacl, %newacl);
 $merged{'create'} = 0 if (!defined($merged{'create'}));
 
