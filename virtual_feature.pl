@@ -218,20 +218,13 @@ if (!$d->{'alias'}) {
 
 	# Add custom directives
 	my $extra_dirs = $tmpl->{$module_name};
+	$extra_dirs = $nginx::config{'extra_dirs'} if ($extra_dirs eq "");
 	$extra_dirs = "" if (!$extra_dirs || $extra_dirs eq "none");
 	if ($extra_dirs) {
 		$extra_dirs = &virtual_server::substitute_domain_template(
 				$extra_dirs, $d);
-		my $temp = &transname();
-		my $fh = "EXTRA";
-		&open_tempfile($fh, ">$temp", 0, 1);
-		&print_tempfile($fh,
-			join("\n", split(/\t+/, $extra_dirs))."\n");
-		&close_tempfile($fh);
-		my $econf = &nginx::read_config_file($temp, 1);
-		&recursive_clear_lines(@$econf);
-		push(@{$server->{'members'}}, @$econf);
-		&unlink_file($temp);
+		push(@{$server->{'members'}},
+		     &nginx::extra_dirs_to_directives($extra_dirs));
 		}
 
 	&nginx::save_directive($http, [ ], [ $server ]);

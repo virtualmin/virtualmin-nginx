@@ -755,20 +755,6 @@ foreach my $l (split(/\r?\n/, $data)) {
 return @rv;
 }
 
-# recursive_clear_lines(&directive, ...)
-# Remove any file and line fields from directives
-sub recursive_clear_lines
-{
-foreach my $e (@_) {
-	delete($e->{'file'});
-	delete($e->{'line'});
-	delete($e->{'eline'});
-	if ($e->{'type'}) {
-		&recursive_clear_lines(@{$e->{'members'}});
-		}
-	}
-}
-
 # parse_backend(url|sock)
 # Parses a URL into host and port or unix domain socket and
 # sets a flag if it is socket

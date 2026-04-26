@@ -41,7 +41,7 @@ sub migrate_to_stock_nginx_config
 {
 my ($oldmod, $newmod) = @_;
 my @shared = qw(nginx_config add_to add_link nginx_cmd start_cmd stop_cmd
-		apply_cmd pid_file);
+		apply_cmd pid_file extra_dirs);
 my %nginx_config = &foreign_config($newmod);
 my $changed_nginx = 0;
 
