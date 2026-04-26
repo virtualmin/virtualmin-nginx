@@ -1083,7 +1083,7 @@ return ( ) if (!$server);
 my @rv = ( { 'mod' => &nginx_webmin_module(),
 	     'desc' => $text{'feat_edit'},
 	     'page' => 'edit_server.cgi?id='.&nginx::server_id($server),
-	     'cat' => 'services' } );
+	     'cat' => 'web' } );
 
 # Links to logs
 foreach my $log ([ 0, $text{'links_anlog'} ],
