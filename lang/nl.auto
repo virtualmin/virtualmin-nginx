@@ -1,12 +1,9 @@
-server_eexist=Geen Nginx-server gevonden
-
 feat_label2=Nginx-website ingeschakeld?
 feat_phpfpm=PHP pool instellen. ..
 feat_phpnone=PHP uitschakelen ..
-feat_module=Nginx Webserver (voor virtuele host)
 feat_evalidatefcgiwrapinit=Er bestaat geen opstartactie voor de FCGIwrap-server!
 feat_evalidatefcgiwraprun=De FCGIwrap-server voor dit domein is niet actief
-
+feat_module=Nginx Webserver (voor virtuele host)
 feat_addprotected=Er bestaat al een beveiliging voor directory $1 en deze is gekoppeld aan een ander $2 auth-gebruikersbestand
 feat_delprotected=Een beveiliging voor map $1 kan niet worden verwijderd omdat deze is gekoppeld aan een ander $2 auth-gebruikersbestand
 
@@ -22,12 +19,12 @@ links_phpini2=PHP $1 -configuratie
 links_phplog=PHP-foutenlogboek
 
 webmin_phpini=PHP-configuratie voor $1 
-webmin_phpini2=PHP $2 -configuratie voor $1 
-
-monitor_missing=Nginx is niet geïnstalleerd
-monitor_type=Nginx Webserver
 
 tmpl_directives=Nginx-configuratierichtlijnen toevoegen
 tmpl_default=Standaard (van bovenliggende sjabloon)
 tmpl_none=Geen
 tmpl_below=Hieronder opgesomd ..
+tmpl_section=Nginx-webserver
+
+server_eexist=Geen Nginx-server gevonden
+sysinfo_nginx=Nginx-versie
