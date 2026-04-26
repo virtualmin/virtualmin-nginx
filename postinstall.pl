@@ -169,6 +169,8 @@ sub migrate_to_stock_nginx_acls
 my ($oldmod, $newmod) = @_;
 return if (!&foreign_check("acl"));
 &foreign_require("acl");
+my $have_virtual_server = &foreign_check("virtual-server");
+&foreign_require("virtual-server") if ($have_virtual_server);
 
 foreach my $user (&acl::list_users()) {
 	my $changed = 0;
@@ -181,8 +183,12 @@ foreach my $user (&acl::list_users()) {
 			}
 		}
 	&acl::modify_user($user->{'name'}, $user) if ($changed);
+	my $domain = $have_virtual_server ?
+		&virtual_server::get_domain_by("user", $user->{'name'},
+					       "parent", "") : undef;
+	my $domain_user = $user->{'readonly'} eq "virtual-server" || $domain;
 	&migrate_to_stock_nginx_acl($user->{'name'}, 0, $oldmod, $newmod,
-				    $changed);
+				    $changed, $domain_user);
 	}
 
 foreach my $group (&acl::list_groups()) {
@@ -197,7 +203,7 @@ foreach my $group (&acl::list_groups()) {
 		}
 	&acl::modify_group($group->{'name'}, $group) if ($changed);
 	&migrate_to_stock_nginx_acl($group->{'name'}, 1, $oldmod, $newmod,
-				    $changed);
+				    $changed, 0);
 	}
 }
 
@@ -297,22 +303,29 @@ return (join(" ", @new), $changed);
 }
 
 # migrate_to_stock_nginx_acl(user-or-group, is-group, old-module, new-module,
-#                            module-granted)
+#                            module-granted, domain-user)
 # Copies explicit legacy ACL values into the stock nginx ACL, while preserving
 # any values already customized on the stock nginx module
 sub migrate_to_stock_nginx_acl
 {
-my ($name, $group, $oldmod, $newmod, $granted) = @_;
+my ($name, $group, $oldmod, $newmod, $granted, $domain_user) = @_;
 my %oldacl = $group ? &get_group_module_acl($name, $oldmod, 1)
 		    : &get_module_acl($name, $oldmod, 0, 1);
 return if (!%oldacl && !$granted);
 
 my %newacl = $group ? &get_group_module_acl($name, $newmod, 1)
 		    : &get_module_acl($name, $newmod, 0, 1);
-# Keep any explicit stock nginx ACL customizations, but seed missing values
-# from the legacy Virtualmin Nginx ACL
+# Preserve explicit stock nginx ACL customizations for admin-style ACLs, while
+# forcing domain-scoped ACLs into safe Virtualmin-managed defaults
 my %merged = (%oldacl, %newacl);
-$merged{'create'} = 0 if (!defined($merged{'create'}));
+my $domain_acl = $domain_user || &is_domain_scoped_nginx_acl(\%merged);
+if ($domain_acl) {
+	$merged{'noconfig'} = 1;
+	$merged{'create'} = 0;
+	}
+elsif (!defined($merged{'create'})) {
+	$merged{'create'} = 1;
+	}
 
 if ($group) {
 	&save_group_module_acl(\%merged, $name, $newmod, 1);
@@ -320,6 +333,15 @@ if ($group) {
 else {
 	&save_module_acl(\%merged, $name, $newmod, 1);
 	}
+}
+
+sub is_domain_scoped_nginx_acl
+{
+my ($acl) = @_;
+return 1 if ($acl->{'vhosts'});
+return 1 if (defined($acl->{'root'}) && $acl->{'root'} ne "" &&
+	     $acl->{'root'} ne "/");
+return 0;
 }
 
 1;

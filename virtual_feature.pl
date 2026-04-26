@@ -998,6 +998,7 @@ if (@doms) {
 	push(@rv, [ &nginx_webmin_module(),
 		   { 'vhosts' => join(' ', @dnames),
 		     'root' => $d->{'home'},
+		     'noconfig' => 1,
 		     'global' => 0,
 		     'logs' => 0,
 		     'user' => $d->{'user'},
