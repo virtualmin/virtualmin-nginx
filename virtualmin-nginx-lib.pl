@@ -12,6 +12,7 @@ our %access = &get_module_acl();
 our (%config, %text, %in, $module_root_directory);
 
 &foreign_require("nginx");
+&import_nginx_module_functions();
 &sync_nginx_module_config();
 
 # nginx_webmin_module()
@@ -19,6 +20,21 @@ our (%config, %text, %in, $module_root_directory);
 sub nginx_webmin_module
 {
 return "nginx";
+}
+
+# import_nginx_module_functions()
+# Keep the old virtualmin_nginx:: API callable for other modules, while the
+# shared Nginx implementation lives in the stock Webmin nginx module.
+sub import_nginx_module_functions
+{
+my $target = __PACKAGE__;
+no strict 'refs';
+foreach my $name (keys %nginx::) {
+	next if ($name =~ /^(BEGIN|END|AUTOLOAD|DESTROY|ISA)$/);
+	my $code = *{"nginx::$name"}{CODE};
+	next if (!$code || defined(&{$target."::".$name}));
+	*{$target."::".$name} = $code;
+	}
 }
 
 # sync_nginx_module_config()
