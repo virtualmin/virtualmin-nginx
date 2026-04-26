@@ -335,6 +335,8 @@ else {
 	}
 }
 
+# is_domain_scoped_nginx_acl(&acl)
+# Returns true for ACLs that should be treated as Virtualmin domain-owner ACLs
 sub is_domain_scoped_nginx_acl
 {
 my ($acl) = @_;
