@@ -218,7 +218,6 @@ if (!$d->{'alias'}) {
 
 	# Add custom directives
 	my $extra_dirs = $tmpl->{$module_name};
-	$extra_dirs ||= $config{'extra_dirs'};
 	$extra_dirs = "" if (!$extra_dirs || $extra_dirs eq "none");
 	if ($extra_dirs) {
 		$extra_dirs = &virtual_server::substitute_domain_template(
