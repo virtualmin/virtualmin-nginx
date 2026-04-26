@@ -1182,7 +1182,7 @@ if (&nginx::is_nginx_running()) {
 		if ($err) {
 			&$virtual_server::second_print(
 			    &text('feat_eapply',
-				  "<tt>".&html_escape($test)."</tt>"));
+				  "<tt>".&html_escape($err)."</tt>"));
 			}
 		else {
 			&$virtual_server::second_print(
