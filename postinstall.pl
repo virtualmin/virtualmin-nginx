@@ -157,13 +157,13 @@ sub migrate_to_stock_nginx_acls
 {
 my ($oldmod, $newmod) = @_;
 return if (!&foreign_check("acl"));
-&foreign_require("acl", "acl-lib.pl");
+&foreign_require("acl");
 
 foreach my $user (&acl::list_users()) {
 	my $changed = 0;
 	foreach my $k ("modules", "ownmods") {
 		my ($modules, $mchanged) =
-			&replace_acl_module($user->{$k}, $oldmod, $newmod);
+			&add_acl_module($user->{$k}, $oldmod, $newmod);
 		if ($mchanged) {
 			$user->{$k} = $modules;
 			$changed = 1;
@@ -178,7 +178,7 @@ foreach my $group (&acl::list_groups()) {
 	my $changed = 0;
 	foreach my $k ("modules", "ownmods") {
 		my ($modules, $mchanged) =
-			&replace_acl_module($group->{$k}, $oldmod, $newmod);
+			&add_acl_module($group->{$k}, $oldmod, $newmod);
 		if ($mchanged) {
 			$group->{$k} = $modules;
 			$changed = 1;
@@ -188,6 +188,28 @@ foreach my $group (&acl::list_groups()) {
 	&migrate_to_stock_nginx_acl($group->{'name'}, 1, $oldmod, $newmod,
 				    $changed);
 	}
+}
+
+sub add_acl_module
+{
+my ($mods, $oldmod, $newmod) = @_;
+my @old = @{$mods || []};
+return ([ @old ], 0) if (&indexof($oldmod, @old) < 0);
+
+my @new;
+my %seen;
+my $changed = 0;
+
+foreach my $m (@old, $newmod) {
+	if ($seen{$m}++) {
+		$changed = 1;
+		next;
+		}
+	push(@new, $m);
+	}
+
+$changed = 1 if (&indexof($newmod, @old) < 0);
+return (\@new, $changed);
 }
 
 sub replace_acl_module
