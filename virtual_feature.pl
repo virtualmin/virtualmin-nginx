@@ -1178,7 +1178,7 @@ if (&nginx::is_nginx_running()) {
 		    &text('feat_econfig2', "<tt>".&html_escape($test)."</tt>"));
 		}
 	else {
-		my $err = apply_nginx();
+		my $err = &nginx::apply_nginx();
 		if ($err) {
 			&$virtual_server::second_print(
 			    &text('feat_eapply',
