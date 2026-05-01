@@ -261,7 +261,7 @@ if (!$d->{'alias'}) {
 		     'type' => 1,
 		     'members' => [
 			{ 'name' => 'try_files',
-			  'words' => [ '$uri', '/' ],
+			  'words' => [ '$uri', '=404' ],
 			},
 		     ],
 		   };
@@ -2163,14 +2163,16 @@ foreach my $r ('webmail', 'admin') {
 		&nginx::save_directive($server, "server_name", [ $obj ]);
 		}
 
-	# Add rewrite directive, inside if block
+	# Add rewrite directive, inside if block; Nginx runs server-level
+	# rewrites before location matching, so exclude ACME challenge paths
 	&nginx::save_directive($server, [ ], [
 		{ 'name' => 'if',
 		  'type' => 2,
 		  'words' => [ '$host', '=', $rhost ],
 		  'members' => [
 			{ 'name' => 'rewrite',
-			  'words' => [ '^/(.*)$', $url.'$1', 'redirect' ],
+			  'words' => [ '^/(?!\.well-known(?:/|$))(.*)$',
+				       $url.'$1', 'redirect' ],
 			},
 			]
 		},
