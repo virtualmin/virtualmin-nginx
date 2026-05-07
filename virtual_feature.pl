@@ -1729,7 +1729,7 @@ return 1;	# Always supported
 
 sub feature_supports_web_host_redirects
 {
-return 0;	# Not implemented yet
+return 1;
 }
 
 # feature_list_web_redirects(&domain)
@@ -1744,15 +1744,42 @@ my $phd = &virtual_server::public_html_dir($d);
 my @rewrites = &nginx::find("rewrite", $server);
 foreach my $i (&nginx::find("if", $server)) {
 	my @w = @{$i->{'words'}};
-	if ($i->{'type'} &&
-	    @{$i->{'members'}} == 1 &&
-	    $w[0] eq "\$scheme" && $w[1] eq "=" &&
+	next if (!$i->{'type'} || @{$i->{'members'}} != 1);
+	if ($w[0] eq "\$scheme" && $w[1] eq "=" &&
 	    ($w[2] eq "http" || $w[2] eq "https")) {
 		# May contain relevant rewrites
 		my ($r) = &nginx::find("rewrite", $i);
+		next if (!$r);
 		$r->{'_scheme'} = $w[2];
 		$r->{'_if'} = $i;
 		push(@rewrites, $r);
+		}
+	elsif ($w[0] eq "\$host" &&
+	       ($w[1] eq '=' || $w[1] eq '~' || $w[1] eq '~*') &&
+	       $i->{'members'}->[0]->{'name'} eq 'return') {
+		# Host-based redirect
+		my $ret = $i->{'members'}->[0];
+		my @rw = @{$ret->{'words'}};
+		next if (@rw < 2);
+		my $url = $rw[1];
+		$url =~ s/\$request_uri\z//;
+		$url .= '/' if ($url !~ m{://[^/]+/});
+		my $host = $w[2];
+		my $hostre = $w[1] eq '=' ? 0 : 1;
+		if ($hostre && $host =~ /^\^(.*)\$\z/) {
+			$host = $1;
+			}
+		push(@rv, { 'path'       => '/',
+			    'dest'       => $url,
+			    'host'       => $host,
+			    'hostregexp' => $hostre,
+			    'code'       => $rw[0],
+			    'http'       => 1,
+			    'https'      => 1,
+			    'alias'      => 0,
+			    'object'     => $ret,
+			    'ifobject'   => $i,
+			    'id'         => 'redirect_/_'.$host });
 		}
 	}
 foreach my $r (@rewrites) {
@@ -1839,6 +1866,38 @@ my $dest = $redirect->{'dest'};
 if ($dest =~ /^(http|https|\$scheme):/) {
 	$dest = &replace_apache_vars($dest, 1);
 	}
+
+# Host-based redirect
+if ($redirect->{'host'}) {
+	my $op  = $redirect->{'hostregexp'} ? '~*' : '=';
+	my $val = $redirect->{'hostregexp'}
+			? '^'.$redirect->{'host'}.'$'
+			: $redirect->{'host'};
+	my $ret_url = $dest;
+	$ret_url =~ s{/+\z}{};
+	$ret_url .= '$request_uri';
+	my $code = $redirect->{'code'} || 302;
+	my $i = { 'name' => 'if',
+		  'type' => 1,
+		  'members' => [ { 'name'  => 'return',
+				   'words' => [ $code, $ret_url ] } ],
+		  'words' => [ '$host', $op, $val ] };
+	&nginx::lock_all_config_files();
+	foreach my $existing (&nginx::find("if", $server)) {
+		my @ew = @{$existing->{'words'}};
+		if (@ew == 3 && $ew[0] eq '$host' &&
+		    $ew[1] eq $op && $ew[2] eq $val) {
+			&nginx::save_directive($server, [ $existing ], [ ]);
+			last;
+			}
+		}
+	&nginx::save_directive($server, [ ], [ $i ]);
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
+	&virtual_server::register_post_action(\&print_apply_nginx);
+	return undef;
+	}
+
 my $re = $redirect->{'path'};
 if ($re !~ /\^\/\(\?\!\.well\-known\)/) {
 	$re = '^\\Q'.$re.'\\E';
