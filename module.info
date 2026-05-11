@@ -1,6 +1,6 @@
 desc=Virtualmin Nginx Webserver
 category=servers
-depends=virtual-server/8.0.1 nginx
-version=2.50
+depends=virtual-server/8.1.0 nginx
+version=3.0.0
 readonly=1
 hidden=1
