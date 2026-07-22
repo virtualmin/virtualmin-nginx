@@ -439,12 +439,8 @@ if (!$d->{'alias'}) {
 				&text('feat_efind', $d->{'dom'}));
 			return 0;
 			}
-<<<<<<< HEAD
-		my @listen = &find("listen", $server);
-		my @newlisten;
-=======
 		my @listen = &nginx::find("listen", $server);
->>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
+		my @newlisten;
 		foreach my $l (@listen) {
 			my @w = @{$l->{'words'}};
 			if ($ob && $w[0] eq $ob) {
@@ -468,7 +464,6 @@ if (!$d->{'alias'}) {
 				push(@newlisten, { 'words' => \@w });
 				}
 			}
-<<<<<<< HEAD
 		if ($nb && !$ob) {
 			push(@newlisten, { 'words' => [ $nb ] });
 			}
@@ -483,7 +478,6 @@ if (!$d->{'alias'}) {
 				&save_directive(
 					$server, "server_name", [ $obj ]);
 				}
-=======
 		&nginx::save_directive($server, "listen", \@listen);
 
 		# Remove IP in server_names
@@ -492,7 +486,6 @@ if (!$d->{'alias'}) {
 		if ($idx >= 0) {
 			splice(@{$obj->{'words'}}, $idx, 0);
 			&nginx::save_directive($server, "server_name", [ $obj ]);
->>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 			}
 
 		&$virtual_server::second_print(
@@ -978,8 +971,7 @@ if ($d->{'alias'}) {
 
 # Check for IPs and port
 if (!$d->{'alias'}) {
-<<<<<<< HEAD
-	my @listen = &find_value("listen", $server);
+	my @listen = &nginx::find_value("listen", $server);
 	if ($d->{'ip'}) {
 		my $found = 0;
 		foreach my $l (@listen) {
@@ -993,19 +985,6 @@ if (!$d->{'alias'}) {
 		$found || return &text('feat_evalidateip',
 				       $d->{'ip'}, $d->{'web_port'});
 		}
-=======
-	my @listen = &nginx::find_value("listen", $server);
-	my $found = 0;
-	foreach my $l (@listen) {
-		$found++ if ($l eq $d->{'ip'} &&
-			      $d->{'web_port'} == 80 ||
-			     $l =~ /^\Q$d->{'ip'}\E:(\d+)$/ &&
-			      $d->{'web_port'} == $1);
-		$found++ if ($l eq $d->{'web_port'} && $config{'listen_mode'} eq '0');
-		}
-	$found || return &text('feat_evalidateip',
-			       $d->{'ip'}, $d->{'web_port'});
->>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 	if ($d->{'virt6'}) {
 		my $found6 = 0;
 		foreach my $l (@listen) {
@@ -2516,23 +2495,14 @@ foreach my $os (&nginx::find("server", $http)) {
 	}
 
 # Remove IP from server_name for all servers, as we don't do that anymore
-<<<<<<< HEAD
 if ($d->{'ip'}) {
-	foreach my $os (&find("server", $http)) {
-		my $obj = &find("server_name", $os);
+	foreach my $os (&nginx::find("server", $http)) {
+		my $obj = &nginx::find("server_name", $os);
 		my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
 		if ($idx >= 0) {
 			splice(@{$obj->{'words'}}, $idx, 1);
-			&save_directive($os, "server_name", [ $obj ]);
+			&nginx::save_directive($os, "server_name", [ $obj ]);
 			}
-=======
-foreach my $os (&nginx::find("server", $http)) {
-	my $obj = &nginx::find("server_name", $os);
-	my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
-	if ($idx >= 0) {
-		splice(@{$obj->{'words'}}, $idx, 1);
-		&nginx::save_directive($os, "server_name", [ $obj ]);
->>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 		}
 	}
 
@@ -2556,19 +2526,13 @@ return 0 if (!$listen);
 my $def = &nginx::get_default_server_param();
 return 1 if (&indexof($def, @{$listen->{'words'}}) >= 0);
 
-<<<<<<< HEAD
 if ($d->{'ip'}) {
 	# Fall back to check for IP server_name
-	my $obj = &find("server_name", $server);
+	my $obj = &nginx::find("server_name", $server);
 	return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
 	}
 
 return 0;
-=======
-# Fall back to check for IP server_name
-my $obj = &nginx::find("server_name", $server);
-return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
->>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 }
 
 # feature_save_web_passphrase(&domain)
@@ -2769,13 +2733,8 @@ if (!$server) {
 &nginx::save_directive($server, "error_log", [ $elog ]) if ($elog);
 
 # Remove IP from server_name if changed
-<<<<<<< HEAD
 if ($oldd && $oldd->{'ip'} && $oldd->{'ip'} ne $d->{'ip'}) {
 	my $obj = &find("server_name", $server);
-=======
-if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
-	my $obj = &nginx::find("server_name", $server);
->>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 	my $idx = &indexof($oldd->{'ip'}, @{$obj->{'words'}});
 	if ($idx >= 0) {
 		splice(@{$obj->{'words'}}, $idx, 1);
@@ -2784,12 +2743,7 @@ if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
 	}
 
 # Change IPv4 in listen directive if changed
-<<<<<<< HEAD
-# XXX what if not more IPv4?
-my @listen = &find("listen", $server);
-=======
 my @listen = &nginx::find("listen", $server);
->>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
 	foreach my $l (@listen) {
 		if ($l->{'words'}->[0] eq $oldd->{'ip'}) {
