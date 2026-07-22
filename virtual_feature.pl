@@ -429,9 +429,9 @@ if (!$d->{'alias'}) {
 		}
 
 	# Update IPv4 address if changed, added or removed
-	my $ob = $oldd->{'ip'} || "";
-	my $nb = $d->{'ip'} || "";
-	if ($ob ne $nb) {
+	my $old_ip = $oldd->{'ip'} || "";
+	my $new_ip = $d->{'ip'} || "";
+	if ($old_ip ne $new_ip) {
 		&$virtual_server::first_print($text{'feat_modifyip'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
@@ -442,50 +442,41 @@ if (!$d->{'alias'}) {
 		my @listen = &nginx::find("listen", $server);
 		my @newlisten;
 		foreach my $l (@listen) {
-			my @w = @{$l->{'words'}};
-			if ($ob && $w[0] eq $ob) {
-				# Found old address with no port - replace
-				# or remove
-				if ($nb) {
-					$w[0] = $nb;
-					push(@newlisten, { 'words' => \@w });
+			my @words = @{$l->{'words'}};
+			if ($old_ip && $words[0] eq $old_ip) {
+				# Found old address with no port - replace or remove
+				if ($new_ip) {
+					$words[0] = $new_ip;
+					push(@newlisten, { 'words' => \@words });
 					}
 				}
-			elsif ($ob && $w[0] =~ /^\Q$ob\E:(\d+)$/) {
-				# Found old address with a port - replace with
+			elsif ($old_ip && $words[0] =~ /^\Q$old_ip\E:(\d+)$/) {
+				# Found old address with a port - replace with the
 				# same port or remove
-				if ($nb) {
-					$w[0] = $nb.":".$1;
-					push(@newlisten, { 'words' => \@w });
+				if ($new_ip) {
+					$words[0] = $new_ip.":".$1;
+					push(@newlisten, { 'words' => \@words });
 					}
 				}
 			else {
-				# Found un-related address, save it
-				push(@newlisten, { 'words' => \@w });
+				# Preserve unrelated listen directives
+				push(@newlisten, { 'words' => \@words });
 				}
 			}
-		if ($nb && !$ob) {
-			push(@newlisten, { 'words' => [ $nb ] });
+		if ($new_ip && !$old_ip) {
+			push(@newlisten, { 'words' => [ $new_ip ] });
 			}
 		&nginx::save_directive($server, "listen", \@newlisten);
 
 		# Remove IP in server_names
-		if ($ob) {
-			my $obj = &find("server_name", $server);
-			my $idx = &indexof($ob, @{$obj->{'words'}});
+		if ($old_ip) {
+			my $obj = &nginx::find("server_name", $server);
+			my $idx = &indexof($old_ip, @{$obj->{'words'}});
 			if ($idx >= 0) {
-				splice(@{$obj->{'words'}}, $idx, 0);
+				splice(@{$obj->{'words'}}, $idx, 1);
 				&nginx::save_directive(
 					$server, "server_name", [ $obj ]);
 				}
-			}
-
-		# Remove IP in server_names
-		my $obj = &nginx::find("server_name", $server);
-		my $idx = &indexof($oldd->{'ip'}, @{$obj->{'words'}});
-		if ($idx >= 0) {
-			splice(@{$obj->{'words'}}, $idx, 0);
-			&nginx::save_directive($server, "server_name", [ $obj ]);
 			}
 
 		&$virtual_server::second_print(
@@ -494,9 +485,9 @@ if (!$d->{'alias'}) {
 		}
 
 	# Update IPv6 address (or add or remove)
-	$ob = $oldd->{'ip6'} ? "[".$oldd->{'ip6'}."]" : "";
-	$nb = $d->{'ip6'} ? "[".$d->{'ip6'}."]" : "";
-	if ($ob ne $nb) {
+	my $old_ip6 = $oldd->{'ip6'} ? "[".$oldd->{'ip6'}."]" : "";
+	my $new_ip6 = $d->{'ip6'} ? "[".$d->{'ip6'}."]" : "";
+	if ($old_ip6 ne $new_ip6) {
 		&$virtual_server::first_print($text{'feat_modifyip6'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
@@ -508,19 +499,19 @@ if (!$d->{'alias'}) {
 		my @newlisten;
 		foreach my $l (@listen) {
 			my @w = @{$l->{'words'}};
-			if ($ob && $w[0] eq $ob) {
+			if ($old_ip6 && $w[0] eq $old_ip6) {
 				# Found old address with no port - replace
 				# or remove
-				if ($nb) {
-					$w[0] = $nb;
+				if ($new_ip6) {
+					$w[0] = $new_ip6;
 					push(@newlisten, { 'words' => \@w });
 					}
 				}
-			elsif ($ob && $w[0] =~ /^\Q$ob\E:(\d+)$/) {
+			elsif ($old_ip6 && $w[0] =~ /^\Q$old_ip6\E:(\d+)$/) {
 				# Found old address with a port - replace with
 				# same port or remove
-				if ($nb) {
-					$w[0] = $nb.":".$1;
+				if ($new_ip6) {
+					$w[0] = $new_ip6.":".$1;
 					push(@newlisten, { 'words' => \@w });
 					}
 				}
@@ -529,8 +520,8 @@ if (!$d->{'alias'}) {
 				push(@newlisten, { 'words' => \@w });
 				}
 			}
-		if ($d->{'ip6'} && !$oldd->{'ip6'}) {
-			push(@newlisten, { 'words' => [ $nb ] });
+		if ($new_ip6 && !$old_ip6) {
+			push(@newlisten, { 'words' => [ $new_ip6 ] });
 			}
 		&nginx::save_directive($server, "listen", \@newlisten);
 		&$virtual_server::second_print(
@@ -2734,7 +2725,7 @@ if (!$server) {
 
 # Remove IP from server_name if changed
 if ($oldd && $oldd->{'ip'} && $oldd->{'ip'} ne $d->{'ip'}) {
-	my $obj = &find("server_name", $server);
+	my $obj = &nginx::find("server_name", $server);
 	my $idx = &indexof($oldd->{'ip'}, @{$obj->{'words'}});
 	if ($idx >= 0) {
 		splice(@{$obj->{'words'}}, $idx, 1);
@@ -2757,7 +2748,6 @@ if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
 	}
 
 # Change IPv6 in listen directive if changed
-# XXX what if not more IPv6?
 if ($oldd && $d->{'ip6'} && $oldd->{'ip6'} ne $d->{'ip6'}) {
 	foreach my $l (@listen) {
 		if ($l->{'words'}->[0] eq "[".$oldd->{'ip6'}."]") {
