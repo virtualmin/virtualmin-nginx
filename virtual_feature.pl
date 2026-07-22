@@ -439,8 +439,10 @@ if (!$d->{'alias'}) {
 		$changed++;
 		}
 
-	# Update IPv4 address
-	if ($d->{'ip'} ne $oldd->{'ip'}) {
+	# Update IPv4 address if changed, added or removed
+	my $ob = $oldd->{'ip'} || "";
+	my $nb = $d->{'ip'} || "";
+	if ($ob ne $nb) {
 		&$virtual_server::first_print($text{'feat_modifyip'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
@@ -449,23 +451,44 @@ if (!$d->{'alias'}) {
 			return 0;
 			}
 		my @listen = &find("listen", $server);
+		my @newlisten;
 		foreach my $l (@listen) {
-			if ($l->{'words'}->[0] eq $oldd->{'ip'}) {
-				$l->{'words'}->[0] = $d->{'ip'};
+			my @w = @{$l->{'words'}};
+			if ($ob && $w[0] eq $ob) {
+				# Found old address with no port - replace
+				# or remove
+				if ($nb) {
+					$w[0] = $nb;
+					push(@newlisten, { 'words' => \@w });
+					}
 				}
-			elsif ($l->{'words'}->[0] =~ /^(\S+):(\d+)$/ &&
-			       $1 eq $oldd->{'ip'}) {
-				$l->{'words'}->[0] = $d->{'ip'}.":".$2;
+			elsif ($ob && $w[0] =~ /^\Q$ob\E:(\d+)$/) {
+				# Found old address with a port - replace with
+				# same port or remove
+				if ($nb) {
+					$w[0] = $nb.":".$1;
+					push(@newlisten, { 'words' => \@w });
+					}
+				}
+			else {
+				# Found un-related address, save it
+				push(@newlisten, { 'words' => \@w });
 				}
 			}
-		&save_directive($server, "listen", \@listen);
+		if ($nb && !$ob) {
+			push(@newlisten, { 'words' => [ $nb ] });
+			}
+		&save_directive($server, "listen", \@newlisten);
 
 		# Remove IP in server_names
-		my $obj = &find("server_name", $server);
-		my $idx = &indexof($oldd->{'ip'}, @{$obj->{'words'}});
-		if ($idx >= 0) {
-			splice(@{$obj->{'words'}}, $idx, 0);
-			&save_directive($server, "server_name", [ $obj ]);
+		if ($ob) {
+			my $obj = &find("server_name", $server);
+			my $idx = &indexof($ob, @{$obj->{'words'}});
+			if ($idx >= 0) {
+				splice(@{$obj->{'words'}}, $idx, 0);
+				&save_directive(
+					$server, "server_name", [ $obj ]);
+				}
 			}
 
 		&$virtual_server::second_print(
@@ -474,8 +497,9 @@ if (!$d->{'alias'}) {
 		}
 
 	# Update IPv6 address (or add or remove)
-	if (($d->{'ip6'} || "") ne ($oldd->{'ip6'} || "") ||
-	    ($d->{'virt6'} || 0) ne ($oldd->{'virt6'} || 0)) {
+	my $ob = $oldd->{'ip6'} ? "[".$oldd->{'ip6'}."]" : "";
+	my $nb = $d->{'ip6'} ? "[".$d->{'ip6'}."]" : "";
+	if ($ob ne $nb) {
 		&$virtual_server::first_print($text{'feat_modifyip6'});
 		my $server = &find_domain_server($d);
 		if (!$server) {
@@ -485,8 +509,6 @@ if (!$d->{'alias'}) {
 			}
 		my @listen = &find("listen", $server);
 		my @newlisten;
-		my $ob = $oldd->{'ip6'} ? "[".$oldd->{'ip6'}."]" : "";
-		my $nb = $d->{'ip6'} ? "[".$d->{'ip6'}."]" : "";
 		foreach my $l (@listen) {
 			my @w = @{$l->{'words'}};
 			if ($ob && $w[0] eq $ob) {
@@ -953,16 +975,19 @@ if ($d->{'alias'}) {
 # Check for IPs and port
 if (!$d->{'alias'}) {
 	my @listen = &find_value("listen", $server);
-	my $found = 0;
-	foreach my $l (@listen) {
-		$found++ if ($l eq $d->{'ip'} &&
-			      $d->{'web_port'} == 80 ||
-			     $l =~ /^\Q$d->{'ip'}\E:(\d+)$/ &&
-			      $d->{'web_port'} == $1);
-		$found++ if ($l eq $d->{'web_port'} && $config{'listen_mode'} eq '0');
+	if ($d->{'ip'}) {
+		my $found = 0;
+		foreach my $l (@listen) {
+			$found++ if ($l eq $d->{'ip'} &&
+				      $d->{'web_port'} == 80 ||
+				     $l =~ /^\Q$d->{'ip'}\E:(\d+)$/ &&
+				      $d->{'web_port'} == $1);
+			$found++ if ($l eq $d->{'web_port'} &&
+				     $config{'listen_mode'} eq '0');
+			}
+		$found || return &text('feat_evalidateip',
+				       $d->{'ip'}, $d->{'web_port'});
 		}
-	$found || return &text('feat_evalidateip',
-			       $d->{'ip'}, $d->{'web_port'});
 	if ($d->{'virt6'}) {
 		my $found6 = 0;
 		foreach my $l (@listen) {
@@ -2303,12 +2328,14 @@ foreach my $os (&find("server", $http)) {
 	}
 
 # Remove IP from server_name for all servers, as we don't do that anymore
-foreach my $os (&find("server", $http)) {
-	my $obj = &find("server_name", $os);
-	my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
-	if ($idx >= 0) {
-		splice(@{$obj->{'words'}}, $idx, 1);
-		&save_directive($os, "server_name", [ $obj ]);
+if ($d->{'ip'}) {
+	foreach my $os (&find("server", $http)) {
+		my $obj = &find("server_name", $os);
+		my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
+		if ($idx >= 0) {
+			splice(@{$obj->{'words'}}, $idx, 1);
+			&save_directive($os, "server_name", [ $obj ]);
+			}
 		}
 	}
 
@@ -2332,9 +2359,13 @@ return 0 if (!$listen);
 my $def = &get_default_server_param();
 return 1 if (&indexof($def, @{$listen->{'words'}}) >= 0);
 
-# Fall back to check for IP server_name
-my $obj = &find("server_name", $server);
-return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
+if ($d->{'ip'}) {
+	# Fall back to check for IP server_name
+	my $obj = &find("server_name", $server);
+	return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
+	}
+
+return 0;
 }
 
 # feature_save_web_passphrase(&domain)
@@ -2534,7 +2565,7 @@ if (!$server) {
 &save_directive($server, "error_log", [ $elog ]) if ($elog);
 
 # Remove IP from server_name if changed
-if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
+if ($oldd && $oldd->{'ip'} && $oldd->{'ip'} ne $d->{'ip'}) {
 	my $obj = &find("server_name", $server);
 	my $idx = &indexof($oldd->{'ip'}, @{$obj->{'words'}});
 	if ($idx >= 0) {
@@ -2544,6 +2575,7 @@ if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
 	}
 
 # Change IPv4 in listen directive if changed
+# XXX what if not more IPv4?
 my @listen = &find("listen", $server);
 if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
 	foreach my $l (@listen) {
@@ -2558,6 +2590,7 @@ if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
 	}
 
 # Change IPv6 in listen directive if changed
+# XXX what if not more IPv6?
 if ($oldd && $d->{'ip6'} && $oldd->{'ip6'} ne $d->{'ip6'}) {
 	foreach my $l (@listen) {
 		if ($l->{'words'}->[0] eq "[".$oldd->{'ip6'}."]") {
