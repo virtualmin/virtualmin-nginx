@@ -2746,7 +2746,7 @@ if ($oldd) {
 	my ($found, $found6);
 	foreach my $l (@listen) {
 		my @words = @{$l->{'words'}};
-		if ($words[0] =~ /^(\S+)(:\d+)?$/ && $1 eq $old_ip) {
+		if ($words[0] =~ /^([0-9\.]+)(:\d+)?$/ && $1 eq $old_ip) {
 			# Change old IPv4 to new IPv4, if there is one
 			if ($new_ip) {
 				$words[0] = $new_ip.$2;
@@ -2754,7 +2754,7 @@ if ($oldd) {
 				}
 			$found++;
 			}
-		elsif ($words[0] =~ /^\[(\S+)\]:(\d+)?$/ && $1 eq $old_ip6) {
+		elsif ($words[0] =~ /^\[(\S+)\](:\d+)?$/ && $1 eq $old_ip6) {
 			# Change old IPv6 to new IPv6, if there is one
 			if ($new_ip6) {
 				$words[0] = "[".$new_ip6."]".$2;
