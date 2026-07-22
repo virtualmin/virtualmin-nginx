@@ -107,9 +107,9 @@ sub feature_setup
 my ($d) = @_;
 
 if (!$d->{'alias'}) {
-	&lock_all_config_files();
-	my $conf = &get_config();
-	my $http = &find("http", $conf);
+	&nginx::lock_all_config_files();
+	my $conf = &nginx::get_config();
+	my $http = &nginx::find("http", $conf);
 
 	# Pick ports
 	my $tmpl = &virtual_server::get_template($d->{'template'});
@@ -117,15 +117,15 @@ if (!$d->{'alias'}) {
 
 	if ($d->{'virt6'}) {
 		# Disable IPv6 default listen in default server
-		foreach my $dserver (&find("server", $http)) {
-			foreach my $l (&find("listen", $dserver)) {
+		foreach my $dserver (&nginx::find("server", $http)) {
+			foreach my $l (&nginx::find("listen", $dserver)) {
 				if ($l->{'words'}->[0] eq
 				    "[::]:".$d->{'web_port'}) {
-					my $name = &find_value("server_name",
+					my $name = &nginx::find_value("server_name",
 							       $dserver);
 					&$virtual_server::first_print(
 					  &text('feat_setupdefault', $name));
-					&save_directive($dserver, [ $l ], [ ]);
+					&nginx::save_directive($dserver, [ $l ], [ ]);
 					&$virtual_server::second_print(
 					  $virtual_server::text{'setup_done'});
 					last;
@@ -135,10 +135,10 @@ if (!$d->{'alias'}) {
 		}
 
 	# Bump up server_names_hash if too low
-	my $snh = &find_value("server_names_hash_bucket_size", $http);
-	$snh ||= int((split(/\//, &get_default("server_names_hash_bucket_size")))[0]);
+	my $snh = &nginx::find_value("server_names_hash_bucket_size", $http);
+	$snh ||= int((split(/\//, &nginx::get_default("server_names_hash_bucket_size")))[0]);
 	if ($snh <= 32) {
-		&save_directive($http, "server_names_hash_bucket_size",
+		&nginx::save_directive($http, "server_names_hash_bucket_size",
 				[ 128 ]);
 		}
 
@@ -150,7 +150,7 @@ if (!$d->{'alias'}) {
                        'type' => 1,
                        'words' => [ ],
                        'members' => [ ] };
-	$server->{'file'} = &get_add_to_file($d->{'dom'});
+	$server->{'file'} = &nginx::get_add_to_file($d->{'dom'});
 
 	# Add domain name field
 	push(@{$server->{'members'}},
@@ -177,7 +177,7 @@ if (!$d->{'alias'}) {
 				  'words' => [ $d->{'ip'}.$portstr ] });
 			}
 		if ($d->{'ip6'}) {
-			my $def = &get_default_server_param();
+			my $def = &nginx::get_default_server_param();
 			push(@{$server->{'members'}},
 				{ 'name' => 'listen',
 				  'words' => [ '['.$d->{'ip6'}.']'.$portstr,
@@ -218,27 +218,19 @@ if (!$d->{'alias'}) {
 
 	# Add custom directives
 	my $extra_dirs = $tmpl->{$module_name};
-	$extra_dirs ||= $config{'extra_dirs'};
+	$extra_dirs = $nginx::config{'extra_dirs'} if ($extra_dirs eq "");
 	$extra_dirs = "" if (!$extra_dirs || $extra_dirs eq "none");
 	if ($extra_dirs) {
 		$extra_dirs = &virtual_server::substitute_domain_template(
 				$extra_dirs, $d);
-		my $temp = &transname();
-		my $fh = "EXTRA";
-		&open_tempfile($fh, ">$temp", 0, 1);
-		&print_tempfile($fh,
-			join("\n", split(/\t+/, $extra_dirs))."\n");
-		&close_tempfile($fh);
-		my $econf = &read_config_file($temp, 1);
-		&recursive_clear_lines(@$econf);
-		push(@{$server->{'members'}}, @$econf);
-		&unlink_file($temp);
+		push(@{$server->{'members'}},
+		     &nginx::extra_dirs_to_directives($extra_dirs));
 		}
 
-	&save_directive($http, [ ], [ $server ]);
-	&flush_config_file_lines();
-	&unlock_all_config_files();
-	&create_server_link($server);
+	&nginx::save_directive($http, [ ], [ $server ]);
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
+	&nginx::create_server_link($server);
 	&virtual_server::setup_apache_logs($d, $alog, $elog);
 	&virtual_server::link_apache_logs($d, $alog, $elog);
 	&virtual_server::register_post_action(\&print_apply_nginx);
@@ -256,11 +248,11 @@ if (!$d->{'alias'}) {
 
 	# Create initial config block for running PHP scripts. The port gets
 	# filled in later by save_domain_php_mode
-	&lock_all_config_files();
+	&nginx::lock_all_config_files();
 	my @params = &list_fastcgi_params($server);
 	push(@params, map { $_->{'words'} }
-			  &find("fastcgi_param", $server));
-	&save_directive($server, "fastcgi_param",
+			  &nginx::find("fastcgi_param", $server));
+	&nginx::save_directive($server, "fastcgi_param",
 		[ map { { 'words' => $_ } } @params ]);
 	
 	# Add .well-known location work with proxy enabled sites
@@ -269,11 +261,11 @@ if (!$d->{'alias'}) {
 		     'type' => 1,
 		     'members' => [
 			{ 'name' => 'try_files',
-			  'words' => [ '$uri', '/' ],
+			  'words' => [ '$uri', '=404' ],
 			},
 		     ],
 		   };
-	&save_directive($server, [ ], [ $wploc ]);
+	&nginx::save_directive($server, [ ], [ $wploc ]);
 
 	# Add location
 	my $ploc = { 'name' => 'location',
@@ -281,25 +273,22 @@ if (!$d->{'alias'}) {
 		     'type' => 1,
 		     'members' => [
 				{ 'name' => 'try_files',
-				  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
+				  'words' => [ '$uri', '$fastcgi_script_name',
+				               '=404' ],
 				},
 				{ 'name' => 'default_type',
 				  'words' => [ 'application/x-httpd-php' ],
-				}
+				},
+				{ 'name' => 'fastcgi_split_path_info',
+				  'words' => [ &split_quoted_string(
+				                 '^(.+\.php)(/.+)$') ],
+				},
 		     ],
 		   };
-	&save_directive($server, [ ], [ $ploc ]);
+	&nginx::save_directive($server, [ ], [ $ploc ]);
 
-	# Add extra directive
-	&save_directive($server, "fastcgi_split_path_info",
-		[
-		  {  'name'  => 'fastcgi_split_path_info',
-		     'words' => [ &split_quoted_string('^(.+\.php)(/.+)$') ]
-		  },
-		]);
-
-	&flush_config_file_lines();
-	&unlock_all_config_files();
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
 
 	# Setup the selected PHP mode
 	&virtual_server::save_domain_php_mode($d, $mode);
@@ -356,27 +345,27 @@ if (!$d->{'alias'}) {
 else {
 	# Add to existing one as an alias
 	&$virtual_server::first_print($text{'feat_setupalias'});
-	&lock_all_config_files();
+	&nginx::lock_all_config_files();
 	my $target = &virtual_server::get_domain($d->{'alias'});
 	my $server = &find_domain_server($target);
 	if (!$server) {
-		&unlock_all_config_files();
+		&nginx::unlock_all_config_files();
 		&$virtual_server::second_print(
 			&text('feat_efind', $target->{'dom'}));
 		return 0;
 		}
 
-	my $obj = &find("server_name", $server);
+	my $obj = &nginx::find("server_name", $server);
 	foreach my $n (&domain_server_names($d)) {
 		if (&indexoflc($n, @{$obj->{'words'}}) < 0) {
 			push(@{$obj->{'words'}}, $n);
 			}
 		}
-	&save_directive($server, "server_name", [ $obj ]);
+	&nginx::save_directive($server, "server_name", [ $obj ]);
 
 	$d->{'web_port'} = 80;
-	&flush_config_file_lines();
-	&unlock_all_config_files();
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
 	&virtual_server::register_post_action(\&print_apply_nginx);
 
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
@@ -400,7 +389,7 @@ if ($oldd->{'alias'} && !$d->{'alias'}) {
 
 if (!$d->{'alias'}) {
 	# Changing a real virtual host
-	&lock_all_config_files();
+	&nginx::lock_all_config_files();
 	my $changed = 0;
 	my $old_alog = &get_nginx_log($d, 0);
 	my $old_elog = &get_nginx_log($d, 1);
@@ -450,8 +439,12 @@ if (!$d->{'alias'}) {
 				&text('feat_efind', $d->{'dom'}));
 			return 0;
 			}
+<<<<<<< HEAD
 		my @listen = &find("listen", $server);
 		my @newlisten;
+=======
+		my @listen = &nginx::find("listen", $server);
+>>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 		foreach my $l (@listen) {
 			my @w = @{$l->{'words'}};
 			if ($ob && $w[0] eq $ob) {
@@ -475,6 +468,7 @@ if (!$d->{'alias'}) {
 				push(@newlisten, { 'words' => \@w });
 				}
 			}
+<<<<<<< HEAD
 		if ($nb && !$ob) {
 			push(@newlisten, { 'words' => [ $nb ] });
 			}
@@ -489,6 +483,16 @@ if (!$d->{'alias'}) {
 				&save_directive(
 					$server, "server_name", [ $obj ]);
 				}
+=======
+		&nginx::save_directive($server, "listen", \@listen);
+
+		# Remove IP in server_names
+		my $obj = &nginx::find("server_name", $server);
+		my $idx = &indexof($oldd->{'ip'}, @{$obj->{'words'}});
+		if ($idx >= 0) {
+			splice(@{$obj->{'words'}}, $idx, 0);
+			&nginx::save_directive($server, "server_name", [ $obj ]);
+>>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 			}
 
 		&$virtual_server::second_print(
@@ -507,7 +511,7 @@ if (!$d->{'alias'}) {
 				&text('feat_efind', $d->{'dom'}));
 			return 0;
 			}
-		my @listen = &find("listen", $server);
+		my @listen = &nginx::find("listen", $server);
 		my @newlisten;
 		foreach my $l (@listen) {
 			my @w = @{$l->{'words'}};
@@ -535,7 +539,7 @@ if (!$d->{'alias'}) {
 		if ($d->{'ip6'} && !$oldd->{'ip6'}) {
 			push(@newlisten, { 'words' => [ $nb ] });
 			}
-		&save_directive($server, "listen", \@newlisten);
+		&nginx::save_directive($server, "listen", \@newlisten);
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
@@ -550,7 +554,7 @@ if (!$d->{'alias'}) {
 				&text('feat_efind', $d->{'dom'}));
 			return 0;
 			}
-		my @listen = &find("listen", $server);
+		my @listen = &nginx::find("listen", $server);
 		my @newlisten;
 		foreach my $l (@listen) {
 			my @w = @{$l->{'words'}};
@@ -565,7 +569,7 @@ if (!$d->{'alias'}) {
 				}
 			push(@newlisten, { 'words' => \@w });
 			}
-		&save_directive($server, "listen", \@newlisten);
+		&nginx::save_directive($server, "listen", \@newlisten);
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
@@ -604,24 +608,24 @@ if (!$d->{'alias'}) {
 		}
 
 	# Flush files and restart
-	&flush_config_file_lines();
-	&unlock_all_config_files();
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
 	if ($changed) {
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
 
 	# Rename config file name, if changed
 	if ($d->{'dom'} ne $oldd->{'dom'}) {
-		my $newfile = &get_add_to_file($d->{'dom'});
+		my $newfile = &nginx::get_add_to_file($d->{'dom'});
 		my $server = &find_domain_server($d);
 		if ((!$newfile || $server->{'file'} ne $newfile) &&
 		    $server->{'file'} =~ /\Q$oldd->{'dom'}\E/) {
 			&$virtual_server::first_print($text{'feat_modifyfile'});
-			&delete_server_link($server);
+			&nginx::delete_server_link($server);
 			&rename_logged($server->{'file'}, $newfile);
 			$server->{'file'} = $newfile;
-			&create_server_link($server);
-			&flush_config_cache();
+			&nginx::create_server_link($server);
+			&nginx::flush_config_cache();
 			&$virtual_server::second_print(
 				$virtual_server::text{'setup_done'});
 			}
@@ -682,7 +686,7 @@ if (!$d->{'alias'}) {
 	}
 else {
 	# Changing inside an alias
-	&lock_all_config_files();
+	&nginx::lock_all_config_files();
 	my $changed = 0;
 
 	# Change domain name in alias target
@@ -691,12 +695,12 @@ else {
 		my $target = &virtual_server::get_domain($d->{'alias'});
 		my $server = &find_domain_server($target);
 		if (!$server) {
-			&unlock_all_config_files();
+			&nginx::unlock_all_config_files();
 			&$virtual_server::second_print(
 				&text('feat_efind', $target->{'dom'}));
 			return 0;
 			}
-		my $obj = &find("server_name", $server);
+		my $obj = &nginx::find("server_name", $server);
 		foreach my $n (&domain_server_names($oldd)) {
 			@{$obj->{'words'}} = grep { $_ ne $n }
 						  @{$obj->{'words'}};
@@ -708,15 +712,15 @@ else {
 		if ($oldstar >= 0) {
 			$obj->{'words'}->[$oldstar] = "*.".$d->{'dom'};
 			}
-		&save_directive($server, "server_name", [ $obj ]);
+		&nginx::save_directive($server, "server_name", [ $obj ]);
 		$changed++;
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		}
 
 	# Flush files and restart
-	&flush_config_file_lines();
-	&unlock_all_config_files();
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
 	if ($changed) {
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
@@ -733,25 +737,25 @@ my ($d) = @_;
 if (!$d->{'alias'}) {
 	# Remove the whole server
 	&$virtual_server::first_print($text{'feat_delete'});
-	&lock_all_config_files();
+	&nginx::lock_all_config_files();
 	&virtual_server::remove_webmail_redirect_directives($d);
 	my $mode = &feature_get_web_php_mode($d);
-	my $conf = &get_config();
-	my $http = &find("http", $conf);
+	my $conf = &nginx::get_config();
+	my $http = &nginx::find("http", $conf);
 	my $server = &find_domain_server($d);
 	if (!$server) {
-                &unlock_all_config_files();
+                &nginx::unlock_all_config_files();
                 &$virtual_server::second_print(
                         &text('feat_efind', $d->{'dom'}));
                 return 0;
 		}
 	my $alog = &get_nginx_log($d, 0);
 	my $elog = &get_nginx_log($d, 1);
-	&save_directive($http, [ $server ], [ ]);
-	&flush_config_file_lines();
-	&unlock_all_config_files();
-	&delete_server_link($server);
-	&delete_server_file_if_empty($server);
+	&nginx::save_directive($http, [ $server ], [ ]);
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
+	&nginx::delete_server_link($server);
+	&nginx::delete_server_file_if_empty($server);
 	if ($mode eq "fcgid") {
 		&delete_php_fcgi_server($d);
 		}
@@ -778,24 +782,24 @@ if (!$d->{'alias'}) {
 else {
 	# Delete from alias
 	&$virtual_server::first_print($text{'feat_deletealias'});
-	&lock_all_config_files();
+	&nginx::lock_all_config_files();
 	my $target = &virtual_server::get_domain($d->{'alias'});
 	my $server = &find_domain_server($target);
 	if (!$server) {
-		&unlock_all_config_files();
+		&nginx::unlock_all_config_files();
 		&$virtual_server::second_print(
 			&text('feat_efind', $target->{'dom'}));
 		return 0;
 		}
 
-	my $obj = &find("server_name", $server);
+	my $obj = &nginx::find("server_name", $server);
 	foreach my $n (&domain_server_names($d), "*.".$d->{'dom'}) {
 		@{$obj->{'words'}} = grep { $_ ne $n } @{$obj->{'words'}};
 		}
-	&save_directive($server, "server_name", [ $obj ]);
+	&nginx::save_directive($server, "server_name", [ $obj ]);
 
-	&flush_config_file_lines();
-	&unlock_all_config_files();
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
 	&virtual_server::register_post_action(\&print_apply_nginx);
 
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
@@ -819,16 +823,16 @@ if ($d->{'alias'}) {
 	}
 else {
 	&$virtual_server::first_print($text{'feat_disable'});
-	&lock_all_config_files();
+	&nginx::lock_all_config_files();
 	my $server = &find_domain_server($d);
 	if (!$server) {
-                &unlock_all_config_files();
+                &nginx::unlock_all_config_files();
                 &$virtual_server::second_print(
                         &text('feat_efind', $d->{'dom'}));
                 return 0;
 		}
 	my $tmpl = &virtual_server::get_template($d->{'template'});
-	my @locs = &find("location", $server);
+	my @locs = &nginx::find("location", $server);
 	my ($clash) = grep { $_->{'words'}->[0] eq '~' &&
 			     $_->{'words'}->[1] eq '/.*' } @locs;
 
@@ -868,7 +872,7 @@ else {
 				  'words' => [ '^/.*', $disfile, 'break' ] },
 			      ],
 			    };
-			&save_directive($server, [ ], [ $loc ], $locs[0]);
+			&nginx::save_directive($server, [ ], [ $loc ], $locs[0]);
 			}
 		}
 	else {
@@ -885,12 +889,12 @@ else {
 				  'words' => [ '^/.*', $url, 'break' ] },
 			      ],
 			    };
-			&save_directive($server, [ ], [ $loc ], $locs[0]);
+			&nginx::save_directive($server, [ ], [ $loc ], $locs[0]);
 			}
 		}
 
-	&flush_config_file_lines();
-        &unlock_all_config_files();
+	&nginx::flush_config_file_lines();
+        &nginx::unlock_all_config_files();
         &virtual_server::register_post_action(\&print_apply_nginx);
 
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
@@ -912,27 +916,27 @@ if ($d->{'alias'}) {
 	}
 else {
 	&$virtual_server::first_print($text{'feat_enable'});
-	&lock_all_config_files();
+	&nginx::lock_all_config_files();
 	my $server = &find_domain_server($d);
 	if (!$server) {
-                &unlock_all_config_files();
+                &nginx::unlock_all_config_files();
                 &$virtual_server::second_print(
                         &text('feat_efind', $d->{'dom'}));
                 return 0;
 		}
 
-	my @locs = &find("location", $server);
+	my @locs = &nginx::find("location", $server);
 	my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
 			   $_->{'words'}->[1] eq '/.*' } @locs;
 	if ($loc) {
-		my $rewrite = &find_value("rewrite", $loc);
+		my $rewrite = &nginx::find_value("rewrite", $loc);
 		if ($rewrite eq '^/.*') {
-			&save_directive($server, [ $loc ], [ ]);
+			&nginx::save_directive($server, [ $loc ], [ ]);
 			}
 		}
 
-	&flush_config_file_lines();
-        &unlock_all_config_files();
+	&nginx::flush_config_file_lines();
+        &nginx::unlock_all_config_files();
         &virtual_server::register_post_action(\&print_apply_nginx);
 
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
@@ -953,7 +957,7 @@ return &text('feat_evalidate',
 
 # Check root directory
 if (!$d->{'alias'}) {
-	my $rootdir = &find_value("root", $server);
+	my $rootdir = &nginx::find_value("root", $server);
 	my $phd = &virtual_server::public_html_dir($d);
 	return &text('feat_evalidateroot',
 		      "<tt>".&html_escape($rootdir)."</tt>",
@@ -974,6 +978,7 @@ if ($d->{'alias'}) {
 
 # Check for IPs and port
 if (!$d->{'alias'}) {
+<<<<<<< HEAD
 	my @listen = &find_value("listen", $server);
 	if ($d->{'ip'}) {
 		my $found = 0;
@@ -988,6 +993,19 @@ if (!$d->{'alias'}) {
 		$found || return &text('feat_evalidateip',
 				       $d->{'ip'}, $d->{'web_port'});
 		}
+=======
+	my @listen = &nginx::find_value("listen", $server);
+	my $found = 0;
+	foreach my $l (@listen) {
+		$found++ if ($l eq $d->{'ip'} &&
+			      $d->{'web_port'} == 80 ||
+			     $l =~ /^\Q$d->{'ip'}\E:(\d+)$/ &&
+			      $d->{'web_port'} == $1);
+		$found++ if ($l eq $d->{'web_port'} && $config{'listen_mode'} eq '0');
+		}
+	$found || return &text('feat_evalidateip',
+			       $d->{'ip'}, $d->{'web_port'});
+>>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 	if ($d->{'virt6'}) {
 		my $found6 = 0;
 		foreach my $l (@listen) {
@@ -1031,14 +1049,16 @@ my @dnames = map { $_->{'dom'} } @doms;
 if (@doms) {
 	# Grant access to Nginx module
 	my @rv;
-	push(@rv, [ $module_name,
+	push(@rv, [ &nginx_webmin_module(),
 		   { 'vhosts' => join(' ', @dnames),
 		     'root' => $d->{'home'},
+		     'noconfig' => 1,
 		     'global' => 0,
 		     'logs' => 0,
 		     'user' => $d->{'user'},
 		     'edit' => 0,
 		     'stop' => 0,
+		     'create' => 0,
 		   } ] );
 
 	# Grant access to system logs
@@ -1072,12 +1092,11 @@ if (@doms) {
 			}
 		elsif ($mode eq "fpm") {
 			# Allow access to FPM configs for PHP overrides
-			my $conf = &virtual_server::get_php_fpm_config($d);
-                        if ($conf) {
-				my $file = $conf->{'dir'}."/".
-                                           $sd->{'id'}.".conf";
-				push(@pconfs, $file."=".
-				  &text('webmin_phpini', $sd->{'dom'}));
+			$sd->{'php_fpm_version'} = &resolve_php_fpm_version($sd);
+			my $conf = &virtual_server::get_php_fpm_config($sd);
+			if ($conf) {
+				my $file = $conf->{'dir'}."/".$sd->{'id'}.".conf";
+				push(@pconfs, $file."=".&text('webmin_phpini', $sd->{'dom'}));
 				}
 			}
 		}
@@ -1103,7 +1122,7 @@ else {
 # granted access to. Used in server templates.
 sub feature_modules
 {
-return ( [ $module_name, $text{'feat_module'} ] );
+return ( [ &nginx_webmin_module(), $text{'feat_module'} ] );
 }
 
 # feature_links(&domain)
@@ -1115,10 +1134,10 @@ my $server = &find_domain_server($d);
 return ( ) if (!$server);
 
 # Link to edit Nginx config for domain
-my @rv = ( { 'mod' => $module_name,
+my @rv = ( { 'mod' => &nginx_webmin_module(),
 	     'desc' => $text{'feat_edit'},
-	     'page' => 'edit_server.cgi?id='.&server_id($server),
-	     'cat' => 'services' } );
+	     'page' => 'edit_server.cgi?id='.&nginx::server_id($server),
+	     'cat' => 'web' } );
 
 # Links to logs
 foreach my $log ([ 0, $text{'links_anlog'} ],
@@ -1170,6 +1189,7 @@ if ($mode eq "fcgid") {
 	}
 elsif ($mode eq "fpm") {
 	# Link to edit FPM configs with PHP settings
+	$d->{'php_fpm_version'} = &resolve_php_fpm_version($d);
 	my $conf = &virtual_server::get_php_fpm_config($d);
 	if ($conf) {
 		my $file = $conf->{'dir'}."/".$d->{'id'}.".conf";
@@ -1189,15 +1209,15 @@ return @rv;
 sub print_apply_nginx
 {
 &$virtual_server::first_print($text{'feat_apply'});
-if (&is_nginx_running()) {
+if (&nginx::is_nginx_running()) {
 	my $test;
 	if ($virtual_server::config{'check_apache'}) {
-		$test = &test_config();
+		$test = &nginx::test_config();
 		if ($test && $test =~ /Cannot\s+assign/i) {
 			# Maybe new address has just come up .. wait 5 seconds
 			# and re-try
 			sleep(5);
-			$test = &test_config();
+			$test = &nginx::test_config();
 			}
 		}
 	if ($test) {
@@ -1205,11 +1225,11 @@ if (&is_nginx_running()) {
 		    &text('feat_econfig2', "<tt>".&html_escape($test)."</tt>"));
 		}
 	else {
-		my $err = apply_nginx();
+		my $err = &nginx::apply_nginx();
 		if ($err) {
 			&$virtual_server::second_print(
 			    &text('feat_eapply',
-				  "<tt>".&html_escape($test)."</tt>"));
+				  "<tt>".&html_escape($err)."</tt>"));
 			}
 		else {
 			&$virtual_server::second_print(
@@ -1254,12 +1274,12 @@ sub feature_get_web_php_mode
 my ($d) = @_;
 my $server = &find_domain_server($d);
 $server || return undef;
-my @locs = &find("location", $server);
+my @locs = &nginx::find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
 		   ($_->{'words'}->[1] eq '\.php$' ||
 		    $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 if ($loc) {
-	my ($pass) = &find("fastcgi_pass", $loc);
+	my ($pass) = &nginx::find("fastcgi_pass", $loc);
 	if ($pass && $pass->{'words'}->[0] =~ /^(localhost|127\.0\.0\.1|unix):(.*)$/) {
 		if (($1 eq "localhost" || $1 eq "127.0.0.1" || $1 eq "unix") &&
 		     $2 && $2 !~ /\.sock\/socket/) {
@@ -1279,6 +1299,7 @@ sub feature_save_web_php_mode
 my ($d, $mode) = @_;
 my $tmpl = &virtual_server::get_template($d->{'template'});
 my $server = &find_domain_server($d);
+my $splitre = '^(.+\.php)(/.+)$';
 my $oldmode = &feature_get_web_php_mode($d) || "";
 if ($oldmode eq "fpm" && $mode ne "fpm") {
 	# Shut down FPM pool
@@ -1303,19 +1324,10 @@ if ($mode eq "fcgid" && ($oldmode ne "fcgid" || !$d->{'nginx_php_port'})) {
 	}
 elsif ($mode eq "fpm" && ($oldmode ne "fpm" || !$d->{'php_fpm_port'})) {
 	# Setup FPM pool
-	if (!$d->{'php_fpm_version'}) {
-		# Work out the default FPM version from the template
-		my @avail = &virtual_server::list_available_php_versions(
-				$d, "fpm");
-		@avail || &error("No FPM versions found!");
-		my $fpm;
-		if ($tmpl->{'web_phpver'}) {
-			($fpm) = grep { $_->[0] eq $tmpl->{'web_phpver'} }
-				      @avail;
-			}
-		$fpm ||= $avail[0];
-		$d->{'php_fpm_version'} = $fpm->[0];
-		}
+	my @avail = &virtual_server::list_available_php_versions($d, "fpm");
+	@avail || &error("No FPM versions found!");
+	$d->{'php_fpm_version'} =
+		&resolve_php_fpm_version($d, \@avail, 1);
 	&virtual_server::create_php_fpm_pool($d);
 	my $listen = &virtual_server::get_php_fpm_config_value($d, "listen");
 	if ($listen =~ /^\S+:(\d+)$/ ||
@@ -1328,60 +1340,60 @@ elsif ($mode eq "fpm" && ($oldmode ne "fpm" || !$d->{'php_fpm_port'})) {
 	}
 
 # Find the location block for PHP
-my @locs = &find("location", $server);
+my @locs = &nginx::find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
 		   ($_->{'words'}->[1] eq '\.php$' ||
 		    $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 
 if ($port) {
-	# Update the port in the config, if changed
-	if (!$loc) {
-		&lock_file($server->{'file'});
-		$loc =
-		   { 'name' => 'location',
-			'words' => [ '~', '\.php(/|$)' ],
-			'type' => 1,
-			'members' => [
-				{ 'name' => 'default_type',
-				  'words' => [ 'application/x-httpd-php' ],
-				},
-				{ 'name' => 'try_files',
-				  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
-				},
-			  ],
-		   };
-		&save_directive($server, [ ], [ $loc ]);
-		&flush_config_file_lines();
-		&unlock_file($server->{'file'});
+	# Keep fastcgi_split_path_info inside the PHP location block, and
+	# replace that block with the standard handler configuration;
+	# replacing the whole block avoids partial section updates that can
+	# otherwise pull following sibling blocks into the PHP location
+	my $newloc = &get_php_location_struct($loc, $port, $splitre);
+	&nginx::lock_all_config_files($server);
+	&nginx::save_directive($server, "fastcgi_split_path_info", [ ]);
+	if ($loc) {
+		my $idx = &indexof($loc, @{$server->{'members'}});
+		my $before = $idx >= 0 ? $server->{'members'}->[$idx+1] : undef;
+		&nginx::save_directive($server, [ $loc ], [ ]);
+		&nginx::save_directive($server, [ ], [ $newloc ], $before);
 		}
-	&lock_file($loc->{'file'});
-	&save_directive($loc, "fastcgi_pass",
-		$port =~ /^\d+$/ ? [ "127.0.0.1:".$port ]
-				 : [ "unix:".$port ]);
-	&flush_config_file_lines();
-	&unlock_file($loc->{'file'});
+	else {
+		&nginx::save_directive($server, [ ], [ $newloc ]);
+		}
+	&nginx::flush_config_file_lines();
+	&nginx::flush_config_cache();
+	&nginx::unlock_all_config_files($server);
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
 elsif ($mode eq 'none') {
-	# Remove the location block
+	# Replace the PHP location block with its disabled form
 	if ($loc) {
-		&lock_file($server->{'file'});
-		my $locdeftype =
-		   { 'name' => 'location',
-			'words' => [ '~', '\.php(/|$)' ],
-			'type' => 1,
-			'members' => [
-				{ 'name' => 'default_type',
-				  'words' => [ 'text/plain' ],
-				},
-				{ 'name' => 'try_files',
-				  'words' => [ '$uri', '$fastcgi_script_name', '=404' ],
-				},
-			],
-		   };
-		&save_directive($server, [ $loc ], [ $locdeftype ]);
-		&flush_config_file_lines();
-		&unlock_file($server->{'file'});
+		# Rebuild the whole location block instead of editing directives
+		# in place, and put the disabled block back in the same position
+		&nginx::lock_all_config_files($server);
+
+		# Keep this directive inside the PHP location block only
+		&nginx::save_directive($server, "fastcgi_split_path_info", [ ]);
+
+		# Build the disabled PHP block while preserving any unrelated
+		# custom directives that already exist in this location
+		my $locdeftype = &get_php_disabled_location_struct($loc);
+		my $idx = &indexof($loc, @{$server->{'members'}});
+		my $before = $idx >= 0 ? $server->{'members'}->[$idx+1] : undef;
+
+		# Remove the old PHP location and insert the disabled one before
+		# the next sibling, so surrounding locations and if blocks stay
+		# put
+		&nginx::save_directive($server, [ $loc ], [ ]);
+		&nginx::save_directive($server, [ ], [ $locdeftype ], $before);
+		&nginx::flush_config_file_lines();
+
+		# Drop the parsed config cache so the next save re-reads the
+		# updated config tree from disk
+		&nginx::flush_config_cache();
+		&nginx::unlock_all_config_files($server);
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
 	}
@@ -1411,21 +1423,18 @@ if ($mode eq 'fcgid') {
 		   'version' => $defver } );
 	}
 elsif ($mode eq 'fpm') {
-	# Find the FPM version installed that matches the version in use
-	my $ver = $d->{'php_fpm_version'} || $avail[0]->[0];
+	return ( ) if (!@avail);
+
+	# Prefer the real pool version over a stale saved version
+	my $ver = &resolve_php_fpm_version($d, \@avail);
 	my ($a) = grep { $_->[0] eq $ver } @avail;
 	if (!$a) {
-		# Selected version doesn't exist .. assume first one
-		$a = $avail[0];
+		# Selected version doesn't exist .. assume highest available
+		$a = $avail[-1];
 		}
-        if (@avail) {
-                return ( { 'dir' => &virtual_server::public_html_dir($d),
-                           'version' => $a->[0],
-                           'mode' => $mode } );
-                }
-        else {
-                return ( );
-                }
+	return ( { 'dir' => &virtual_server::public_html_dir($d),
+		   'version' => $a->[0],
+		   'mode' => $mode } );
 	}
 return ( );	# Should never happen
 }
@@ -1441,11 +1450,8 @@ my $mode = &feature_get_web_php_mode($d);
 my @avail = &virtual_server::list_available_php_versions($d, $mode);
 if ($mode eq "fpm") {
 	# If the FPM version changed, just reset up
-	if (!$d->{'php_fpm_version'}) {
-		# Assume currently on first version
-		$d->{'php_fpm_version'} = $avail[0]->[0];
-		}
-	if ($ver ne $d->{'php_fpm_version'}) {
+	my $currver = &resolve_php_fpm_version($d, \@avail, 1);
+	if ($ver ne $currver) {
 		&virtual_server::delete_php_fpm_pool($d);
 		$d->{'php_fpm_version'} = $ver;
 		&virtual_server::lock_domain($d);
@@ -1492,21 +1498,21 @@ my ($d) = @_;
 my $server = &find_domain_server($d);
 my $maxexectime = $virtual_server::max_php_fcgid_timeout || 9999;
 if ($server) {
-	my $ver = &get_nginx_version();
+	my $ver = &nginx::get_nginx_version();
 	$ver =~ s/^(\d+\.\d+)(.*)/$1/;
 	if ($ver >= 1.6) {
 		# New format directive
 		my ($t) = grep { $_->{'words'}->[0] eq "read_timeout" }
-			     &find("fastcgi_param", $server);
+			     &nginx::find("fastcgi_param", $server);
 		my $v = $t ? $t->{'words'}->[1] : undef;
 		return !$v ? undef : $v == $maxexectime ? undef : $v;
 		}
 	else {
 		# Old format directive
-		my $t = &find_value("fastcgi_read_timeout", $server);
+		my $t = &nginx::find_value("fastcgi_read_timeout", $server);
 		return $t == $maxexectime ? undef : $t if ($t);
 		}
-	return &get_default("fastcgi_read_timeout");
+	return &nginx::get_default("fastcgi_read_timeout");
 	}
 }
 
@@ -1515,28 +1521,28 @@ if ($server) {
 sub feature_set_fcgid_max_execution_time
 {
 my ($d, $max) = @_;
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $server = &find_domain_server($d);
 my $maxexectime = $virtual_server::max_php_fcgid_timeout || 9999;
 if ($server) {
-	my $ver = &get_nginx_version();
+	my $ver = &nginx::get_nginx_version();
 	$ver =~ s/^(\d+\.\d+)(.*)/$1/;
 	if ($ver >= 1.6) {
 		# New format directive
-		my @p = &find("fastcgi_param", $server);
+		my @p = &nginx::find("fastcgi_param", $server);
 		@p = grep { $_->{'words'}->[0] ne 'read_timeout' } @p;
 		push(@p, { 'name' => 'fastcgi_param',
 			   'words' => [ "read_timeout", ($max || $maxexectime) ] });
-		&save_directive($server, "fastcgi_param", \@p);
+		&nginx::save_directive($server, "fastcgi_param", \@p);
 		}
 	else {
 		# Old format directive
-		&save_directive($server, "fastcgi_read_timeout",
+		&nginx::save_directive($server, "fastcgi_read_timeout",
 			        [ $max || $maxexectime ]);
 		}
 	}
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 }
 
@@ -1572,16 +1578,14 @@ sub feature_get_web_php_children
 {
 my ($d) = @_;
 my $mode = &feature_get_web_php_mode($d);
-my $childrenmax = 
-	defined(&virtual_server::get_php_max_childred_allowed) ? 
-	&virtual_server::get_php_max_childred_allowed() :
-	$virtual_server::max_php_fcgid_children;
+my $childrenmax = &virtual_server::get_php_max_children_allowed();
 if ($mode eq "fcgid") {
 	# Stored in the domain's config
 	return $d->{'nginx_php_children'} || 0;
 	}
 elsif ($mode eq "fpm") {
 	# Read from FPM config file
+	$d->{'php_fpm_version'} = &resolve_php_fpm_version($d);
 	my $conf = &virtual_server::get_php_fpm_config($d);
 	return -1 if (!$conf);
 	my $childs = &virtual_server::get_php_fpm_pool_config_value(
@@ -1599,10 +1603,7 @@ else {
 sub feature_save_web_php_children
 {
 my ($d, $children) = @_;
-my $childrenmax = 
-	defined(&virtual_server::get_php_max_childred_allowed) ? 
-	&virtual_server::get_php_max_childred_allowed() :
-	$virtual_server::max_php_fcgid_children;
+my $childrenmax = &virtual_server::get_php_max_children_allowed();
 $d->{'nginx_php_children'} ||= 0;
 if ($children != $d->{'nginx_php_children'}) {
 	my $children_curr = $d->{'nginx_php_children'} ||
@@ -1616,23 +1617,27 @@ if ($children != $d->{'nginx_php_children'}) {
 		}
 	elsif ($mode eq "fpm") {
 		# Set in the FPM config
+		$d->{'php_fpm_version'} =
+			&resolve_php_fpm_version($d, undef, 1);
 		my $conf = &virtual_server::get_php_fpm_config($d);
 		return 0 if (!$conf);
-		$children = $childrenmax if ($children == 0);   # Recommended default
-		my $fpmstartservers =
-		       defined(&virtual_server::get_php_start_servers) ? 
-		       &virtual_server::get_php_start_servers($children) : 1;
+		$children = $childrenmax if ($children == 0);  # Use recommended default
+		
 		&virtual_server::save_php_fpm_pool_config_value(
 			$conf, $d->{'id'}, "pm.max_children", $children);
-		&virtual_server::save_php_fpm_pool_config_value(
-			$conf, $d->{'id'}, "pm.start_servers", $fpmstartservers);
+
 		if ($children != $children_curr) {
-			my $fpmmaxspare =
-				defined(&virtual_server::get_php_max_spare_servers)
-					? &virtual_server::get_php_max_spare_servers($children)
-					: int($children / 2) || $children;
 			&virtual_server::save_php_fpm_pool_config_value(
-				$conf, $d->{'id'}, "pm.max_spare_servers", $fpmmaxspare);
+				$conf, $d->{'id'}, "pm.start_servers",
+					&virtual_server::get_php_start_servers($children));
+
+			&virtual_server::save_php_fpm_pool_config_value(
+				$conf, $d->{'id'}, "pm.min_spare_servers",
+					&virtual_server::get_php_min_spare_servers($children));
+
+			&virtual_server::save_php_fpm_pool_config_value(
+				$conf, $d->{'id'}, "pm.max_spare_servers",
+					&virtual_server::get_php_max_spare_servers($children));
 			}
 		}
 	&virtual_server::lock_domain($d);
@@ -1646,8 +1651,8 @@ return undef;
 # Returns info for restarting Nginx
 sub feature_startstop
 {
-my $pid = &is_nginx_running();
-my @links = ( { 'link' => '/'.$module_name.'/',
+my $pid = &nginx::is_nginx_running();
+my @links = ( { 'link' => '/' . &nginx_webmin_module() . '/',
 		'desc' => $text{'feat_manage'},
 		'manage' => 1 } );
 if ($pid) {
@@ -1671,14 +1676,14 @@ else {
 # Stop the Nginx webserver, from the System Information page
 sub feature_stop_service
 {
-return &stop_nginx();
+return &nginx::stop_nginx();
 }
 
 # feature_start_service()
 # Start the Nginx webserver, from the System Information page
 sub feature_start_service
 {
-return &start_nginx();
+return &nginx::start_nginx();
 }
 
 # feature_bandwidth(&domain, start, &bw-hash)
@@ -1729,7 +1734,7 @@ sub feature_get_web_domain_star
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return undef if (!$server);
-my $obj = &find("server_name", $server);
+my $obj = &nginx::find("server_name", $server);
 foreach my $w (@{$obj->{'words'}}) {
 	if ($w eq "*.".$d->{'dom'}) {
 		return 1;
@@ -1743,23 +1748,23 @@ return 0;
 sub feature_save_web_domain_star
 {
 my ($d, $star) = @_;
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $server = &find_domain_server($d);
 return undef if (!$server);
-my $obj = &find("server_name", $server);
+my $obj = &nginx::find("server_name", $server);
 my $idx = &indexof("*.".$d->{'dom'}, @{$obj->{'words'}});
 if ($star && $idx < 0) {
 	# Need to add
 	push(@{$obj->{'words'}}, "*.".$d->{'dom'});
-	&save_directive($server, "server_name", [ $obj ]);
+	&nginx::save_directive($server, "server_name", [ $obj ]);
 	}
 elsif (!$star && $idx >= 0) {
 	# Need to remove
 	splice(@{$obj->{'words'}}, $idx, 1);
-	&save_directive($server, "server_name", [ $obj ]);
+	&nginx::save_directive($server, "server_name", [ $obj ]);
 	}
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 }
 
@@ -1778,7 +1783,72 @@ return 1;	# Always supported
 
 sub feature_supports_web_host_redirects
 {
-return 0;	# Not implemented yet
+return 1;
+}
+
+# feature_supports_web_redirect_part_options()
+# Lets the core UI expose filename/query controls for nginx redirects.
+sub feature_supports_web_redirect_part_options
+{
+return 1;
+}
+
+# append_web_redirect_subpath(destination, path-part)
+# Inserts a captured path part before any destination query string or fragment.
+sub append_web_redirect_subpath
+{
+my ($dest, $part) = @_;
+my $suffix = "";
+if ($dest =~ s/([?#].*)\z//) {
+	$suffix = $1;
+	}
+return $dest.$part.$suffix;
+}
+
+# remove_web_redirect_subpath(destination)
+# Removes a generated $1 path part while preserving query strings/fragments.
+sub remove_web_redirect_subpath
+{
+my ($dest) = @_;
+$dest =~ s/\$1([?#].*)?\z/$1 || ""/e;
+return $dest;
+}
+
+# quote_web_redirect_path_re(path)
+# Quotes a UI path for nginx's PCRE syntax. Do not use Perl \Q...\E here.
+sub quote_web_redirect_path_re
+{
+my ($path) = @_;
+my $pathre = quotemeta($path);
+$pathre =~ s!\\/!/!g;
+return $pathre;
+}
+
+# unquote_web_redirect_path_re(regex-path)
+# Reverses quote_web_redirect_path_re, returning undef for custom regexes.
+sub unquote_web_redirect_path_re
+{
+my ($pathre) = @_;
+if ($pathre =~ /^\\Q(\/.*)\\E\z/) {
+	# Older generated rules used Perl's \Q...\E quoting, which nginx
+	# does not support. Accept it while listing so users can remove them.
+	return $1;
+	}
+my $path = "";
+while (length($pathre)) {
+	if ($pathre =~ s/^\\([^A-Za-z0-9])//) {
+		$path .= $1;
+		}
+	elsif ($pathre =~ s/^([A-Za-z0-9_\/]+)//) {
+		$path .= $1;
+		}
+	else {
+		# Not a literal path generated by quote_web_redirect_path_re.
+		# Leave arbitrary regex rewrites alone.
+		return undef;
+		}
+	}
+return $path;
 }
 
 # feature_list_web_redirects(&domain)
@@ -1790,45 +1860,108 @@ my $server = &find_domain_server($d);
 return () if (!$server);
 my @rv;
 my $phd = &virtual_server::public_html_dir($d);
-my @rewrites = &find("rewrite", $server);
-foreach my $i (&find("if", $server)) {
+my @rewrites = &nginx::find("rewrite", $server);
+foreach my $i (&nginx::find("if", $server)) {
 	my @w = @{$i->{'words'}};
-	if ($i->{'type'} &&
-	    @{$i->{'members'}} == 1 &&
-	    $w[0] eq "\$scheme" && $w[1] eq "=" &&
+	next if (!$i->{'type'} || @{$i->{'members'}} != 1);
+	if ($w[0] eq "\$scheme" && $w[1] eq "=" &&
 	    ($w[2] eq "http" || $w[2] eq "https")) {
 		# May contain relevant rewrites
-		my ($r) = &find("rewrite", $i);
+		my ($r) = &nginx::find("rewrite", $i);
+		next if (!$r);
 		$r->{'_scheme'} = $w[2];
 		$r->{'_if'} = $i;
 		push(@rewrites, $r);
 		}
+	elsif ($w[0] eq "\$host" &&
+	       ($w[1] eq '=' || $w[1] eq '~' || $w[1] eq '~*') &&
+	       $i->{'members'}->[0]->{'name'} eq 'return') {
+		# Host-based redirect
+		my $ret = $i->{'members'}->[0];
+		my @rw = @{$ret->{'words'}};
+		next if (@rw < 2);
+		my $url = $rw[1];
+		my $stripquery = 0;
+		if (!($url =~ s/\$request_uri\z//)) {
+			if ($url =~ s/\$uri\z//) {
+				$stripquery = 1;
+				}
+			}
+		$url .= '/' if ($url !~ m{://[^/]+/});
+		my $host = $w[2];
+		my $hostre = $w[1] eq '=' ? 0 : 1;
+		if ($hostre && $host =~ /^\^(.*)\$\z/) {
+			$host = $1;
+			}
+		push(@rv, { 'path'       => '/',
+			    'dest'       => $url,
+			    'host'       => $host,
+			    'hostregexp' => $hostre,
+			    'code'       => $rw[0],
+			    'http'       => 1,
+			    'https'      => 1,
+			    'alias'      => 0,
+			    'object'     => $ret,
+			    'stripquery' => $stripquery,
+			    'ifobject'   => $i,
+			    'id'         => 'redirect_/_'.$host });
+		}
 	}
 foreach my $r (@rewrites) {
 	my $redirect;
+	my $pathre = $r->{'words'}->[0];
 	if ($r->{'words'}->[2] &&
 	    $r->{'words'}->[2] =~ /break|redirect|permanent/ &&
-	    $r->{'words'}->[0] =~ /^\^\\Q(\/.*)\\E(\(\.\*\))?(\$)?/) {
-		# Regular redirect
-		$redirect = { 'path' => $1,
-			      'dest' => $r->{'words'}->[1],
-			      'object' => $r,
-			    };
-		if ($2) {
-			if ($redirect->{'dest'} =~ s/\$1$//) {
-				$redirect->{'regexp'} = 0;
-				}
-			else {
-				$redirect->{'regexp'} = 1;
+	    $r->{'words'}->[0] !~ /\^\/\(\?\!\.well\-known\)/) {
+		# Regular redirect. Strip our known suffix first; what remains
+		# must be a literal path generated by quote_web_redirect_path_re.
+		my $match;
+		if ($pathre =~ s/\(\.\*\?\)\(\?:\[\^\/\]\*\\\.\[\^\/\]\*\)\?\$\z//) {
+			$match = 'stripfile';
+			}
+		elsif ($pathre =~ s/\(\.\*\)\z//) {
+			$match = 'subpaths';
+			}
+		elsif ($pathre =~ s/\$\z//) {
+			$match = 'exact';
+			}
+		if ($pathre =~ s/^\^//) {
+			my $path = &unquote_web_redirect_path_re($pathre);
+			if (defined($path) && $path =~ /^\//) {
+				$redirect = { 'path' => $path,
+					      'dest' => $r->{'words'}->[1],
+					      'object' => $r,
+					    };
+				# A trailing ? on an nginx replacement drops
+				# the original request query string.
+				if ($redirect->{'dest'} =~ s/\?$//) {
+					$redirect->{'stripquery'} = 1;
+					}
+				if ($match && $match ne 'exact') {
+					# Destinations with $1 keep the matched
+					# sub-path; otherwise sub-paths are ignored.
+					if ($redirect->{'dest'} =~ /\$1(?:[?#].*)?\z/) {
+						$redirect->{'dest'} =
+							&remove_web_redirect_subpath(
+								$redirect->{'dest'});
+						$redirect->{'stripfile'} = 1
+							if ($match eq 'stripfile');
+						}
+					else {
+						$redirect->{'regexp'} = 1;
+						}
+					}
+				elsif ($match && $match eq 'exact') {
+					$redirect->{'exact'} = 1;
+					}
 				}
 			}
-		elsif ($3) {
-			$redirect->{'exact'} = 1;
+		if ($redirect) {
+			my $m = $r->{'words'}->[2];
+			$redirect->{'code'} = $m eq 'permanent' ? 301 :
+					      $m eq 'redirect' ? 302 :
+					      $m eq 'break' ? 302 : undef;
 			}
-		my $m = $r->{'words'}->[2];
-		$redirect->{'code'} = $m eq 'permanent' ? 301 :
-				      $m eq 'redirect' ? 302 :
-				      $m eq 'break' ? 302 : undef;
 		}
 	elsif ($r->{'words'}->[0] =~ /\^\/\(\?\!\.well\-known\)(\$)?/) {
 		# Special case for / which excludes .well-known
@@ -1888,9 +2021,49 @@ my $dest = $redirect->{'dest'};
 if ($dest =~ /^(http|https|\$scheme):/) {
 	$dest = &replace_apache_vars($dest, 1);
 	}
+
+# Host-based redirect
+if ($redirect->{'host'}) {
+	my $op  = $redirect->{'hostregexp'} ? '~*' : '=';
+	my $val = $redirect->{'hostregexp'}
+			? '^'.$redirect->{'host'}.'$'
+			: $redirect->{'host'};
+	if ($redirect->{'stripfile'}) {
+		return "Filename redirect option cannot be used with ".
+		       "hostname filters on Nginx websites";
+		}
+	# Host redirects use return and apply to the whole request URI, so
+	# only query stripping maps cleanly onto nginx's built-in variables.
+	my $ret_url = $dest;
+	$ret_url =~ s{/+\z}{};
+	$ret_url .= $redirect->{'stripquery'} ? '$uri' : '$request_uri';
+	my $code = $redirect->{'code'} || 302;
+	my $i = { 'name' => 'if',
+		  'type' => 1,
+		  'members' => [ { 'name'  => 'return',
+				   'words' => [ $code, $ret_url ] } ],
+		  'words' => [ '$host', $op, $val ] };
+	&nginx::lock_all_config_files();
+	foreach my $existing (&nginx::find("if", $server)) {
+		my @ew = @{$existing->{'words'}};
+		if (@ew == 3 && $ew[0] eq '$host' &&
+		    $ew[1] eq $op && $ew[2] eq $val) {
+			&nginx::save_directive($server, [ $existing ], [ ]);
+			last;
+			}
+		}
+	&nginx::save_directive($server, [ ], [ $i ]);
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
+	&virtual_server::register_post_action(\&print_apply_nginx);
+	return undef;
+	}
+
+# Nginx rewrite rules take PCRE regexes. Quote the user-entered path
+# literally, then append our capture/exact suffix below.
 my $re = $redirect->{'path'};
 if ($re !~ /\^\/\(\?\!\.well\-known\)/) {
-	$re = '^\\Q'.$re.'\\E';
+	$re = '^'.&quote_web_redirect_path_re($re);
 	}
 my @c = !$redirect->{'code'} && $redirect->{'alias'} ? ( 'break' ) :
 	!$redirect->{'code'} && !$redirect->{'alias'} ? ( 'redirect' ) :
@@ -1908,16 +2081,29 @@ if ($re !~ /\^\/\(\?\!\.well\-known\)/) {
 		# Redirect only the specific path
 		$r->{'words'}->[0] .= "\$";
 		}
+	elsif ($redirect->{'stripfile'}) {
+		# Redirect sub-directory to same sub-dir on dest, but
+		# strip a file-like final path segment
+		$r->{'words'}->[0] .=
+			"(.*?)(?:[^/]*\\.[^/]*)?\$";
+		$r->{'words'}->[1] =
+			&append_web_redirect_subpath($r->{'words'}->[1], "\$1");
+		}
 	else {
 		# Redirect sub-directory to same sub-dir on dest
 		$r->{'words'}->[0] .= "(.*)";
-		$r->{'words'}->[1] .= "\$1";
+		$r->{'words'}->[1] =
+			&append_web_redirect_subpath($r->{'words'}->[1], "\$1");
 		}
 	}
-&lock_all_config_files();
+# In nginx rewrite replacements, a trailing ? discards the original args.
+if ($redirect->{'stripquery'} && !$redirect->{'alias'}) {
+	$r->{'words'}->[1] .= "?";
+	}
+&nginx::lock_all_config_files();
 if ($redirect->{'http'} && $redirect->{'https'}) {
 	# Can just go at top level
-	&save_directive($server, [ ], [ $r ]);
+	&nginx::save_directive($server, [ ], [ $r ]);
 	}
 else {
 	# Put under an 'if' statement
@@ -1926,10 +2112,10 @@ else {
 		  'type' => 1,
 		  'members' => [ $r ],
 		  'words' => [ '$scheme', '=', $s ] }; 
-	&save_directive($server, [ ], [ $i ]);
+	&nginx::save_directive($server, [ ], [ $i ]);
 	}
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -1942,15 +2128,15 @@ my ($d, $redirect) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 return $text{'redirect_eobj'} if (!$redirect->{'object'});
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 if ($redirect->{'ifobject'}) {
-	&save_directive($server, [ $redirect->{'ifobject'} ], [ ]);
+	&nginx::save_directive($server, [ $redirect->{'ifobject'} ], [ ]);
 	}
 else {
-	&save_directive($server, [ $redirect->{'object'} ], [ ]);
+	&nginx::save_directive($server, [ $redirect->{'object'} ], [ ]);
 	}
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -1968,13 +2154,13 @@ my ($d) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 my @rv;
-my @locations = &find("location", $server);
-my $conf = &get_config();
-my $http = &find("http", $conf);
-my %upstreams = map { $_->{'words'}->[0], $_ } &find("upstream", $http);
+my @locations = &nginx::find("location", $server);
+my $conf = &nginx::get_config();
+my $http = &nginx::find("http", $conf);
+my %upstreams = map { $_->{'words'}->[0], $_ } &nginx::find("upstream", $http);
 foreach my $l (@locations) {
 	next if (@{$l->{'words'}} > 1);
-	my $pp = &find_value("proxy_pass", $l);
+	my $pp = &nginx::find_value("proxy_pass", $l);
 	next if (!$pp && @{$l->{'members'}});
 	my $b = { 'path' => $l->{'words'}->[0],
 		  'location' => $l };
@@ -1987,7 +2173,7 @@ foreach my $l (@locations) {
 		$b->{'balancer'} = $1;
 		my $u = $upstreams{$1};
 		$b->{'urls'} = [ map { &upstream_to_url($_) }
-				     &find_value("server", $u) ];
+				     &nginx::find_value("server", $u) ];
 		$b->{'upstream'} = $u;
 		}
 	else {
@@ -2012,9 +2198,9 @@ my ($d, $balancer) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 my ($clash) = grep { $_->{'words'}->[0] eq $balancer->{'path'} }
-		   &find("location", $server);
+		   &nginx::find("location", $server);
 $clash && return &text('redirect_eclash', $balancer->{'path'});
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
 my $url;
 foreach my $u (@urls) {
@@ -2027,10 +2213,10 @@ return $err if ($err);
 if (@urls > 1) {
 	$balancer->{'balancer'} ||= 'virtualmin_'.time().'_'.$$;
 	$url = 'http://'.$balancer->{'balancer'};
-	my $conf = &get_config();
-	my $http = &find("http", $conf);
+	my $conf = &nginx::get_config();
+	my $http = &nginx::find("http", $conf);
 	my ($clash) = grep { $_->{'words'}->[0] eq $balancer->{'balancer'} }
-			   &find("upstream", $http);
+			   &nginx::find("upstream", $http);
 	$clash && return &text('redirect_eupstream', $balancer->{'balancer'});
 	my $u = { 'name' => 'upstream',
 		  'words' => [ $balancer->{'balancer'} ],
@@ -2041,7 +2227,7 @@ if (@urls > 1) {
 		  	]
 		};
 	$balancer->{'upstream'} = $u;
-	&save_directive($http, [ ], [ $u ]);
+	&nginx::save_directive($http, [ ], [ $u ]);
 	}
 elsif (!$balancer->{'none'}) {
 	$url = $urls[0];
@@ -2077,9 +2263,9 @@ if ($url) {
 	}
 $balancer->{'location'} = $l;
 my $before = &find_before_location($server, $balancer->{'path'});
-&save_directive($server, [ ], [ $l ], $before);
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::save_directive($server, [ ], [ $l ], $before);
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -2093,22 +2279,22 @@ my ($d, $balancer) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 return $text{'redirect_eobj2'} if (!$balancer->{'location'});
-&lock_all_config_files();
-my $pp = &find_value("proxy_pass", $balancer->{'location'});
+&nginx::lock_all_config_files();
+my $pp = &nginx::find_value("proxy_pass", $balancer->{'location'});
 if ($balancer->{'upstream'}) {
 	# Has associated upstream block .. check for other users
-	my $conf = &get_config();
-	my $http = &find("http", $conf);
-	my @pps = &find_recursive("proxy_pass", $http);
+	my $conf = &nginx::get_config();
+	my $http = &nginx::find("http", $conf);
+	my @pps = &nginx::find_recursive("proxy_pass", $http);
 	my @users = grep { $_->{'words'}->[0] =~
 			   /^http:\/\/\Q$balancer->{'balancer'}\E/ } @pps;
 	if (@users <= 1) {
-		&save_directive($http, [ $balancer->{'upstream'} ], [ ]);
+		&nginx::save_directive($http, [ $balancer->{'upstream'} ], [ ]);
 		}
 	}
-&save_directive($server, [ $balancer->{'location'} ], [ ]);
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::save_directive($server, [ $balancer->{'location'} ], [ ]);
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -2121,11 +2307,11 @@ my ($d, $balancer, $oldbalancer) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 return $text{'redirect_eobj2'} if (!$oldbalancer->{'location'});
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $l = $oldbalancer->{'location'};
 if ($balancer->{'path'} ne $oldbalancer->{'path'}) {
 	$l->{'words'}->[0] = $balancer->{'path'};
-	&save_directive($server, [ $l ], [ $l ]);
+	&nginx::save_directive($server, [ $l ], [ $l ]);
 	}
 my $u = $oldbalancer->{'upstream'};
 my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
@@ -2139,7 +2325,7 @@ return $err if ($err);
 my $url;
 if ($u) {
 	# Change URLs in upstream block
-	&save_directive($u, "server", [ map { &url_to_upstream($_) } @urls ]);
+	&nginx::save_directive($u, "server", [ map { &url_to_upstream($_) } @urls ]);
 	$url = "http://".$oldbalancer->{'balancer'};
 	}
 elsif (@urls > 1) {
@@ -2148,11 +2334,11 @@ elsif (@urls > 1) {
 	}
 else {
 	# Just change one URL
-	&save_directive($l, "proxy_pass", \@urls);
+	&nginx::save_directive($l, "proxy_pass", \@urls);
 	$url = @urls ? $urls[0] : undef;
 	}
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -2170,7 +2356,7 @@ sub feature_add_web_webmail_redirect
 my ($d, $tmpl) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 foreach my $r ('webmail', 'admin') {
 	next if (!$tmpl->{'web_'.$r});
 
@@ -2205,28 +2391,30 @@ foreach my $r ('webmail', 'admin') {
 		}
 
 	# Update server_name
-	my $obj = &find("server_name", $server);
+	my $obj = &nginx::find("server_name", $server);
 	my $rhost = $r.".".$d->{'dom'};
 	if (&indexof($rhost, @{$obj->{'words'}}) < 0) {
 		push(@{$obj->{'words'}}, $rhost);
-		&save_directive($server, "server_name", [ $obj ]);
+		&nginx::save_directive($server, "server_name", [ $obj ]);
 		}
 
-	# Add rewrite directive, inside if block
-	&save_directive($server, [ ], [
+	# Add rewrite directive, inside if block; Nginx runs server-level
+	# rewrites before location matching, so exclude ACME challenge paths
+	&nginx::save_directive($server, [ ], [
 		{ 'name' => 'if',
 		  'type' => 2,
 		  'words' => [ '$host', '=', $rhost ],
 		  'members' => [
 			{ 'name' => 'rewrite',
-			  'words' => [ '^/(.*)$', $url.'$1', 'redirect' ],
+			  'words' => [ '^/(?!\.well-known(?:/|$))(.*)$',
+				       $url.'$1', 'redirect' ],
 			},
 			]
 		},
 		]);
 	}
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -2238,29 +2426,29 @@ sub feature_remove_web_webmail_redirect
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 foreach my $r ('webmail', 'admin') {
 	# Update server_name
-	my $obj = &find("server_name", $server);
+	my $obj = &nginx::find("server_name", $server);
 	my $rhost = $r.".".$d->{'dom'};
 	my $idx = &indexof($rhost, @{$obj->{'words'}});
 	if ($idx >= 0) {
 		splice(@{$obj->{'words'}}, $idx, 1);
-		&save_directive($server, "server_name", [ $obj ]);
+		&nginx::save_directive($server, "server_name", [ $obj ]);
 		}
 
 	# Remove if block for the rewrite
-	my @ifs = &find("if", $server);
+	my @ifs = &nginx::find("if", $server);
 	foreach my $i (@ifs) {
 		if ($i->{'words'}->[0] eq '$host' &&
 		    $i->{'words'}->[1] eq '=' &&
 		    $i->{'words'}->[2] eq $rhost) {
-			&save_directive($server, [ $i ], [ ]);
+			&nginx::save_directive($server, [ $i ], [ ]);
 			}
 		}
 	}
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -2272,7 +2460,7 @@ sub feature_get_web_webmail_redirect
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return 0 if (!$server);
-my $obj = &find("server_name", $server);
+my $obj = &nginx::find("server_name", $server);
 my @rv;
 foreach my $r ("webmail", "admin") {
 	my $rhost = $r.".".$d->{'dom'};
@@ -2293,13 +2481,13 @@ sub feature_set_web_default
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
-&lock_all_config_files();
-my $conf = &get_config();
-my $http = &find("http", $conf);
+&nginx::lock_all_config_files();
+my $conf = &nginx::get_config();
+my $http = &nginx::find("http", $conf);
 
 # Add default_server to listen directives for this server
-my $def = &get_default_server_param();
-my @listen = &find("listen", $server);
+my $def = &nginx::get_default_server_param();
+my @listen = &nginx::find("listen", $server);
 foreach my $l (@listen) {
 	if (&indexof($def, @{$l->{'words'}}) < 0) {
 		push(@{$l->{'words'}}, $def);
@@ -2307,12 +2495,12 @@ foreach my $l (@listen) {
 	}
 my $first_lip = $listen[0]->{'words'}->[0];
 $first_lip =~ s/(^|:)\d+$//;
-&save_directive($server, "listen", \@listen);
+&nginx::save_directive($server, "listen", \@listen);
 
 # Remove default_server from listen directive for other servers on the IP
-foreach my $os (&find("server", $http)) {
+foreach my $os (&nginx::find("server", $http)) {
 	next if ($os eq $server);
-	my @listen = &find("listen", $os);
+	my @listen = &nginx::find("listen", $os);
 	my $changed = 0;
 	foreach my $l (@listen) {
 		my $lip = $l->{'words'}->[0];
@@ -2324,10 +2512,11 @@ foreach my $os (&find("server", $http)) {
 			$changed++;
 			}
 		}
-	&save_directive($os, "listen", \@listen) if ($changed);
+	&nginx::save_directive($os, "listen", \@listen) if ($changed);
 	}
 
 # Remove IP from server_name for all servers, as we don't do that anymore
+<<<<<<< HEAD
 if ($d->{'ip'}) {
 	foreach my $os (&find("server", $http)) {
 		my $obj = &find("server_name", $os);
@@ -2336,11 +2525,19 @@ if ($d->{'ip'}) {
 			splice(@{$obj->{'words'}}, $idx, 1);
 			&save_directive($os, "server_name", [ $obj ]);
 			}
+=======
+foreach my $os (&nginx::find("server", $http)) {
+	my $obj = &nginx::find("server_name", $os);
+	my $idx = &indexof($d->{'ip'}, @{$obj->{'words'}});
+	if ($idx >= 0) {
+		splice(@{$obj->{'words'}}, $idx, 1);
+		&nginx::save_directive($os, "server_name", [ $obj ]);
+>>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 		}
 	}
 
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -2354,11 +2551,12 @@ my $server = &find_domain_server($d);
 return 0 if (!$server);
 
 # Does listen contain default_server?
-my $listen = &find("listen", $server);
+my $listen = &nginx::find("listen", $server);
 return 0 if (!$listen);
-my $def = &get_default_server_param();
+my $def = &nginx::get_default_server_param();
 return 1 if (&indexof($def, @{$listen->{'words'}}) >= 0);
 
+<<<<<<< HEAD
 if ($d->{'ip'}) {
 	# Fall back to check for IP server_name
 	my $obj = &find("server_name", $server);
@@ -2366,6 +2564,11 @@ if ($d->{'ip'}) {
 	}
 
 return 0;
+=======
+# Fall back to check for IP server_name
+my $obj = &nginx::find("server_name", $server);
+return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
+>>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 }
 
 # feature_save_web_passphrase(&domain)
@@ -2386,7 +2589,7 @@ my ($d, $mode) = @_;
 my $server = &find_domain_server($d);
 return undef if (!$server);
 if ($mode eq 'cert') {
-	my $rv = &find_value("ssl_certificate", $server);
+	my $rv = &nginx::find_value("ssl_certificate", $server);
 	if ($rv eq $d->{'ssl_combined'} && $d->{'ssl_cert'}) {
 		# The Nginx directive points to the combined file, but the
 		# cert-only file is what we really want to return
@@ -2395,7 +2598,7 @@ if ($mode eq 'cert') {
 	return $rv;
 	}
 elsif ($mode eq 'key') {
-	return &find_value("ssl_certificate_key", $server);
+	return &nginx::find_value("ssl_certificate_key", $server);
 	}
 elsif ($mode eq 'ca') {
 	# Always appeneded to the cert file
@@ -2409,33 +2612,34 @@ return undef;
 sub feature_save_web_ssl_file
 {
 my ($d, $mode, $file) = @_;
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $server = &find_domain_server($d);
 return &text('feat_efind', $d->{'dom'}) if (!$server);
 if ($mode eq 'cert') {
-	&save_directive($server, "ssl_certificate",
+	&nginx::save_directive($server, "ssl_certificate",
 			$file ? [ $file ] : [ ]);
 	}
 elsif ($mode eq 'key') {
-	&save_directive($server, "ssl_certificate_key",
+	&nginx::save_directive($server, "ssl_certificate_key",
 			$file ? [ $file ] : [ ]);
 	}
 elsif ($mode eq 'ca') {
 	# Nginx needs cert and CA in the same file!
+	$d->{'ssl_chain'} = $file;
 	if ($file) {
-		# Use the combined file
-		if (!$d->{'ssl_combined'} || !-r $d->{'ssl_combined'}) {
-			&virtual_server::sync_combined_ssl_cert($d);
-			}
-		&save_directive($server, "ssl_certificate", [ $d->{'ssl_combined'} ]);
+		# Always re-sync here because linkage may have changed
+		&virtual_server::sync_combined_ssl_cert($d);
+		&nginx::save_directive($server, "ssl_certificate", [ $d->{'ssl_combined'} ]);
 		}
 	else {
+		&virtual_server::sync_combined_ssl_cert($d)
+			if ($d->{'ssl_cert'} && $d->{'ssl_key'});
 		# Revert to just the cert file
-		&save_directive($server, "ssl_certificate", [ $d->{'ssl_cert'} ]);
+		&nginx::save_directive($server, "ssl_certificate", [ $d->{'ssl_cert'} ]);
 		}
 	}
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -2450,10 +2654,10 @@ return 1 if ($d->{'alias'});
 
 # Write config directives from the server block to a file
 &$virtual_server::first_print($text{'feat_backup'});
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $server = &find_domain_server($d);
 if (!$server) {
-	&unlock_all_config_files();
+	&nginx::unlock_all_config_files();
 	&$virtual_server::second_print(
 		&text('feat_efind', $d->{'dom'}));
 	return 0;
@@ -2468,7 +2672,7 @@ foreach my $l (@$lref[($server->{'line'}+1) .. ($server->{'eline'}-1)]) {
 	&print_tempfile($fh, $l."\n") if ($l);
 	}
 &virtual_server::close_tempfile_as_domain_user($d, $fh);
-my $addto = &get_add_to_file($d->{'dom'});
+my $addto = &nginx::get_add_to_file($d->{'dom'});
 if ($addto &&
     $server->{'file'} eq $addto &&
     $config{'add_to'} && -d $config{'add_to'}) {
@@ -2483,7 +2687,7 @@ if ($addto &&
 		}
 	&virtual_server::flush_file_lines_as_domain_user($d, $file."_complete");
 	}
-&unlock_all_config_files();
+&nginx::unlock_all_config_files();
 &$virtual_server::second_print($virtual_server::text{'setup_done'});
 
 # Save log files, if outside home
@@ -2526,17 +2730,17 @@ return 1 if ($d->{'alias'});
 
 # Replace lines in the server block with those from the backup file
 &$virtual_server::first_print($text{'feat_restore'});
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $server = &find_domain_server($d);
 if (!$server) {
-	&unlock_all_config_files();
+	&nginx::unlock_all_config_files();
 	&$virtual_server::second_print(
 		&text('feat_efind', $d->{'dom'}));
 	return 0;
 	}
 my $alog = &get_nginx_log($d, 0);
 my $elog = &get_nginx_log($d, 1);
-if ($server->{'file'} eq &get_add_to_file($d->{'dom'}) &&
+if ($server->{'file'} eq &nginx::get_add_to_file($d->{'dom'}) &&
     $config{'add_to'} && -d $config{'add_to'} &&
     -s $file."_complete") {
 	# Domain is in its own file, and backup includes the whole file .. so
@@ -2552,7 +2756,7 @@ else {
 	       @$srclref);
 	&flush_file_lines($server->{'file'});
 	}
-&flush_config_cache();
+&nginx::flush_config_cache();
 $server = &find_domain_server($d);
 if (!$server) {
 	&$virtual_server::second_print(
@@ -2561,22 +2765,31 @@ if (!$server) {
 	}
 
 # Put back old log file paths
-&save_directive($server, "access_log", [ $alog ]) if ($alog);
-&save_directive($server, "error_log", [ $elog ]) if ($elog);
+&nginx::save_directive($server, "access_log", [ $alog ]) if ($alog);
+&nginx::save_directive($server, "error_log", [ $elog ]) if ($elog);
 
 # Remove IP from server_name if changed
+<<<<<<< HEAD
 if ($oldd && $oldd->{'ip'} && $oldd->{'ip'} ne $d->{'ip'}) {
 	my $obj = &find("server_name", $server);
+=======
+if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
+	my $obj = &nginx::find("server_name", $server);
+>>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 	my $idx = &indexof($oldd->{'ip'}, @{$obj->{'words'}});
 	if ($idx >= 0) {
 		splice(@{$obj->{'words'}}, $idx, 1);
-		&save_directive($server, "server_name", [ $obj ]);
+		&nginx::save_directive($server, "server_name", [ $obj ]);
 		}
 	}
 
 # Change IPv4 in listen directive if changed
+<<<<<<< HEAD
 # XXX what if not more IPv4?
 my @listen = &find("listen", $server);
+=======
+my @listen = &nginx::find("listen", $server);
+>>>>>>> e4b23eb196be219c4300dc76465292c9a376c43d
 if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
 	foreach my $l (@listen) {
 		if ($l->{'words'}->[0] eq $oldd->{'ip'}) {
@@ -2625,7 +2838,7 @@ foreach my $l (@listen) {
 		}
 	}
 
-&save_directive($server, "listen", \@listen);
+&nginx::save_directive($server, "listen", \@listen);
 
 # Fix up home directory if changed
 if ($oldd && $d->{'home'} && $oldd->{'home'} &&
@@ -2638,9 +2851,9 @@ if ($oldd && $d->{'home'} && $oldd->{'home'} &&
 if ($oldd && $oldd->{'nginx_php_port'} ne $d->{'nginx_php_port'}) {
 	my ($l) = grep { ($_->{'words'}->[1] eq '\.php$' ||
                       $_->{'words'}->[1] eq '\.php(/|$)') }
-		       &find("location", $server);
+		       &nginx::find("location", $server);
 	if ($l) {
-		&save_directive($l, "fastcgi_pass",
+		&nginx::save_directive($l, "fastcgi_pass",
 			$oldd->{'nginx_php_port'} =~ /^\d+$/ ?
 			    [ "127.0.0.1:".$oldd->{'nginx_php_port'} ] :
 			    [ "unix:".$oldd->{'nginx_php_port'} ]);
@@ -2648,8 +2861,8 @@ if ($oldd && $oldd->{'nginx_php_port'} ne $d->{'nginx_php_port'}) {
 		}
 	}
 
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 &$virtual_server::second_print($virtual_server::text{'setup_done'});
 
@@ -2733,16 +2946,16 @@ if ($d->{'alias'}) {
 	&$virtual_server::second_print($text{'feat_clonealias'});
 	return 1;
 	}
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $server = &find_domain_server($d);
 if (!$server) {
-	&unlock_all_config_files();
+	&nginx::unlock_all_config_files();
 	&$virtual_server::second_print(&text('feat_efind', $d->{'dom'}));
 	return 0;
 	}
 my $oldserver = &find_domain_server($d);
 if (!$oldserver) {
-	&unlock_all_config_files();
+	&nginx::unlock_all_config_files();
 	&$virtual_server::second_print(&text('feat_efind', $oldd->{'dom'}));
 	return 0;
 	}
@@ -2750,7 +2963,7 @@ if (!$oldserver) {
 # Preserve some settings from the clone target
 my $alog = &get_nginx_log($d, 0);
 my $elog = &get_nginx_log($d, 1);
-my $obj = &find("server_name", $server);
+my $obj = &nginx::find("server_name", $server);
 
 # Copy across all directives to the new server block, fixing the server_name
 # so that it can be found
@@ -2759,25 +2972,25 @@ my $lref = &read_file_lines($server->{'file'});
 my @lines = @$oldlref[$oldserver->{'line'}+1 .. $oldserver->{'eline'}-1];
 foreach my $l (@lines) {
 	if ($l =~ /^(\s*server_name\s+)/) {
-		$l = $1.&join_words(@{$obj->{'words'}}).';';
+		$l = $1.&nginx::join_words(@{$obj->{'words'}}).';';
 		}
 	}
 splice(@$lref, $server->{'line'}+1, $server->{'eline'}-$server->{'line'}-1,
        @lines);
 &flush_file_lines($server->{'file'});
-&flush_config_cache();
+&nginx::flush_config_cache();
 
 # Re-get the new server block
 $server = &find_domain_server($d);
 if (!$server) {
-	&unlock_all_config_files();
+	&nginx::unlock_all_config_files();
 	&$virtual_server::second_print(&text('feat_eclonefind', $d->{'dom'}));
 	return 0;
 	}
 
 # Put back old log file paths
-&save_directive($server, "access_log", [ $alog ]) if ($alog);
-&save_directive($server, "error_log", [ $elog ]) if ($elog);
+&nginx::save_directive($server, "access_log", [ $alog ]) if ($alog);
+&nginx::save_directive($server, "error_log", [ $elog ]) if ($elog);
 
 # Fix home dir, which is incorrect in copied directives
 &recursive_change_directives(
@@ -2792,8 +3005,8 @@ if (!$server) {
 # Fix domain name, which is incorrect in copied directives
 &recursive_change_directives($server, $oldd->{'dom'},
 			     $d->{'dom'}, 0, 0, 1, [ "server_name" ]);
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 
 # Re-setup the PHP mode
 my $mode = &feature_get_web_php_mode($oldd);
@@ -2813,17 +3026,17 @@ sub feature_set_web_public_html_dir
 my ($d, $subdir) = @_;
 my $server = &find_domain_server($d);
 $server || return &text('redirect_efind', $d->{'dom'});
-&lock_all_config_files();
-my $oldroot = &find_value("root", $server);
+&nginx::lock_all_config_files();
+my $oldroot = &nginx::find_value("root", $server);
 my $root = $d->{'home'}."/".$subdir;
-&save_directive($server, "root", [ $root ]);
-my @fp = &find("fastcgi_param", $server);
+&nginx::save_directive($server, "root", [ $root ]);
+my @fp = &nginx::find("fastcgi_param", $server);
 foreach my $fp (@fp) {
 	$fp->{'words'}->[1] =~ s/\Q$oldroot\E/$root/g;
 	}
-&save_directive($server, "fastcgi_param", \@fp);
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::save_directive($server, "fastcgi_param", \@fp);
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -2836,7 +3049,7 @@ sub feature_find_web_html_cgi_dirs
 my ($d) = @_;
 my $server = &find_domain_server($d);
 return undef if (!$server);
-my $root = &find_value("root", $server);
+my $root = &nginx::find_value("root", $server);
 return undef if (!$root);
 $d->{'public_html_path'} = $root;
 if ($root =~ /^\Q$d->{'home'}\E\/(.*)$/) {
@@ -2926,15 +3139,15 @@ my ($d, $logfile, $name) = @_;
 # Update Nginx config
 my $server = &find_domain_server($d);
 $server || return &text('redirect_efind', $d->{'dom'});
-&lock_all_config_files();
-my $obj = &find($name, $server);
+&nginx::lock_all_config_files();
+my $obj = &nginx::find($name, $server);
 my @w = $obj ? @{$obj->{'words'}} : ( );
 my $old_logfile = shift(@w);
-&save_directive($server, $name,
+&nginx::save_directive($server, $name,
 		[ { 'name' => $name,
 		    'words' => [ $logfile, @w ] } ]);
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 
 # Actually move the file
@@ -2997,7 +3210,7 @@ sub get_nginx_log
 my ($d, $want_error) = @_;
 my $s = &find_domain_server($d);
 if ($s) {
-	return &find_value($want_error ? "error_log" : "access_log", $s);
+	return &nginx::find_value($want_error ? "error_log" : "access_log", $s);
 	}
 return undef;
 }
@@ -3006,9 +3219,9 @@ return undef;
 # Returns the use nginx runs as
 sub get_nginx_user
 {
-my $conf = &get_config();
-my $user = &find_value("user", $conf);
-$user ||= &get_default("user");
+my $conf = &nginx::get_config();
+my $user = &nginx::find_value("user", $conf);
+$user ||= &nginx::get_default("user");
 return $user;
 }
 
@@ -3029,16 +3242,16 @@ elsif ($d->{'proxy_pass_mode'} == 2) {
 	# Add frame forward
 	my $server = &find_domain_server($d);
 	$server || return &text('redirect_efind', $d->{'dom'});
-	&lock_all_config_files();
+	&nginx::lock_all_config_files();
 	&virtual_server::create_framefwd_file($d);
 	my $ff = &virtual_server::framefwd_file($d);
 	my $phd = &virtual_server::public_html_dir($d);
 	$ff =~ s/^\Q$phd\E//;
-	&save_directive($server, [ ],
+	&nginx::save_directive($server, [ ],
 		[ { 'name' => 'rewrite',
 		    'words' => [ '^/.*$', $ff, 'break' ] } ]);
-	&flush_config_file_lines();
-	&unlock_all_config_files();
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
 else {
@@ -3065,18 +3278,18 @@ elsif ($d->{'proxy_pass_mode'} == 2) {
 	# Remove frame forward
 	my $server = &find_domain_server($d);
 	$server || return &text('redirect_efind', $d->{'dom'});
-	&lock_all_config_files();
+	&nginx::lock_all_config_files();
 	my $ff = &virtual_server::framefwd_file($d);
 	my $phd = &virtual_server::public_html_dir($d);
 	$ff =~ s/^\Q$phd\E//;
 	my ($rewrite) = grep { $_->{'words'}->[0] eq '^/.*$' &&
 			       $_->{'words'}->[1] eq $ff }
-			     &find("rewrite", $server);
+			     &nginx::find("rewrite", $server);
 	if ($rewrite) {
-		&save_directive($server, [ $rewrite ], [ ]);
+		&nginx::save_directive($server, [ $rewrite ], [ ]);
 		}
-	&flush_config_file_lines();
-	&unlock_all_config_files();
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	return undef;
 	}
@@ -3091,11 +3304,11 @@ my ($l, $adoms) = @_;
 if ($l =~ /^(\s*)server_name(\s+.*);/) {
 	# Exclude server_name entries for alias domains
 	my $indent = $1;
-	my @sa = &split_words($2);
+	my @sa = &nginx::split_words($2);
 	@sa = grep { !($adoms->{$_} ||
 		       /^([^\.]+)\.(\S+)/ && $adoms->{$2}) } @sa;
 	return undef if (!@sa);
-	$l = $indent."server_name ".&join_words(@sa).";";
+	$l = $indent."server_name ".&nginx::join_words(@sa).";";
 	}
 return $l;
 }
@@ -3104,12 +3317,12 @@ return $l;
 sub feature_get_domain_web_config
 {
 my ($dname, $port) = @_;
-my $conf = &get_config();
-my $http = &find("http", $conf);
+my $conf = &nginx::get_config();
+my $http = &nginx::find("http", $conf);
 return undef if (!$http);
-my @servers = &find("server", $http);
+my @servers = &nginx::find("server", $http);
 foreach my $s (@servers) {
-	my $obj = &find("server_name", $s);
+	my $obj = &nginx::find("server_name", $s);
 	foreach my $name (@{$obj->{'words'}}) {
 		if (lc($name) eq lc($dname)) {
 			return $s;
@@ -3127,12 +3340,12 @@ my ($d) = @_;
 # Get the port used in the Nginx config
 my $server = &find_domain_server($d);
 return (0, "No Nginx server found") if (!$server);
-my @locs = &find("location", $server);
+my @locs = &nginx::find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
                    ($_->{'words'}->[1] eq '\.php$' ||
                         $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 return (0, "No location block for .php files found") if (!$loc);
-my ($pass) = &find("fastcgi_pass", $loc);
+my ($pass) = &nginx::find("fastcgi_pass", $loc);
 return (0, "No fastcgi_pass directive found") if (!$pass);
 my $webport;
 if ($pass->{'words'}->[0] =~ /^localhost:(\d+)/ ||
@@ -3146,6 +3359,7 @@ else {
 
 # Get the Nginx listen directive
 my $fpmport;
+$d->{'php_fpm_version'} = &resolve_php_fpm_version($d);
 my $listen = &virtual_server::get_php_fpm_config_value($d, "listen");
 if ($listen =~ /^\S+:(\d+)$/ ||
     $listen =~ /^(\d+)$/ ||
@@ -3167,21 +3381,22 @@ sub feature_save_domain_php_fpm_port
 my ($d, $socket) = @_;
 
 # First update the Nginx config
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $server = &find_domain_server($d);
 return "No Nginx server found" if (!$server);
-my @locs = &find("location", $server);
+my @locs = &nginx::find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
                    ($_->{'words'}->[1] eq '\.php$' ||
                         $_->{'words'}->[1] eq '\.php(/|$)') } @locs;
 return "No location block for .php files found" if (!$loc);
-&save_directive($loc, "fastcgi_pass",
+&nginx::save_directive($loc, "fastcgi_pass",
 		[ $socket =~ /^\// ? "unix:$socket" : "127.0.0.1:$socket" ]);
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 
 # Second update the FPM server port
+$d->{'php_fpm_version'} = &resolve_php_fpm_version($d, undef, 1);
 my $conf = &virtual_server::get_php_fpm_config($d);
 &virtual_server::save_php_fpm_config_value($d, "listen", $socket);
 &virtual_server::register_post_action(
@@ -3196,12 +3411,12 @@ sub feature_save_web_autoconfig
 {
 my ($d, $enable) = @_;
 my @autoconfig = &virtual_server::get_autoconfig_hostname($d);
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $server = &find_domain_server($d);
 return "No Nginx server found" if (!$server);
 
 # Add or remove autoconfig alias names
-my $sn = &find("server_name", $server);
+my $sn = &nginx::find("server_name", $server);
 my @oldsn = @{$sn->{'words'}};
 my @newsn;
 if ($enable) {
@@ -3214,11 +3429,11 @@ else {
 	}
 if (join(" ", @oldsn) ne join(" ", @newsn)) {
 	$sn->{'words'} = \@newsn;
-	&save_directive($server, "server_name", [ $sn ]);
-	&flush_config_file_lines();
+	&nginx::save_directive($server, "server_name", [ $sn ]);
+	&nginx::flush_config_file_lines();
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
-&unlock_all_config_files();
+&nginx::unlock_all_config_files();
 
 # Add redirects to the CGI script
 my @paths = ( "/mail/config-v1.1.xml",
@@ -3331,13 +3546,13 @@ my ($d) = @_;
 if ($d->{'virtualmin-nginx-ssl'}) {
 	my $s = &find_domain_server($d);
 	return "No Nginx server found!" if (!$s);
-	foreach my $l (&find("listen", $s)) {
+	foreach my $l (&nginx::find("listen", $s)) {
 		my @w = @{$l->{'words'}};
 		if (&indexof("ssl", @w) >= 0 && &indexof("http2", @w) >= 0) {
 			return ['http/1.1', 'h2']
 			}
 		}
-	my $http2 = &find_value("http2", $s);
+	my $http2 = &nginx::find_value("http2", $s);
 	if ($http2 && lc($http2) eq 'on') {
 		return ['http/1.1', 'h2']
 		}
@@ -3354,8 +3569,8 @@ my ($d, $prots) = @_;
 if ($d->{'virtualmin-nginx-ssl'}) {
 	my $s = &find_domain_server($d);
 	return "No Nginx server found!" if (!$s);
-	&lock_all_config_files();
-	my @listen = &find("listen", $s);
+	&nginx::lock_all_config_files();
+	my @listen = &nginx::find("listen", $s);
 	foreach my $l (@listen) {
 		my @w = @{$l->{'words'}};
 		if (&indexof("ssl", @w) >= 0) {
@@ -3369,9 +3584,9 @@ if ($d->{'virtualmin-nginx-ssl'}) {
 			$l->{'words'} = \@w;
 			}
 		}
-	&save_directive($s, "listen", \@listen);
-	&flush_config_file_lines();
-	&unlock_all_config_files();
+	&nginx::save_directive($s, "listen", \@listen);
+	&nginx::flush_config_file_lines();
+	&nginx::unlock_all_config_files();
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
 return undef;
@@ -3384,7 +3599,7 @@ sub feature_get_web_server_names
 my ($d) = @_;
 my $s = &find_domain_server($d);
 return "No Nginx server found!" if (!$s);
-my $obj = &find("server_name", $s);
+my $obj = &nginx::find("server_name", $s);
 return $obj ? $obj->{'words'} : [ ];
 }
 
@@ -3395,13 +3610,13 @@ sub feature_save_web_server_names
 my ($d, $sn) = @_;
 my $s = &find_domain_server($d);
 return "No Nginx server found!" if (!$s);
-&lock_all_config_files();
-my $obj = &find("server_name", $s);
+&nginx::lock_all_config_files();
+my $obj = &nginx::find("server_name", $s);
 $obj ||= { 'name' => 'server_name' };
 $obj->{'words'} = $sn;
-&save_directive($s, "server_name", [ $obj ]);
-&flush_config_file_lines();
-&unlock_all_config_files();
+&nginx::save_directive($s, "server_name", [ $obj ]);
+&nginx::flush_config_file_lines();
+&nginx::unlock_all_config_files();
 &virtual_server::register_post_action(\&print_apply_nginx);
 return undef;
 }
@@ -3454,8 +3669,8 @@ if ($mode eq 'fcgiwrap' && !$d->{'nginx_fcgiwrap_port'}) {
 		     { 'name' => 'fastcgi_param',
 		       'words' => [ @$p ] });
 		}
-	&save_directive($server, [ ], [ $cloc ]);
-	&flush_config_file_lines();
+	&nginx::save_directive($server, [ ], [ $cloc ]);
+	&nginx::flush_config_file_lines();
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	}
 elsif ($mode eq '' && $d->{'nginx_fcgiwrap_port'}) {
@@ -3466,10 +3681,10 @@ elsif ($mode eq '' && $d->{'nginx_fcgiwrap_port'}) {
 	&virtual_server::unlock_domain($d);
 	my $server = &find_domain_server($d);
 	my ($cgi) = grep { $_->{'words'}->[0] eq '/cgi-bin/' }
-			 &find("location", $server);
+			 &nginx::find("location", $server);
 	if ($cgi) {
-		&save_directive($server, [ $cgi ], [ ]);
-		&flush_config_file_lines();
+		&nginx::save_directive($server, [ $cgi ], [ ]);
+		&nginx::flush_config_file_lines();
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
 	}
@@ -3504,17 +3719,17 @@ sub feature_add_protected_dir
 {
 my ($d, $opts) = @_;
 my ($err, $status);
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $server = &find_domain_server($d);
 if (!$server) {
 	$err = $text{'server_eexist'};
-	&unlock_all_config_files();
+	&nginx::unlock_all_config_files();
 	return wantarray ? ($err, -2) : $err;
 	}
 my $public_html_dir = &virtual_server::public_html_dir($d);
 $opts->{'protected_dir'} =~ s/^\Q$public_html_dir\E|^\Q$d->{'home'}\E//g;
 $opts->{'protected_dir'} ||= '/';
-my @locs = &find("location", $server);
+my @locs = &nginx::find("location", $server);
 my ($loc) = grep {
 	if ($opts->{'protected_dir'} eq '/') {
 		$_->{'words'}->[0] eq $opts->{'protected_dir'}
@@ -3557,8 +3772,8 @@ else {
 			}
 		]
 	};
-	&save_directive($server, [ ], [ $protected ]);
-	&flush_config_file_lines();
+	&nginx::save_directive($server, [ ], [ $protected ]);
+	&nginx::flush_config_file_lines();
 	&virtual_server::push_all_print();
 	&virtual_server::set_all_null_print();
 	&virtual_server::register_post_action(\&print_apply_nginx);
@@ -3566,7 +3781,7 @@ else {
 	&virtual_server::pop_all_print();
 	$status = 0;
 	}
-&unlock_all_config_files();
+&nginx::unlock_all_config_files();
 return wantarray ? ($err, $status) : $err;
 }
 
@@ -3579,28 +3794,27 @@ sub feature_delete_protected_dir
 {
 my ($d, $opts) = @_;
 my ($err, $status);
-&lock_all_config_files();
+&nginx::lock_all_config_files();
 my $server = &find_domain_server($d);
 if (!$server) {
 	$err = $text{'server_eexist'};
-	&unlock_all_config_files();
+	&nginx::unlock_all_config_files();
 	return wantarray ? ($err, -2) : $err;
 	}
 my $public_html_dir = &virtual_server::public_html_dir($d);
 my $protected_dir = $opts->{'protected_dir'};
 $protected_dir = '/' if ($protected_dir eq $public_html_dir);
-my @locs = &find("location", $server);
+my @locs = &nginx::find("location", $server);
 my ($loc) = grep { $protected_dir =~ /\Q$_->{'words'}->[0]\E$/ } @locs;
 if ($loc) {
 	my ($contains_auth_basic_user_file) =
 			grep { $_->{name} eq 'auth_basic_user_file' } @{$loc->{members}};
-	var_dump($contains_auth_basic_user_file, 'contains_auth_basic_user_file');
 	if ($contains_auth_basic_user_file &&
 	    $contains_auth_basic_user_file->{'value'}) {
 		if ($contains_auth_basic_user_file->{'value'} eq $opts->{'protected_user_file_path'}) {
 			# Can delete the location block
-			&save_directive($server, [ $loc ], [ ]);
-			&flush_config_file_lines();
+			&nginx::save_directive($server, [ $loc ], [ ]);
+			&nginx::flush_config_file_lines();
 			&virtual_server::push_all_print();
 			&virtual_server::set_all_null_print();
 			&virtual_server::register_post_action(\&print_apply_nginx);
@@ -3619,7 +3833,7 @@ if ($loc) {
 			}
 		}
 	}
-&unlock_all_config_files();
+&nginx::unlock_all_config_files();
 return wantarray ? ($err, $status) : $err;
 }
 
@@ -3627,7 +3841,7 @@ return wantarray ? ($err, $status) : $err;
 # Returns Nginx and available PHP version
 sub feature_sysinfo
 {
-my @rv = ( [ $text{'sysinfo_nginx'}, &get_nginx_version() ] );
+my @rv = ( [ $text{'sysinfo_nginx'}, &nginx::get_nginx_version() ] );
 my @avail = &virtual_server::list_available_php_versions();
 my @vers;
 foreach my $a (grep { $_->[1] } @avail) {

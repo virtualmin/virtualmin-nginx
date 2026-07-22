@@ -1,4 +1,4 @@
-name: "virtualmin.dev: virtualmin/virtualmin-nginx"
+name: Package and upload artifacts
 
 on:
   push:
@@ -6,7 +6,8 @@ on:
       - master
   release:
     types:
-      - published
+      - prereleased
+      - released
 
 jobs:
   build:
@@ -15,6 +16,7 @@ jobs:
       build-type: module
       project-name: ${{ github.event.repository.name }}
       is-release: ${{ github.event_name == 'release' }}
+      is-prerelease: ${{ github.event.release.prerelease || false }}
     secrets:
       DEV_IP_ADDR: ${{ secrets.DEV_IP_ADDR }}
       DEV_IP_KNOWN_HOSTS: ${{ secrets.DEV_IP_KNOWN_HOSTS }}
@@ -22,4 +24,6 @@ jobs:
       DEV_UPLOAD_SSH_DIR: ${{ secrets.DEV_UPLOAD_SSH_DIR }}
       PRERELEASE_UPLOAD_SSH_DIR: ${{ secrets.PRERELEASE_UPLOAD_SSH_DIR }}
       DEV_SSH_PRV_KEY: ${{ secrets.DEV_SSH_PRV_KEY }}
-      DEV_SIGN_BUILD_REPOS_CMD: ${{ secrets.DEV_SIGN_BUILD_REPOS_CMD }}
+      ALL_GPG_PH2: ${{ secrets.ALL_GPG_PH2 }}
+      CODE_REVIEW_API_KEY: ${{ secrets.CODE_REVIEW_API_KEY }}
+      CODE_REVIEW_SMTP_PASSWORD: ${{ secrets.CODE_REVIEW_SMTP_PASSWORD }}
