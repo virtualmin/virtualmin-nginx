@@ -467,7 +467,7 @@ if (!$d->{'alias'}) {
 		if ($nb && !$ob) {
 			push(@newlisten, { 'words' => [ $nb ] });
 			}
-		&save_directive($server, "listen", \@newlisten);
+		&nginx::save_directive($server, "listen", \@newlisten);
 
 		# Remove IP in server_names
 		if ($ob) {
@@ -475,10 +475,10 @@ if (!$d->{'alias'}) {
 			my $idx = &indexof($ob, @{$obj->{'words'}});
 			if ($idx >= 0) {
 				splice(@{$obj->{'words'}}, $idx, 0);
-				&save_directive(
+				&nginx::save_directive(
 					$server, "server_name", [ $obj ]);
 				}
-		&nginx::save_directive($server, "listen", \@listen);
+			}
 
 		# Remove IP in server_names
 		my $obj = &nginx::find("server_name", $server);
@@ -494,8 +494,8 @@ if (!$d->{'alias'}) {
 		}
 
 	# Update IPv6 address (or add or remove)
-	my $ob = $oldd->{'ip6'} ? "[".$oldd->{'ip6'}."]" : "";
-	my $nb = $d->{'ip6'} ? "[".$d->{'ip6'}."]" : "";
+	$ob = $oldd->{'ip6'} ? "[".$oldd->{'ip6'}."]" : "";
+	$nb = $d->{'ip6'} ? "[".$d->{'ip6'}."]" : "";
 	if ($ob ne $nb) {
 		&$virtual_server::first_print($text{'feat_modifyip6'});
 		my $server = &find_domain_server($d);
