@@ -2518,7 +2518,8 @@ my $def = &nginx::get_default_server_param();
 return 1 if (&indexof($def, @{$listen->{'words'}}) >= 0);
 
 if ($d->{'ip'}) {
-	# Fall back to check for IP server_name
+	# Fall back to check for IP server_name, even though
+	# this is obsolete
 	my $obj = &nginx::find("server_name", $server);
 	return &indexof($d->{'ip'}, @{$obj->{'words'}}) >= 0 ? 1 : 0;
 	}
@@ -2723,66 +2724,58 @@ if (!$server) {
 &nginx::save_directive($server, "access_log", [ $alog ]) if ($alog);
 &nginx::save_directive($server, "error_log", [ $elog ]) if ($elog);
 
-# Remove IP from server_name if changed
-if ($oldd && $oldd->{'ip'} && $oldd->{'ip'} ne $d->{'ip'}) {
+# Remove old IP from server_name if changed, since it is no
+# longer needed
+my $old_ip = !$oldd ? "" : $oldd->{'ip'} ? $oldd->{'ip'} : "";
+my $new_ip = $d->{'ip'} || "";
+my $old_ip6 = !$oldd ? "" : $oldd->{'ip6'} ? $oldd->{'ip6'} : "";
+my $new_ip6 = $d->{'ip6'} || "";
+if ($old_ip && $old_ip ne $new_ip) {
 	my $obj = &nginx::find("server_name", $server);
-	my $idx = &indexof($oldd->{'ip'}, @{$obj->{'words'}});
+	my $idx = &indexof($old_ip, @{$obj->{'words'}});
 	if ($idx >= 0) {
 		splice(@{$obj->{'words'}}, $idx, 1);
 		&nginx::save_directive($server, "server_name", [ $obj ]);
 		}
 	}
 
-# Change IPv4 in listen directive if changed
-my @listen = &nginx::find("listen", $server);
-if ($oldd && $oldd->{'ip'} ne $d->{'ip'}) {
+# Change IPv4 and v6 addresses in listen directive if changed
+if ($oldd) {
+	my @listen = &nginx::find("listen", $server);
+	my @newlisten;
+	my ($found, $found6);
 	foreach my $l (@listen) {
-		if ($l->{'words'}->[0] eq $oldd->{'ip'}) {
-			$l->{'words'}->[0] = $d->{'ip'};
+		my @words = @{$l->{'words'}};
+		if ($words[0] =~ /^(\S+)(:\d+)?$/ && $1 eq $old_ip) {
+			# Change old IPv4 to new IPv4, if there is one
+			if ($new_ip) {
+				$words[0] = $new_ip.$2;
+				push(@newlisten, { 'words' => \@words });
+				}
+			$found++;
 			}
-		elsif ($l->{'words'}->[0] =~ /^(\S+):(\d+)$/ &&
-		       $1 eq $oldd->{'ip'}) {
-			$l->{'words'}->[0] = $d->{'ip'}.":".$2;
+		elsif ($words[0] =~ /^\[(\S+)\]:(\d+)?$/ && $1 eq $old_ip6) {
+			# Change old IPv6 to new IPv6, if there is one
+			if ($new_ip6) {
+				$words[0] = "[".$new_ip6."]".$2;
+				push(@newlisten, { 'words' => \@words });
+				}
+			$found6++;
+			}
+		else {
+			# Listen directive is fine, keep as-is
+			push(@newlisten, { 'words' => \@words });
 			}
 		}
+	my $portstr = $d->{'web_port'} == 80 ? '' : ':'.$d->{'web_port'};
+	if ($new_ip && !$found) {
+		push(@newlisten, { 'words' => [ $new_ip.$portstr ] });
+		}
+	if ($new_ip6 && !$found6) {
+		push(@newlisten, { 'words' => [ "[".$new_ip6."]".$portstr ] });
+		}
+	&nginx::save_directive($server, "listen", \@newlisten);
 	}
-
-# Change IPv6 in listen directive if changed
-if ($oldd && $d->{'ip6'} && $oldd->{'ip6'} ne $d->{'ip6'}) {
-	foreach my $l (@listen) {
-		if ($l->{'words'}->[0] eq "[".$oldd->{'ip6'}."]") {
-			$l->{'words'}->[0] = "[".$d->{'ip6'}."]";
-			}
-		elsif ($l->{'words'}->[0] =~ /^\[(\S+)\]:(\d+)$/ &&
-		       $1 eq $oldd->{'ip6'}) {
-			$l->{'words'}->[0] = "[".$d->{'ip6'}."]:".$2;
-			}
-		}
-	}
-
-# Make sure the listen directives match this system
-foreach my $l (@listen) {
-	if ($config{'listen_mode'} eq '0') {
-		# Remove any IP address
-		if ($l->{'words'}->[0] =~ /^([0-9\.]+):(\d+)$/) {
-			$l->{'words'}->[0] = $2;
-			}
-		elsif ($l->{'words'}->[0] =~ /^\[(\S+)\]:(\d+)$/) {
-			$l->{'words'}->[0] = '[::]'.$2;
-			}
-		}
-	else {
-		# Add IP address
-		if ($l->{'words'}->[0] =~ /^(\d+)$/) {
-			$l->{'words'}->[0] = $d->{'ip'}.":".$1;
-			}
-		elsif ($l->{'words'}->[0] =~ /^\[::\]:(\d+)$/) {
-			$l->{'words'}->[0] = "[".$d->{'ip6'}."]:".$1;
-			}
-		}
-	}
-
-&nginx::save_directive($server, "listen", \@listen);
 
 # Fix up home directory if changed
 if ($oldd && $d->{'home'} && $oldd->{'home'} &&
