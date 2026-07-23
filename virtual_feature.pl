@@ -1174,11 +1174,13 @@ elsif ($mode eq "fpm") {
 return @rv;
 }
 
-# print_apply_nginx()
+# print_apply_nginx([full-restart])
 # Restart Nginx, and print a message
 sub print_apply_nginx
 {
-&$virtual_server::first_print($text{'feat_apply'});
+my ($restart) = @_;
+&$virtual_server::first_print($restart ? $text{'feat_apply2'}
+				       : $text{'feat_apply'});
 if (&nginx::is_nginx_running()) {
 	my $test;
 	if ($virtual_server::config{'check_apache'}) {
@@ -1191,10 +1193,26 @@ if (&nginx::is_nginx_running()) {
 			}
 		}
 	if ($test) {
+		# Config test failed
 		&$virtual_server::second_print(
 		    &text('feat_econfig2', "<tt>".&html_escape($test)."</tt>"));
 		}
+	elsif ($restart) {
+		# Needs a full restart
+		&nginx::stop_nginx();
+		my $err = &nginx::start_nginx();
+		if ($err) {
+			&$virtual_server::second_print(
+			    &text('feat_estart',
+				  "<tt>".&html_escape($err)."</tt>"));
+			}
+		else {
+			&$virtual_server::second_print(
+				$virtual_server::text{'setup_done'});
+			}
+		}
 	else {
+		# Attempt a graceful restart
 		my $err = &nginx::apply_nginx();
 		if ($err) {
 			&$virtual_server::second_print(
@@ -1208,6 +1226,7 @@ if (&nginx::is_nginx_running()) {
 		}
 	}
 else {
+	# Nginx is not running!
 	&$virtual_server::second_print($text{'feat_notrunning'});
 	}
 }
