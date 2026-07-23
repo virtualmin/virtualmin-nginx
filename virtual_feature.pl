@@ -233,7 +233,7 @@ if (!$d->{'alias'}) {
 	&nginx::create_server_link($server);
 	&virtual_server::setup_apache_logs($d, $alog, $elog);
 	&virtual_server::link_apache_logs($d, $alog, $elog);
-	&virtual_server::register_post_action(\&print_apply_nginx);
+	&virtual_server::register_post_action(\&print_apply_nginx, 1);
 	$d->{'proxy_pass_mode'} ||= 0;
 	$d->{'proxy_pass'} ||= "";
 	if ($d->{'proxy_pass_mode'}) {
@@ -393,6 +393,7 @@ if (!$d->{'alias'}) {
 	my $changed = 0;
 	my $old_alog = &get_nginx_log($d, 0);
 	my $old_elog = &get_nginx_log($d, 1);
+	my $need_restart = 0;
 
 	# Update domain name in server_name
 	if ($d->{'dom'} ne $oldd->{'dom'}) {
@@ -527,6 +528,7 @@ if (!$d->{'alias'}) {
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
+		$need_restart++;
 		}
 
 	# Update port, if changed
@@ -557,6 +559,7 @@ if (!$d->{'alias'}) {
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
+		$need_restart++;
 		}
 
 	# Update proxy settings if needed
@@ -595,7 +598,7 @@ if (!$d->{'alias'}) {
 	&nginx::flush_config_file_lines();
 	&nginx::unlock_all_config_files();
 	if ($changed) {
-		&virtual_server::register_post_action(\&print_apply_nginx);
+		&virtual_server::register_post_action(\&print_apply_nginx, $need_restart);
 		}
 
 	# Rename config file name, if changed
@@ -747,7 +750,7 @@ if (!$d->{'alias'}) {
 		&virtual_server::delete_php_fpm_pool($d);
 		}
 	&delete_fcgiwrap_server($d);
-	&virtual_server::register_post_action(\&print_apply_nginx);
+	&virtual_server::register_post_action(\&print_apply_nginx, 1);
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
 	# Remove log files too, if outside home
