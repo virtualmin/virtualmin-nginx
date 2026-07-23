@@ -1202,8 +1202,8 @@ if (&nginx::is_nginx_running()) {
 		}
 	elsif ($restart) {
 		# Needs a full restart
-		&nginx::stop_nginx();
-		my $err = &nginx::start_nginx();
+		my $err = &nginx::stop_nginx();
+		$err = &nginx::start_nginx() if (!$err);
 		if ($err) {
 			&$virtual_server::second_print(
 			    &text('feat_estart',
