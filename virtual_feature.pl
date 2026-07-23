@@ -2807,20 +2807,16 @@ if ($old_ip && $old_ip ne $new_ip) {
 if ($oldd) {
 	my @listen = &nginx::find("listen", $server);
 	my @newlisten;
+	my $ip_specific = grep {
+		my $word = $_->{'words'}->[0];
+		($old_ip && $word =~ /^\Q$old_ip\E(?::\d+)?$/) ||
+			($old_ip6 &&
+			 $word =~ /^\[\Q$old_ip6\E\](?::\d+)?$/)
+		} @listen;
 	foreach my $l (@listen) {
 		my @words = @{$l->{'words'}};
-		if ($config{'listen_mode'} eq '0') {
-			# Convert IP-specific listeners to wildcard listeners
-			if ($words[0] =~ /^\d+(?:\.\d+){3}(?::(\d+))?$/) {
-				$words[0] = $1 || 80;
-				}
-			elsif ($words[0] =~ /^\[\S+\](?::(\d+))?$/) {
-				$words[0] = "[::]:".($1 || 80);
-				}
-			push(@newlisten, { 'words' => \@words });
-			}
-		elsif ($old_ip &&
-		       $words[0] =~ /^\Q$old_ip\E(?::(\d+))?$/) {
+		if ($old_ip &&
+		    $words[0] =~ /^\Q$old_ip\E(?::(\d+))?$/) {
 			# Change or remove an old IPv4-specific listener
 			if ($new_ip) {
 				my $port = $1 || 80;
@@ -2839,64 +2835,48 @@ if ($oldd) {
 				push(@newlisten, { 'words' => \@words });
 				}
 			}
-		elsif ($words[0] =~ /^(\d+)$/) {
-			# Convert a wildcard IPv4 listener to this domain's IP
-			if ($new_ip) {
-				$words[0] = $new_ip.
-					($1 == 80 ? "" : ":".$1);
-				push(@newlisten, { 'words' => \@words });
-				}
-			}
-		elsif ($words[0] =~ /^\[::\](?::(\d+))?$/) {
-			# Convert a wildcard IPv6 listener to this domain's IP
-			if ($new_ip6) {
-				my $port = $1 || 80;
-				$words[0] = "[".$new_ip6."]".
-					($port == 80 ? "" : ":".$port);
-				push(@newlisten, { 'words' => \@words });
-				}
-			}
 		else {
 			# Listen directive is fine, keep as-is
 			push(@newlisten, { 'words' => \@words });
 			}
 		}
 
-	# Normalization can collapse multiple listeners into the same directive
+	# Address replacement can collapse multiple listeners into one
 	my %seen;
 	@newlisten = grep {
 		!$seen{join("\0", @{$_->{'words'}})}++
 		} @newlisten;
 
-	# Ensure that both configured address families have an HTTP listener
-	my $portstr = $d->{'web_port'} == 80 ? '' : ':'.$d->{'web_port'};
-	my $want_ip = $config{'listen_mode'} eq '0' ? $d->{'web_port'} :
-		      $new_ip ? $new_ip.$portstr : "";
-	my $want_ip6 = $config{'listen_mode'} eq '0' ?
-		       "[::]:".$d->{'web_port'} :
-		       $new_ip6 ? "[".$new_ip6."]".$portstr : "";
-	foreach my $want ($want_ip, $want_ip6) {
-		if ($want &&
-		    !grep { $_->{'words'}->[0] eq $want } @newlisten) {
-			push(@newlisten, { 'words' => [ $want ] });
-			}
-		}
-
-	# Do the same for HTTPS, preserving the backed-up SSL options
-	my ($ssl) = grep {
-		&indexof('ssl', @{$_->{'words'}}) >= 0
-		} @listen;
-	if ($ssl) {
-		my $sslport = $d->{'web_sslport'} || 443;
-		my @wantssl = $config{'listen_mode'} eq '0' ?
-			      ($sslport, "[::]:".$sslport) :
-			      ($new_ip ? $new_ip.":".$sslport : "",
-			       $new_ip6 ? "[".$new_ip6."]:".$sslport : "");
-		foreach my $want (@wantssl) {
+	# For an IP-specific backup, ensure that both configured address
+	# families retain HTTP and HTTPS listeners.  Wildcard backups keep
+	# their original listener style, regardless of the local listen_mode.
+	if ($ip_specific) {
+		my $portstr = $d->{'web_port'} == 80 ? '' :
+			      ':'.$d->{'web_port'};
+		foreach my $want (
+			$new_ip ? $new_ip.$portstr : "",
+			$new_ip6 ? "[".$new_ip6."]".$portstr : "") {
 			if ($want &&
 			    !grep { $_->{'words'}->[0] eq $want } @newlisten) {
-				push(@newlisten,
-				     &clone_ssl_listen_for_address($ssl, $want));
+				push(@newlisten, { 'words' => [ $want ] });
+				}
+			}
+
+		my ($ssl) = grep {
+			&indexof('ssl', @{$_->{'words'}}) >= 0
+			} @listen;
+		if ($ssl) {
+			my $sslport = $d->{'web_sslport'} || 443;
+			foreach my $want (
+				$new_ip ? $new_ip.":".$sslport : "",
+				$new_ip6 ? "[".$new_ip6."]:".$sslport : "") {
+				if ($want &&
+				    !grep { $_->{'words'}->[0] eq $want }
+					  @newlisten) {
+					push(@newlisten,
+					     &clone_ssl_listen_for_address(
+						     $ssl, $want));
+					}
 				}
 			}
 		}
