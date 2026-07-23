@@ -6,7 +6,7 @@ no warnings 'uninitialized';
 
 use Time::Local;
 require 'virtualmin-nginx-lib.pl';
-our (%text, %config, $module_name, %access);
+our (%text, %config, $module_name, %access, $restart_nginx_for_listen);
 
 # feature_name()
 # Returns a short name for this feature
@@ -233,6 +233,7 @@ if (!$d->{'alias'}) {
 	&nginx::create_server_link($server);
 	&virtual_server::setup_apache_logs($d, $alog, $elog);
 	&virtual_server::link_apache_logs($d, $alog, $elog);
+	$restart_nginx_for_listen = 1;
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	$d->{'proxy_pass_mode'} ||= 0;
 	$d->{'proxy_pass'} ||= "";
@@ -373,6 +374,18 @@ else {
 	}
 }
 
+# clone_ssl_listen_for_address(&listen, address:port)
+# Clone an SSL listener without options that are specific to its old address
+sub clone_ssl_listen_for_address
+{
+my ($ssl, $address) = @_;
+my $def = &nginx::get_default_server_param();
+my @words = grep { $_ ne $def && $_ !~ /^ipv6only=/ }
+		  @{$ssl->{'words'}};
+$words[0] = $address;
+return { 'words' => \@words };
+}
+
 # feature_modify(&domain, &old-domain)
 # Change the Nginx domain name or home directory
 sub feature_modify
@@ -463,10 +476,25 @@ if (!$d->{'alias'}) {
 				push(@newlisten, { 'words' => \@words });
 				}
 			}
-		if ($new_ip && !$old_ip) {
-			push(@newlisten, { 'words' => [ $new_ip ] });
+		if ($new_ip && !$old_ip && $config{'listen_mode'} ne '0') {
+			my $portstr = $d->{'web_port'} == 80 ? ''
+							     : ':'.$d->{'web_port'};
+			push(@newlisten,
+			     { 'words' => [ $new_ip.$portstr ] });
+			my ($ssl) = grep {
+				&indexof('ssl', @{$_->{'words'}}) >= 0
+				} @listen;
+			if ($ssl) {
+				my @sslwords = @{$ssl->{'words'}};
+				my ($sslport) =
+					$sslwords[0] =~ /(?:^|:)(\d+)$/;
+				push(@newlisten, &clone_ssl_listen_for_address(
+					$ssl, $new_ip.":".
+					($sslport || $d->{'web_sslport'} || 443)));
+				}
 			}
 		&nginx::save_directive($server, "listen", \@newlisten);
+		$restart_nginx_for_listen = 1;
 
 		# Remove IP in server_names
 		if ($old_ip) {
@@ -520,10 +548,25 @@ if (!$d->{'alias'}) {
 				push(@newlisten, { 'words' => \@w });
 				}
 			}
-		if ($new_ip6 && !$old_ip6) {
-			push(@newlisten, { 'words' => [ $new_ip6 ] });
+		if ($new_ip6 && !$old_ip6 && $config{'listen_mode'} ne '0') {
+			my $portstr = $d->{'web_port'} == 80 ? ''
+							     : ':'.$d->{'web_port'};
+			push(@newlisten,
+			     { 'words' => [ $new_ip6.$portstr ] });
+			my ($ssl) = grep {
+				&indexof('ssl', @{$_->{'words'}}) >= 0
+				} @listen;
+			if ($ssl) {
+				my @sslwords = @{$ssl->{'words'}};
+				my ($sslport) =
+					$sslwords[0] =~ /(?:^|:)(\d+)$/;
+				push(@newlisten, &clone_ssl_listen_for_address(
+					$ssl, $new_ip6.":".
+					($sslport || $d->{'web_sslport'} || 443)));
+				}
 			}
 		&nginx::save_directive($server, "listen", \@newlisten);
+		$restart_nginx_for_listen = 1;
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
@@ -542,18 +585,20 @@ if (!$d->{'alias'}) {
 		my @newlisten;
 		foreach my $l (@listen) {
 			my @w = @{$l->{'words'}};
-			my $p = $w[0] =~ /:(\d+)$/ ? $1 : 80;
-			if ($p == $oldd->{'web_port'}) {
+			if ($w[0] =~ /^(\d+)$/) {
+				$w[0] = $d->{'web_port'}
+					if ($1 == $oldd->{'web_port'});
+				}
+			elsif (($w[0] =~ /:(\d+)$/ ? $1 : 80) ==
+			       $oldd->{'web_port'}) {
 				$w[0] =~ s/:\d+$//;
 				$w[0] .= ":".$d->{'web_port'}
 					if ($d->{'web_port'} != 80);
 				}
-			elsif ($w[0] eq $oldd->{'web_port'}) {
-				$w[0] = $d->{'web_port'};
-				}
 			push(@newlisten, { 'words' => \@w });
 			}
 		&nginx::save_directive($server, "listen", \@newlisten);
+		$restart_nginx_for_listen = 1;
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
 		$changed++;
@@ -747,6 +792,7 @@ if (!$d->{'alias'}) {
 		&virtual_server::delete_php_fpm_pool($d);
 		}
 	&delete_fcgiwrap_server($d);
+	$restart_nginx_for_listen = 1;
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	&$virtual_server::second_print($virtual_server::text{'setup_done'});
 
@@ -1179,9 +1225,11 @@ return @rv;
 sub print_apply_nginx
 {
 &$virtual_server::first_print($text{'feat_apply'});
+my $restart = $restart_nginx_for_listen;
+$restart_nginx_for_listen = 0;
 if (&nginx::is_nginx_running()) {
 	my $test;
-	if ($virtual_server::config{'check_apache'}) {
+	if ($virtual_server::config{'check_apache'} || $restart) {
 		$test = &nginx::test_config();
 		if ($test && $test =~ /Cannot\s+assign/i) {
 			# Maybe new address has just come up .. wait 5 seconds
@@ -1195,7 +1243,14 @@ if (&nginx::is_nginx_running()) {
 		    &text('feat_econfig2', "<tt>".&html_escape($test)."</tt>"));
 		}
 	else {
-		my $err = &nginx::apply_nginx();
+		my $err;
+		if ($restart) {
+			$err = &nginx::stop_nginx();
+			$err = &nginx::start_nginx() if (!$err);
+			}
+		else {
+			$err = &nginx::apply_nginx();
+			}
 		if ($err) {
 			&$virtual_server::second_print(
 			    &text('feat_eapply',
@@ -2743,38 +2798,100 @@ if ($old_ip && $old_ip ne $new_ip) {
 if ($oldd) {
 	my @listen = &nginx::find("listen", $server);
 	my @newlisten;
-	my ($found, $found6);
 	foreach my $l (@listen) {
 		my @words = @{$l->{'words'}};
-		if ($words[0] =~ /^([0-9\.]+)(:\d+)?$/ && $1 eq $old_ip) {
-			# Change old IPv4 to new IPv4, if there is one
-			if ($new_ip) {
-				$words[0] = $new_ip.$2;
-				push(@newlisten, { 'words' => \@words });
+		if ($config{'listen_mode'} eq '0') {
+			# Convert IP-specific listeners to wildcard listeners
+			if ($words[0] =~ /^\d+(?:\.\d+){3}(?::(\d+))?$/) {
+				$words[0] = $1 || 80;
 				}
-			$found++;
+			elsif ($words[0] =~ /^\[\S+\](?::(\d+))?$/) {
+				$words[0] = "[::]:".($1 || 80);
+				}
+			push(@newlisten, { 'words' => \@words });
 			}
-		elsif ($words[0] =~ /^\[(\S+)\](:\d+)?$/ && $1 eq $old_ip6) {
-			# Change old IPv6 to new IPv6, if there is one
-			if ($new_ip6) {
-				$words[0] = "[".$new_ip6."]".$2;
+		elsif ($words[0] =~ /^\Q$old_ip\E(?::(\d+))?$/ && $old_ip) {
+			# Change or remove an old IPv4-specific listener
+			if ($new_ip) {
+				my $port = $1 || 80;
+				$words[0] = $new_ip.
+					($port == 80 ? "" : ":".$port);
 				push(@newlisten, { 'words' => \@words });
 				}
-			$found6++;
+			}
+		elsif ($words[0] =~ /^\[\Q$old_ip6\E\](?::(\d+))?$/ &&
+		       $old_ip6) {
+			# Change or remove an old IPv6-specific listener
+			if ($new_ip6) {
+				my $port = $1 || 80;
+				$words[0] = "[".$new_ip6."]".
+					($port == 80 ? "" : ":".$port);
+				push(@newlisten, { 'words' => \@words });
+				}
+			}
+		elsif ($words[0] =~ /^(\d+)$/) {
+			# Convert a wildcard IPv4 listener to this domain's IP
+			if ($new_ip) {
+				$words[0] = $new_ip.
+					($1 == 80 ? "" : ":".$1);
+				push(@newlisten, { 'words' => \@words });
+				}
+			}
+		elsif ($words[0] =~ /^\[::\](?::(\d+))?$/) {
+			# Convert a wildcard IPv6 listener to this domain's IP
+			if ($new_ip6) {
+				my $port = $1 || 80;
+				$words[0] = "[".$new_ip6."]".
+					($port == 80 ? "" : ":".$port);
+				push(@newlisten, { 'words' => \@words });
+				}
 			}
 		else {
 			# Listen directive is fine, keep as-is
 			push(@newlisten, { 'words' => \@words });
 			}
 		}
+
+	# Normalization can collapse multiple listeners into the same directive
+	my %seen;
+	@newlisten = grep {
+		!$seen{join("\0", @{$_->{'words'}})}++
+		} @newlisten;
+
+	# Ensure that both configured address families have an HTTP listener
 	my $portstr = $d->{'web_port'} == 80 ? '' : ':'.$d->{'web_port'};
-	if ($new_ip && !$found) {
-		push(@newlisten, { 'words' => [ $new_ip.$portstr ] });
+	my $want_ip = $config{'listen_mode'} eq '0' ? $d->{'web_port'} :
+		      $new_ip ? $new_ip.$portstr : "";
+	my $want_ip6 = $config{'listen_mode'} eq '0' ?
+		       "[::]:".$d->{'web_port'} :
+		       $new_ip6 ? "[".$new_ip6."]".$portstr : "";
+	foreach my $want ($want_ip, $want_ip6) {
+		if ($want &&
+		    !grep { $_->{'words'}->[0] eq $want } @newlisten) {
+			push(@newlisten, { 'words' => [ $want ] });
+			}
 		}
-	if ($new_ip6 && !$found6) {
-		push(@newlisten, { 'words' => [ "[".$new_ip6."]".$portstr ] });
+
+	# Do the same for HTTPS, preserving the backed-up SSL options
+	my ($ssl) = grep {
+		&indexof('ssl', @{$_->{'words'}}) >= 0
+		} @listen;
+	if ($ssl) {
+		my $sslport = $d->{'web_sslport'} || 443;
+		my @wantssl = $config{'listen_mode'} eq '0' ?
+			      ($sslport, "[::]:".$sslport) :
+			      ($new_ip ? $new_ip.":".$sslport : "",
+			       $new_ip6 ? "[".$new_ip6."]:".$sslport : "");
+		foreach my $want (@wantssl) {
+			if ($want &&
+			    !grep { $_->{'words'}->[0] eq $want } @newlisten) {
+				push(@newlisten,
+				     &clone_ssl_listen_for_address($ssl, $want));
+				}
+			}
 		}
 	&nginx::save_directive($server, "listen", \@newlisten);
+	$restart_nginx_for_listen = 1;
 	}
 
 # Fix up home directory if changed
