@@ -429,6 +429,12 @@ if (!$d->{'alias'}) {
 		$changed++;
 		}
 
+	# Compute port suffixes
+	my $port = $d->{'web_port'} && $d->{'web_port'} != 80 ?
+			":".$d->{'web_port'} : "";
+	my $sslport = $d->{'web_sslport'} && $d->{'web_sslport'} != 80 ?
+			":".$d->{'web_sslport'} : "";
+
 	# Update IPv4 address if changed, added or removed
 	my $old_ip = $oldd->{'ip'} || "";
 	my $new_ip = $d->{'ip'} || "";
@@ -465,7 +471,12 @@ if (!$d->{'alias'}) {
 				}
 			}
 		if ($new_ip && !$old_ip) {
-			push(@newlisten, { 'words' => [ $new_ip ] });
+			# Need to add an IPv4 address
+			push(@newlisten, { 'words' => [ $new_ip.$port ] });
+			if ($d->{'virtualmin-nginx-ssl'}) {
+				# Also needs an SSL port
+				push(@newlisten, { 'words' => [ $new_ip.$sslport, 'ssl' ] });
+				}
 			}
 		&nginx::save_directive($server, "listen", \@newlisten);
 
@@ -522,7 +533,12 @@ if (!$d->{'alias'}) {
 				}
 			}
 		if ($new_ip6 && !$old_ip6) {
-			push(@newlisten, { 'words' => [ $new_ip6 ] });
+			# Add IPv6 address
+			push(@newlisten, { 'words' => [ $new_ip6.$port ] });
+			if ($d->{'virtualmin-nginx-ssl'}) {
+				# Also needs an SSL port
+				push(@newlisten, { 'words' => [ $new_ip6.$sslport, 'ssl' ] });
+				}
 			}
 		&nginx::save_directive($server, "listen", \@newlisten);
 		&$virtual_server::second_print(
