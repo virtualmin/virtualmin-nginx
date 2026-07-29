@@ -430,10 +430,8 @@ if (!$d->{'alias'}) {
 		}
 
 	# Compute port suffixes
-	my $port = $d->{'web_port'} && $d->{'web_port'} != 80 ?
-			":".$d->{'web_port'} : "";
-	my $sslport = $d->{'web_sslport'} && $d->{'web_sslport'} != 80 ?
-			":".$d->{'web_sslport'} : "";
+	my $port = $d->{'web_port'} == 80 ? '' : ':'.$d->{'web_port'};
+	my $sslport = $d->{'web_sslport'} == 443 ? '' : ':'.$d->{'web_sslport'};
 
 	# Update IPv4 address if changed, added or removed
 	my $old_ip = $oldd->{'ip'} || "";
@@ -446,39 +444,9 @@ if (!$d->{'alias'}) {
 				&text('feat_efind', $d->{'dom'}));
 			return 0;
 			}
-		my @listen = &nginx::find("listen", $server);
-		my @newlisten;
-		foreach my $l (@listen) {
-			my @words = @{$l->{'words'}};
-			if ($old_ip && $words[0] eq $old_ip) {
-				# Found old address with no port - replace or remove
-				if ($new_ip) {
-					$words[0] = $new_ip;
-					push(@newlisten, { 'words' => \@words });
-					}
-				}
-			elsif ($old_ip && $words[0] =~ /^\Q$old_ip\E:(\d+)$/) {
-				# Found old address with a port - replace with the
-				# same port or remove
-				if ($new_ip) {
-					$words[0] = $new_ip.":".$1;
-					push(@newlisten, { 'words' => \@words });
-					}
-				}
-			else {
-				# Preserve unrelated listen directives
-				push(@newlisten, { 'words' => \@words });
-				}
-			}
-		if ($new_ip && !$old_ip) {
-			# Need to add an IPv4 address
-			push(@newlisten, { 'words' => [ $new_ip.$port ] });
-			if ($d->{'virtualmin-nginx-ssl'}) {
-				# Also needs an SSL port
-				push(@newlisten, { 'words' => [ $new_ip.$sslport, 'ssl' ] });
-				}
-			}
-		&nginx::save_directive($server, "listen", \@newlisten);
+		my $u = &update_listen_ips($d, $server, $old_ip, $new_ip);
+		$changed += $u;
+		$need_restart += $u;
 
 		# Remove IP in server_names
 		if ($old_ip) {
@@ -493,7 +461,6 @@ if (!$d->{'alias'}) {
 
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
-		$changed++;
 		}
 
 	# Update IPv6 address (or add or remove)
@@ -507,44 +474,11 @@ if (!$d->{'alias'}) {
 				&text('feat_efind', $d->{'dom'}));
 			return 0;
 			}
-		my @listen = &nginx::find("listen", $server);
-		my @newlisten;
-		foreach my $l (@listen) {
-			my @w = @{$l->{'words'}};
-			if ($old_ip6 && $w[0] eq $old_ip6) {
-				# Found old address with no port - replace
-				# or remove
-				if ($new_ip6) {
-					$w[0] = $new_ip6;
-					push(@newlisten, { 'words' => \@w });
-					}
-				}
-			elsif ($old_ip6 && $w[0] =~ /^\Q$old_ip6\E:(\d+)$/) {
-				# Found old address with a port - replace with
-				# same port or remove
-				if ($new_ip6) {
-					$w[0] = $new_ip6.":".$1;
-					push(@newlisten, { 'words' => \@w });
-					}
-				}
-			else {
-				# Found un-related address, save it
-				push(@newlisten, { 'words' => \@w });
-				}
-			}
-		if ($new_ip6 && !$old_ip6) {
-			# Add IPv6 address
-			push(@newlisten, { 'words' => [ $new_ip6.$port ] });
-			if ($d->{'virtualmin-nginx-ssl'}) {
-				# Also needs an SSL port
-				push(@newlisten, { 'words' => [ $new_ip6.$sslport, 'ssl' ] });
-				}
-			}
-		&nginx::save_directive($server, "listen", \@newlisten);
+		my $u += &update_listen_ips($d, $server, $old_ip6, $new_ip6);
+		$changed += $u;
+		$need_restart += $u;
 		&$virtual_server::second_print(
 			$virtual_server::text{'setup_done'});
-		$changed++;
-		$need_restart++;
 		}
 
 	# Update port, if changed
@@ -727,7 +661,6 @@ else {
 	if ($changed) {
 		&virtual_server::register_post_action(\&print_apply_nginx);
 		}
-
 	}
 }
 
@@ -2721,6 +2654,7 @@ sub feature_restore
 {
 my ($d, $file, undef, undef, undef, $oldd) = @_;
 return 1 if ($d->{'alias'});
+my $need_restart = 0;
 
 # Replace lines in the server block with those from the backup file
 &$virtual_server::first_print($text{'feat_restore'});
@@ -2779,40 +2713,16 @@ if ($old_ip && $old_ip ne $new_ip) {
 
 # Change IPv4 and v6 addresses in listen directive if changed
 if ($oldd) {
-	my @listen = &nginx::find("listen", $server);
-	my @newlisten;
-	my ($found, $found6);
-	foreach my $l (@listen) {
-		my @words = @{$l->{'words'}};
-		if ($words[0] =~ /^([0-9\.]+)(:\d+)?$/ && $1 eq $old_ip) {
-			# Change old IPv4 to new IPv4, if there is one
-			if ($new_ip) {
-				$words[0] = $new_ip.$2;
-				push(@newlisten, { 'words' => \@words });
-				}
-			$found++;
-			}
-		elsif ($words[0] =~ /^\[(\S+)\](:\d+)?$/ && $1 eq $old_ip6) {
-			# Change old IPv6 to new IPv6, if there is one
-			if ($new_ip6) {
-				$words[0] = "[".$new_ip6."]".$2;
-				push(@newlisten, { 'words' => \@words });
-				}
-			$found6++;
-			}
-		else {
-			# Listen directive is fine, keep as-is
-			push(@newlisten, { 'words' => \@words });
-			}
+	my $old_ip = $oldd->{'ip'} || "";
+        my $new_ip = $d->{'ip'} || "";
+	if ($old_ip ne $new_ip) {
+		$need_restart += &update_listen_ips($d, $server, $old_ip, $new_ip);
 		}
-	my $portstr = $d->{'web_port'} == 80 ? '' : ':'.$d->{'web_port'};
-	if ($new_ip && !$found) {
-		push(@newlisten, { 'words' => [ $new_ip.$portstr ] });
+	my $old_ip6 = $oldd->{'ip6'} ? "[".$oldd->{'ip6'}."]" : "";
+        my $new_ip6 = $d->{'ip6'} ? "[".$d->{'ip6'}."]" : "";
+	if ($old_ip6 ne $new_ip6) {
+		$need_restart += &update_listen_ips($d, $server, $old_ip6, $new_ip6);
 		}
-	if ($new_ip6 && !$found6) {
-		push(@newlisten, { 'words' => [ "[".$new_ip6."]".$portstr ] });
-		}
-	&nginx::save_directive($server, "listen", \@newlisten);
 	}
 
 # Fix up home directory if changed
@@ -2838,7 +2748,8 @@ if ($oldd && $oldd->{'nginx_php_port'} ne $d->{'nginx_php_port'}) {
 
 &nginx::flush_config_file_lines();
 &nginx::unlock_all_config_files();
-&virtual_server::register_post_action(\&print_apply_nginx);
+&virtual_server::register_post_action(
+	\&print_apply_nginx, $need_restart);
 &$virtual_server::second_print($virtual_server::text{'setup_done'});
 
 # Correct system-specific entries in PHP config files
@@ -3841,6 +3752,56 @@ sub feature_reset_also
 {
 my ($d) = @_;
 return $d->{'virtualmin-nginx-ssl'} ? ('virtualmin-nginx-ssl') : ( );
+}
+
+# update_listen_ips(&domain, &server, old-ip-string, new-ip-string)
+# If an IPv4 or v6 address has changed, been added or removed, update IP
+# addresses in the listen block
+sub update_listen_ips
+{
+my ($d, $server, $old_ip, $new_ip) = @_;
+return 0 if ($old_ip eq $new_ip);
+my $rv = 0;
+my @listen = &nginx::find("listen", $server);
+my @newlisten;
+foreach my $l (@listen) {
+	my @words = @{$l->{'words'}};
+	if ($old_ip && $words[0] eq $old_ip) {
+		# Found old address with no port - replace or remove
+		if ($new_ip) {
+			$words[0] = $new_ip;
+			push(@newlisten, { 'words' => \@words });
+			}
+		$rv++;
+		}
+	elsif ($old_ip && $words[0] =~ /^\Q$old_ip\E:(\d+)$/) {
+		# Found old address with a port - replace with the
+		# same port or remove
+		if ($new_ip) {
+			$words[0] = $new_ip.":".$1;
+			push(@newlisten, { 'words' => \@words });
+			}
+		$rv++;
+		}
+	else {
+		# Preserve unrelated listen directives
+		push(@newlisten, { 'words' => \@words });
+		}
+	}
+if ($new_ip && !$old_ip) {
+	# Need to add an IP address
+	my $port = $d->{'web_port'} == 80 ? '' : ':'.$d->{'web_port'};
+	my $sslport = ':'.$d->{'web_sslport'};
+	push(@newlisten, { 'words' => [ $new_ip.$port ] });
+	$rv++;
+	if ($d->{'virtualmin-nginx-ssl'}) {
+		# Also needs an SSL port
+		push(@newlisten, { 'words' => [ $new_ip.$sslport, 'ssl' ] });
+		$rv++;
+		}
+	}
+&nginx::save_directive($server, "listen", \@newlisten);
+return $rv;
 }
 
 1;
