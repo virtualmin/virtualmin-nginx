@@ -495,7 +495,8 @@ if (!$d->{'alias'}) {
 		foreach my $l (@listen) {
 			my @w = @{$l->{'words'}};
 			my $p = $w[0] =~ /:(\d+)$/ ? $1 : 80;
-			if ($p == $oldd->{'web_port'}) {
+			if ($p == $oldd->{'web_port'} &&
+			    $w[0] !~ /^\d+$/) {
 				$w[0] =~ s/:\d+$//;
 				$w[0] .= ":".$d->{'web_port'}
 					if ($d->{'web_port'} != 80);
@@ -3788,7 +3789,7 @@ foreach my $l (@listen) {
 		push(@newlisten, { 'words' => \@words });
 		}
 	}
-if ($new_ip && !$old_ip) {
+if ($new_ip && !$old_ip && $config{'listen_mode'} ne '0') {
 	# Need to add an IP address
 	my $port = $d->{'web_port'} == 80 ? '' : ':'.$d->{'web_port'};
 	my $sslport = ':'.$d->{'web_sslport'};
