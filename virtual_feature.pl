@@ -2201,6 +2201,8 @@ if ($url) {
 	       'words' => [ 'Connection', 'Upgrade' ], },
 	     { 'name' => 'proxy_set_header',
 	       'words' => [ 'Host', '$host' ], },
+	     { 'name' => 'proxy_set_header',
+	       'words' => [ 'X-Forwarded-Proto', '$scheme' ], },
 	    );
 	}
 $balancer->{'location'} = $l;
