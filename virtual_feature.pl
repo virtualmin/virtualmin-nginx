@@ -1793,6 +1793,165 @@ while (length($pathre)) {
 return $path;
 }
 
+# make_web_alias_rewrite(path, destination-uri, regexp, exact)
+# Returns the regex and replacement for an internal directory alias. The
+# generated rule will not rewrite its own internal destination a second time.
+sub make_web_alias_rewrite
+{
+my ($path, $dest, $regexp, $exact) = @_;
+my $trailingslash = $path ne '/' && $path =~ m{/$};
+my $matchpath = $path;
+$matchpath =~ s{/$}{} if ($trailingslash);
+my $pathbase = $path;
+$pathbase =~ s{/+\z}{} if ($pathbase ne '/');
+my $destslash = $dest ne '/' && $dest =~ m{/$};
+$dest =~ s{/+\z}{} if ($dest ne '/');
+
+my $re;
+if ($path eq '/') {
+	my @exclude = ('\\.well-known(?:/|$)');
+	if ($dest ne '/') {
+		(my $destpath = $dest) =~ s{^/}{};
+		push(@exclude, &quote_web_redirect_path_re($destpath).
+			       '(?:/|$)');
+		}
+	$re = '^/(?!'.join('|', @exclude).')';
+	}
+else {
+	$re = '^'.&quote_web_redirect_path_re($matchpath);
+	$re .= '/' if ($trailingslash);
+	if (index($dest, $pathbase.'/') == 0) {
+		my $destpath = substr($dest, length($pathbase)+1);
+		$re .= ($trailingslash ? '(?!' : '(?!/').
+		       &quote_web_redirect_path_re($destpath).
+		       '(?:/|$))';
+		}
+	}
+
+if ($exact) {
+	# The empty group identifies alias rules that do not need a path capture.
+	$re .= '(?:)$';
+	}
+elsif ($regexp) {
+	# Keep the same marker on aliases that intentionally discard sub-paths.
+	$re .= $path eq '/' || $trailingslash ? '.*(?:)$' :
+		'(?:/.*)?(?:)$';
+	}
+else {
+	$re .= $path eq '/' ? '(.*)$' :
+	       $trailingslash ? '(.*)$' : '(?:/(.*))?$';
+	}
+
+my $replacement;
+if ($regexp || $exact) {
+	$replacement = $dest;
+	$replacement .= '/' if ($dest ne '/' && $destslash);
+	}
+else {
+	$replacement = ($dest eq '/' ? '' : $dest).'/'.'$1';
+	}
+return ($re, $replacement);
+}
+
+# parse_web_alias_rewrite(&rewrite)
+# Parses only the exact rule shape emitted by make_web_alias_rewrite.
+sub parse_web_alias_rewrite
+{
+my ($r) = @_;
+return undef if (!$r->{'words'}->[2] ||
+		 $r->{'words'}->[2] ne 'break' ||
+		 $r->{'words'}->[1] !~ m{^/});
+
+my $dest = $r->{'words'}->[1];
+my $keepsubpaths = $dest =~ s{/\$1\z}{};
+$dest = '/' if ($keepsubpaths && $dest eq '');
+my $pathre = $r->{'words'}->[0];
+my $path;
+my ($regexp, $exact);
+
+# The root form always starts with the well-known exclusion.
+if ($pathre =~ m{^\^/\(\?!\\\.well-known\(\?:/\|\$\)}) {
+	$path = '/';
+	if (!$keepsubpaths) {
+		if ($pathre =~ /\.\*\(\?:\)\$\z/) {
+			$regexp = 1;
+			}
+		elsif ($pathre =~ /\(\?:\)\$\z/) {
+			$exact = 1;
+			}
+		else {
+			return undef;
+			}
+		}
+	}
+else {
+	my $quoted = $pathre;
+	my $trailingslash;
+	if ($keepsubpaths) {
+		if (!($quoted =~ s/\(\?:\/\(\.\*\)\)\?\$\z//)) {
+			$quoted =~ s/\(\.\*\)\$\z// || return undef;
+			$trailingslash = 1;
+			}
+		}
+	elsif ($quoted =~ s/\(\?:\/\.\*\)\?\(\?:\)\$\z//) {
+		$regexp = 1;
+		}
+	elsif ($quoted =~ s/\.\*\(\?:\)\$\z//) {
+		$regexp = 1;
+		$trailingslash = 1;
+		}
+	elsif ($quoted =~ s/\(\?:\)\$\z//) {
+		$exact = 1;
+		}
+	else {
+		return undef;
+		}
+	$quoted =~ s/(?<!\\)\(\?!.*\)\z//;
+	$trailingslash = $quoted =~ m{/$} if ($exact);
+	$quoted =~ s/^\^// || return undef;
+	$path = &unquote_web_redirect_path_re($quoted);
+	return undef if (!defined($path) || $path !~ m{^/});
+	$path .= '/' if ($trailingslash && $path !~ m{/$});
+	}
+$dest .= '/' if ($keepsubpaths &&
+			($path eq '/' || $path =~ m{/$}) &&
+			$dest ne '/' && $dest !~ m{/$});
+
+# Regenerate the rule to ensure that an unrelated custom rewrite was not
+# mistaken for one of Virtualmin's aliases.
+my ($expected_re, $expected_dest) =
+	&make_web_alias_rewrite($path, $dest, $regexp, $exact);
+return undef if ($pathre ne $expected_re ||
+		 $r->{'words'}->[1] ne $expected_dest);
+return { 'path' => $path,
+	 'dest' => $dest,
+	 'regexp' => $regexp,
+	 'exact' => $exact,
+	 'object' => $r,
+	 '_alias' => 1 };
+}
+
+# find_web_alias_container(&server, [root-only])
+# Returns the first top-level rewrite or if block containing one of the
+# aliases generated above. Redirects must be inserted before this object,
+# because an alias using break stops later server-level rewrite processing.
+sub find_web_alias_container
+{
+my ($server, $rootonly) = @_;
+foreach my $member (@{$server->{'members'}}) {
+	my $rewrite;
+	if ($member->{'name'} eq 'rewrite') {
+		$rewrite = $member;
+		}
+	elsif ($member->{'name'} eq 'if') {
+		($rewrite) = &nginx::find('rewrite', $member);
+		}
+	my $alias = $rewrite && &parse_web_alias_rewrite($rewrite);
+	return $member if ($alias && (!$rootonly || $alias->{'path'} eq '/'));
+	}
+return undef;
+}
+
 # feature_list_web_redirects(&domain)
 # Finds redirects from rewrite directives in the Nginx config
 sub feature_list_web_redirects
@@ -1850,9 +2009,9 @@ foreach my $i (&nginx::find("if", $server)) {
 		}
 	}
 foreach my $r (@rewrites) {
-	my $redirect;
+	my $redirect = &parse_web_alias_rewrite($r);
 	my $pathre = $r->{'words'}->[0];
-	if ($r->{'words'}->[2] &&
+	if (!$redirect && $r->{'words'}->[2] &&
 	    $r->{'words'}->[2] =~ /break|redirect|permanent/ &&
 	    $r->{'words'}->[0] !~ /\^\/\(\?\!\.well\-known\)/) {
 		# Regular redirect. Strip our known suffix first; what remains
@@ -1919,11 +2078,25 @@ foreach my $r (@rewrites) {
 			}
 		}
 	if ($redirect) {
+		my $parsed_alias = delete($redirect->{'_alias'});
 		if ($r->{'words'}->[1] =~ /^(http|https):/) {
 			# Redirect to a specific URL
 			$redirect->{'dest'} = &replace_apache_vars(
 						$redirect->{'dest'}, 0);
 			$redirect->{'alias'} = 0;
+			}
+		elsif ($parsed_alias) {
+			# Internal URI generated for a directory alias
+			$redirect->{'dest'} = $phd.$redirect->{'dest'};
+			$redirect->{'alias'} = 1;
+			delete($redirect->{'code'});
+			}
+		elsif ($r->{'words'}->[2] eq 'break' &&
+		       $redirect->{'dest'} =~ /^\Q$phd\E(?:\/|$)/) {
+			# Legacy directory aliases used an absolute filesystem path
+			# directly as the rewrite replacement.
+			$redirect->{'alias'} = 1;
+			delete($redirect->{'code'});
 			}
 		elsif ($r->{'words'}->[2] eq 'permanent' ||
 		       $r->{'words'}->[2] eq 'redirect' ||
@@ -1960,7 +2133,15 @@ my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 my $phd = &virtual_server::public_html_dir($d);
 my $dest = $redirect->{'dest'};
-if ($dest =~ /^(http|https|\$scheme):/) {
+if ($redirect->{'alias'}) {
+	# A directory alias destination is a filesystem path, while an Nginx
+	# rewrite replacement is a URI. Convert destinations below the domain's
+	# document root to the corresponding internal URI.
+	$dest =~ s/^\Q$phd\E(?=\/|$)// ||
+		return &text('redirect_ephd', $phd);
+	$dest = '/' if ($dest eq '');
+	}
+elsif ($dest =~ /^(http|https|\$scheme):/) {
 	$dest = &replace_apache_vars($dest, 1);
 	}
 
@@ -1994,18 +2175,28 @@ if ($redirect->{'host'}) {
 			last;
 			}
 		}
-	&nginx::save_directive($server, [ ], [ $i ]);
+	my $before = &find_web_alias_container($server);
+	&nginx::save_directive($server, [ ], [ $i ], $before);
 	&nginx::flush_config_file_lines();
 	&nginx::unlock_all_config_files();
 	&virtual_server::register_post_action(\&print_apply_nginx);
 	return undef;
 	}
 
-# Nginx rewrite rules take PCRE regexes. Quote the user-entered path
-# literally, then append our capture/exact suffix below.
-my $re = $redirect->{'path'};
-if ($re !~ /\^\/\(\?\!\.well\-known\)/) {
-	$re = '^'.&quote_web_redirect_path_re($re);
+# Nginx rewrite rules take PCRE regexes. Directory aliases need a specialized
+# internal rule that avoids recursive rewrites. Redirect paths are quoted
+# literally, then their capture or exact suffix is appended below.
+my $re;
+if ($redirect->{'alias'}) {
+	($re, $dest) = &make_web_alias_rewrite(
+		$redirect->{'path'}, $dest,
+		$redirect->{'regexp'}, $redirect->{'exact'});
+	}
+else {
+	$re = $redirect->{'path'};
+	if ($re !~ /\^\/\(\?\!\.well\-known\)/) {
+		$re = '^'.&quote_web_redirect_path_re($re);
+		}
 	}
 my @c = !$redirect->{'code'} && $redirect->{'alias'} ? ( 'break' ) :
 	!$redirect->{'code'} && !$redirect->{'alias'} ? ( 'redirect' ) :
@@ -2014,7 +2205,8 @@ my @c = !$redirect->{'code'} && $redirect->{'alias'} ? ( 'break' ) :
 my $r = { 'name' => 'rewrite',
 	  'words' => [ $re, $dest, @c ],
 	};
-if ($re !~ /\^\/\(\?\!\.well\-known\)/) {
+if (!$redirect->{'alias'} &&
+    $re !~ /\^\/\(\?\!\.well\-known\)/) {
 	if ($redirect->{'regexp'}) {
 		# All sub-directories go to same dest path
 		$r->{'words'}->[0] .= "(.*)";
@@ -2043,9 +2235,30 @@ if ($redirect->{'stripquery'} && !$redirect->{'alias'}) {
 	$r->{'words'}->[1] .= "?";
 	}
 &nginx::lock_all_config_files();
+if ($redirect->{'alias'}) {
+	# try_files can clear $fastcgi_path_info. Do not pass an empty PATH_INFO
+	# value to PHP, so applications can fall back to REQUEST_URI.
+	my @params = &nginx::find("fastcgi_param", $server);
+	my $changed;
+	foreach my $param (@params) {
+		if ($param->{'words'}->[0] eq 'PATH_INFO' &&
+		    $param->{'words'}->[1] eq '$fastcgi_path_info' &&
+		    (!defined($param->{'words'}->[2]) ||
+		     $param->{'words'}->[2] ne 'if_not_empty')) {
+			$param->{'words'}->[2] = 'if_not_empty';
+			$changed++;
+			}
+		}
+	&nginx::save_directive($server, "fastcgi_param", \@params)
+		if ($changed);
+	}
+my $before = !$redirect->{'alias'} ?
+	&find_web_alias_container($server) :
+	$redirect->{'path'} ne '/' ?
+	&find_web_alias_container($server, 1) : undef;
 if ($redirect->{'http'} && $redirect->{'https'}) {
 	# Can just go at top level
-	&nginx::save_directive($server, [ ], [ $r ]);
+	&nginx::save_directive($server, [ ], [ $r ], $before);
 	}
 else {
 	# Put under an 'if' statement
@@ -2054,7 +2267,7 @@ else {
 		  'type' => 1,
 		  'members' => [ $r ],
 		  'words' => [ '$scheme', '=', $s ] }; 
-	&nginx::save_directive($server, [ ], [ $i ]);
+	&nginx::save_directive($server, [ ], [ $i ], $before);
 	}
 &nginx::flush_config_file_lines();
 &nginx::unlock_all_config_files();

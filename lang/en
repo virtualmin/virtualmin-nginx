@@ -78,6 +78,7 @@ redirect_eupstream=A balancer named $1 already exists
 redirect_eurl=Not a valid URL or UDS : $1
 redirect_eurlhost=Hostname in URL cannot be resolved : $1
 redirect_eclash=A location for $1 already exists
+redirect_ephd=Nginx only allows alias destination directories under $1
 
 links_anlog=Nginx Access Log
 links_enlog=Nginx Error Log
