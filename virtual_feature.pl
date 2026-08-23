@@ -545,6 +545,12 @@ if (!$d->{'alias'}) {
 			$virtual_server::text{'setup_done'});
 		}
 
+	# Keep QUIC listeners aligned with any changed SSL listeners
+	my $server = &find_domain_server($d);
+	if ($changed && $server && &server_http3_enabled($server)) {
+		$changed += &update_server_http3($d, $server, 1);
+		}
+
 	# Flush files and restart
 	&nginx::flush_config_file_lines();
 	&nginx::unlock_all_config_files();
@@ -689,6 +695,7 @@ if (!$d->{'alias'}) {
 	my $alog = &get_nginx_log($d, 0);
 	my $elog = &get_nginx_log($d, 1);
 	&nginx::save_directive($http, [ $server ], [ ]);
+	&normalize_http3_reuseport();
 	&nginx::flush_config_file_lines();
 	&nginx::unlock_all_config_files();
 	&nginx::delete_server_link($server);
@@ -2672,6 +2679,7 @@ foreach my $os (&nginx::find("server", $http)) {
 		}
 	&nginx::save_directive($os, "listen", \@listen) if ($changed);
 	}
+&normalize_http3_reuseport();
 
 # Remove IP from server_name for all servers, as we don't do that anymore
 if ($d->{'ip'}) {
@@ -3204,7 +3212,19 @@ sub template_input
 {
 my ($tmpl) = @_;
 my $dirs = $tmpl->{$module_name};
-return &ui_table_row($text{'tmpl_directives'},
+my $rv;
+if (&supports_http3()) {
+	my $key = $module_name."_http3";
+	my $enabled = $tmpl->{$key};
+	$enabled = 0 if ($tmpl->{'default'} &&
+			 (!defined($enabled) || $enabled eq ''));
+	my @opts = ( [ 0, $virtual_server::text{'no'} ],
+		     [ 1, $virtual_server::text{'yes'} ] );
+	unshift(@opts, [ '', $text{'tmpl_default'} ]) if (!$tmpl->{'default'});
+	$rv .= &ui_table_row($text{'tmpl_http3'},
+		&ui_radio($key, $enabled, \@opts));
+	}
+$rv .= &ui_table_row($text{'tmpl_directives'},
 	&ui_radio($module_name."_mode",
 		  $dirs eq "" ? 0 : $dirs eq "none" ? 1 : 2,
 		  [ $tmpl->{'default'} ? ( ) : ( [ 0, $text{'tmpl_default'} ] ),
@@ -3213,6 +3233,7 @@ return &ui_table_row($text{'tmpl_directives'},
 	&ui_textarea($module_name."_dirs",
 		     $dirs eq "none" ? "" : join("\n", split(/\t/, $dirs)),
 		     10, 80));
+return $rv;
 }
 
 # template_parse(&template, &in)
@@ -3221,6 +3242,8 @@ return &ui_table_row($text{'tmpl_directives'},
 sub template_parse
 {
 my ($tmpl, $in) = @_;
+my $http3key = $module_name."_http3";
+$tmpl->{$http3key} = $in->{$http3key} if (defined($in->{$http3key}));
 my $mode = $in->{$module_name."_mode"};
 if ($mode == 0) {
 	$tmpl->{$module_name} = "";
@@ -3575,13 +3598,14 @@ return undef;
 }
 
 # feature_reset(&domain)
-# Reset the Nginx config, but preserve redirects and PHP settings
+# Reset the Nginx config, but preserve redirects, protocols and PHP settings
 sub feature_reset
 {
 my ($d) = @_;
 my $ssl = $d->{'virtualmin-nginx-ssl'};
+my $protocols = $ssl ? &feature_get_http_protocols($d) : undef;
 
-# Save redirects, PHP version, PHP mode and per-directory settings
+# Save redirects, HTTP protocols, PHP version, PHP mode and per-directory settings
 my (@redirs, $mode, @dirs);
 if (!$d->{'alias'}) {
 	@redirs = &virtual_server::list_redirects($d);
@@ -3605,6 +3629,7 @@ $d->{'web_nodeletelogs'} = 0;
 if ($ssl) {
 	$d->{'virtualmin-nginx-ssl'} = 1;
 	&virtualmin_nginx_ssl::feature_setup($d);
+	&feature_save_http_protocols($d, $protocols) if (ref($protocols));
 	}
 
 if (!$d->{'alias'}) {
@@ -3630,55 +3655,231 @@ if (!$d->{'alias'}) {
 
 }
 
+# supports_http3()
+# Returns 1 if Nginx was built with the HTTP/3 module
+sub supports_http3
+{
+my $out = &backquote_command("$config{'nginx_cmd'} -V 2>&1 </dev/null");
+return $out =~ /(?:^|\s)--with-http_v3_module(?:\s|$)/ ? 1 : 0;
+}
+
+# is_quic_listen(&listen)
+# Returns 1 if a listen directive accepts QUIC connections
+sub is_quic_listen
+{
+my ($listen) = @_;
+return scalar(grep { lc($_) eq 'quic' } @{$listen->{'words'}}) ? 1 : 0;
+}
+
+# server_http3_enabled(&server)
+# Returns 1 if a server block has an active QUIC listener
+sub server_http3_enabled
+{
+my ($server) = @_;
+my $http3 = &nginx::find_value("http3", $server);
+return 0 if (defined($http3) && lc($http3) eq 'off');
+return scalar(grep { &is_quic_listen($_) }
+		     &nginx::find("listen", $server)) ? 1 : 0;
+}
+
+# is_http3_alt_svc(&directive)
+# Returns 1 for an Alt-Svc header that advertises HTTP/3
+sub is_http3_alt_svc
+{
+my ($dir) = @_;
+my @words = @{$dir->{'words'}};
+return @words > 1 && lc($words[0]) eq 'alt-svc' &&
+	$words[1] =~ /(?:^|,)\s*h3(?:-\d+)?\s*=/i ? 1 : 0;
+}
+
+# normalize_http3_reuseport()
+# Keep reuseport on exactly one QUIC listener for each address and port
+sub normalize_http3_reuseport
+{
+my $conf = &nginx::get_config();
+my $http = &nginx::find("http", $conf);
+return 0 if (!$http);
+
+my %groups;
+foreach my $server (&nginx::find("server", $http)) {
+	foreach my $listen (&nginx::find("listen", $server)) {
+		next if (!&is_quic_listen($listen));
+		my ($ip, $port) = &nginx::split_ip_port(
+			$listen->{'words'}->[0]);
+		$ip = '*' if (!defined($ip) || $ip eq '0.0.0.0');
+		push(@{$groups{lc($ip).":".$port}}, [ $server, $listen ]);
+		}
+	}
+
+my %changed;
+foreach my $group (values %groups) {
+	my ($owner) = grep {
+		my @words = @{$_->[1]->{'words'}};
+		scalar(grep { $_ eq 'default' || $_ eq 'default_server' }
+			     @words);
+		} @$group;
+	$owner ||= $group->[0];
+	foreach my $entry (@$group) {
+		my ($server, $listen) = @$entry;
+		my @words = @{$listen->{'words'}};
+		my $has = scalar(grep { lc($_) eq 'reuseport' } @words);
+		if ($entry eq $owner && !$has) {
+			push(@words, 'reuseport');
+			}
+		elsif ($entry ne $owner && $has) {
+			@words = grep { lc($_) ne 'reuseport' } @words;
+			}
+		else {
+			next;
+			}
+		$listen->{'words'} = \@words;
+		$changed{"$server"} = $server;
+		}
+	}
+foreach my $server (values %changed) {
+	my @listen = &nginx::find("listen", $server);
+	&nginx::save_directive($server, "listen", \@listen);
+	}
+return scalar(keys %changed);
+}
+
+# update_server_http3(&domain, &server, enabled)
+# Adds or removes the HTTP/3 listeners and advertisement for a server block
+sub update_server_http3
+{
+my ($d, $server, $enabled) = @_;
+my @listen = &nginx::find("listen", $server);
+my $changed = 0;
+
+if ($enabled) {
+	my %quic = map { $_->{'words'}->[0], 1 }
+		   grep { &is_quic_listen($_) } @listen;
+	foreach my $listen (@listen) {
+		my @words = @{$listen->{'words'}};
+		next if (&is_quic_listen($listen) ||
+			 !scalar(grep { lc($_) eq 'ssl' } @words) ||
+			 $quic{$words[0]});
+		my @qwords = ( $words[0], 'quic' );
+		push(@qwords, grep { $_ eq 'default' || $_ eq 'default_server' }
+				     @words);
+		push(@listen, { 'name' => 'listen', 'words' => \@qwords });
+		$quic{$words[0]} = 1;
+		$changed++;
+		}
+	}
+else {
+	my @keep = grep { !&is_quic_listen($_) } @listen;
+	$changed += @listen - @keep;
+	@listen = @keep;
+	}
+&nginx::save_directive($server, "listen", \@listen) if ($changed);
+
+# Keep protocol negotiation explicit when the feature is enabled
+my @http3 = &nginx::find("http3", $server);
+if ($enabled && (@http3 != 1 ||
+			 lc($http3[0]->{'words'}->[0] || '') ne 'on')) {
+	&nginx::save_directive($server, "http3", [ "on" ]);
+	$changed++;
+	}
+elsif (!$enabled && @http3) {
+	&nginx::save_directive($server, "http3", [ ]);
+	$changed++;
+	}
+
+# Replace any HTTP/3 advertisement with the canonical SSL port
+my @headers = &nginx::find("add_header", $server);
+my @h3headers = grep { &is_http3_alt_svc($_) } @headers;
+my $alt = 'h3=":'.($d->{'web_sslport'} || 443).'"; ma=86400';
+my $header_ok = @h3headers == 1 &&
+	$h3headers[0]->{'words'}->[1] eq $alt &&
+	scalar(grep { lc($_) eq 'always' }
+		@{$h3headers[0]->{'words'}});
+if (@h3headers && (!$enabled || !$header_ok)) {
+	&nginx::save_directive($server, \@h3headers, [ ]);
+	$changed++;
+	}
+if ($enabled && !$header_ok) {
+	my $header = { 'name' => 'add_header',
+		       'words' => [ 'Alt-Svc', $alt, 'always' ] };
+	&nginx::save_directive($server, [ ], [ $header ]);
+	$changed++;
+	}
+
+$changed += &normalize_http3_reuseport();
+return $changed;
+}
+
+# template_http3_enabled(&template)
+# Returns the effective HTTP/3 setting for an Nginx server template
+sub template_http3_enabled
+{
+my ($tmpl) = @_;
+my $key = $module_name."_http3";
+my $enabled = $tmpl->{$key};
+if (!$tmpl->{'default'} && (!defined($enabled) || $enabled eq '')) {
+	my $def = &virtual_server::get_template(0);
+	$enabled = $def->{$key} if ($def);
+	}
+return $enabled ? 1 : 0;
+}
+
 # feature_get_supported_http_protocols(&domain)
-# Nginx supports only HTTP/1.1 and HTTP2 over SSL
+# Returns the protocols supported by Nginx for an SSL website
 sub feature_get_supported_http_protocols
 {
 my ($d) = @_;
 if ($d->{'virtualmin-nginx-ssl'}) {
-	return ['http/1.1', 'h2'];
+	return [ 'http/1.1', 'h2', &supports_http3() ? ( 'h3' ) : ( ) ];
 	}
 return [];
 }
 
 # feature_get_http_protocols(&domain)
-# Checks if http2 is enabled for the SSL listen
+# Returns the protocols enabled for an SSL website
 sub feature_get_http_protocols
 {
 my ($d) = @_;
 if ($d->{'virtualmin-nginx-ssl'}) {
 	my $s = &find_domain_server($d);
 	return "No Nginx server found!" if (!$s);
+	my @protocols = ('http/1.1');
+	my $has_http2 = 0;
 	foreach my $l (&nginx::find("listen", $s)) {
 		my @w = @{$l->{'words'}};
 		if (&indexof("ssl", @w) >= 0 && &indexof("http2", @w) >= 0) {
-			return ['http/1.1', 'h2']
+			$has_http2 = 1;
 			}
 		}
 	my $http2 = &nginx::find_value("http2", $s);
 	if ($http2 && lc($http2) eq 'on') {
-		return ['http/1.1', 'h2']
+		$has_http2 = 1;
 		}
-	return ['http/1.1'];
+	push(@protocols, 'h2') if ($has_http2);
+	push(@protocols, 'h3') if (&server_http3_enabled($s));
+	return \@protocols;
 	}
 return [];
 }
 
 # feature_save_http_protocols(&domain, &protocols)
-# Turn http2 on or off for the SSL listen
+# Turns HTTP/2 and HTTP/3 on or off for an SSL website
 sub feature_save_http_protocols
 {
 my ($d, $prots) = @_;
 if ($d->{'virtualmin-nginx-ssl'}) {
 	my $s = &find_domain_server($d);
 	return "No Nginx server found!" if (!$s);
+	my $http3 = &indexof('h3', @$prots) >= 0;
+	return &text('feat_ehttp3') if ($http3 && !&supports_http3());
+	my $restart = &server_http3_enabled($s) != $http3;
 	&nginx::lock_all_config_files();
 	my @listen = &nginx::find("listen", $s);
+	my @http2 = &nginx::find("http2", $s);
 	foreach my $l (@listen) {
 		my @w = @{$l->{'words'}};
 		if (&indexof("ssl", @w) >= 0) {
 			# Found one to modify
-			if (&indexof("h2", @$prots) >= 0) {
+			if (!@http2 && &indexof("h2", @$prots) >= 0) {
 				@w = &unique(@w, "http2");
 				}
 			else {
@@ -3688,9 +3889,16 @@ if ($d->{'virtualmin-nginx-ssl'}) {
 			}
 		}
 	&nginx::save_directive($s, "listen", \@listen);
+	if (@http2) {
+		&nginx::save_directive($s, "http2",
+			&indexof("h2", @$prots) >= 0 ? [ "on" ] : [ ]);
+		}
+	&update_server_http3($d, $s, $http3);
 	&nginx::flush_config_file_lines();
 	&nginx::unlock_all_config_files();
-	&virtual_server::register_post_action(\&print_apply_nginx);
+	# Fully restart when changing QUIC sockets so old reuseport workers
+	# cannot receive handshakes using the previous server configuration
+	&virtual_server::register_post_action(\&print_apply_nginx, $restart);
 	}
 return undef;
 }
