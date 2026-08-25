@@ -3212,14 +3212,7 @@ sub template_input
 {
 my ($tmpl) = @_;
 my $dirs = $tmpl->{$module_name};
-my $rv;
-
-# Keep the option available with Virtualmin versions that predate the
-# dedicated placement hook
-$rv .= &template_web_protocols_input($tmpl)
-	if (!defined(&virtual_server::template_web_protocols_input));
-
-$rv .= &ui_table_row($text{'tmpl_directives'},
+return &ui_table_row($text{'tmpl_directives'},
 	&ui_radio($module_name."_mode",
 		  $dirs eq "" ? 0 : $dirs eq "none" ? 1 : 2,
 		  [ $tmpl->{'default'} ? ( ) : ( [ 0, $text{'tmpl_default'} ] ),
@@ -3228,7 +3221,6 @@ $rv .= &ui_table_row($text{'tmpl_directives'},
 	&ui_textarea($module_name."_dirs",
 		     $dirs eq "none" ? "" : join("\n", split(/\t/, $dirs)),
 		     10, 80));
-return $rv;
 }
 
 # template_web_protocols_input(&template)
