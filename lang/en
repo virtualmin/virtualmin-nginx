@@ -18,6 +18,7 @@ feat_phpnone=Disabling PHP ..
 feat_apply=Applying Nginx configuration ..
 feat_apply2=Restarting Nginx server ..
 feat_econfig2=.. configuration is invalid : $1
+feat_ehttp3=Nginx was not built with HTTP/3 support
 feat_eapply=.. restart failed : $1
 feat_estart=.. restart failed : $1
 feat_notrunning=.. Nginx webserver is not running
@@ -89,6 +90,7 @@ links_phplog=PHP Error Log
 webmin_phpini=PHP configuration for $1
 
 tmpl_directives=Extra directives for new Nginx websites
+tmpl_http3=Enable HTTP/3 for new Nginx websites?
 tmpl_default=Default (from parent template)
 tmpl_none=None
 tmpl_below=Listed below ..
