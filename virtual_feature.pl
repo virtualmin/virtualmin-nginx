@@ -2380,8 +2380,12 @@ foreach my $u (@urls) {
 		$u = "http://unix:".$1;
 		}
 	}
+# Reject invalid backends before changing the Nginx configuration.
 my $err = &validate_balancer_urls(@urls);
-return $err if ($err);
+if ($err) {
+	&nginx::unlock_all_config_files();
+	return $err;
+	}
 if (@urls > 1) {
 	$balancer->{'balancer'} ||= 'virtualmin_'.time().'_'.$$;
 	$url = 'http://'.$balancer->{'balancer'};
@@ -2389,7 +2393,10 @@ if (@urls > 1) {
 	my $http = &nginx::find("http", $conf);
 	my ($clash) = grep { $_->{'words'}->[0] eq $balancer->{'balancer'} }
 			   &nginx::find("upstream", $http);
-	$clash && return &text('redirect_eupstream', $balancer->{'balancer'});
+	if ($clash) {
+		&nginx::unlock_all_config_files();
+		return &text('redirect_eupstream', $balancer->{'balancer'});
+		}
 	my $u = { 'name' => 'upstream',
 		  'words' => [ $balancer->{'balancer'} ],
 		  'type' => 1,
@@ -2484,13 +2491,6 @@ return &text('redirect_efind', $d->{'dom'}) if (!$server);
 return $text{'redirect_eobj2'} if (!$oldbalancer->{'location'});
 &nginx::lock_all_config_files();
 my $l = $oldbalancer->{'location'};
-my $location_words = &web_balancer_location_words(
-	$balancer->{'path'}, $balancer->{'none'});
-if (join("\0", @{$l->{'words'} || []}) ne join("\0", @$location_words)) {
-	# Update the path and promote legacy proxy locations to regex-protected ones.
-	$l->{'words'} = $location_words;
-	&nginx::save_directive($server, [ $l ], [ $l ]);
-	}
 my $u = $oldbalancer->{'upstream'};
 my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
 foreach my $u (@urls) {
@@ -2498,8 +2498,19 @@ foreach my $u (@urls) {
 		$u = "http://unix:".$1;
 		}
 	}
+# Reject invalid backends before changing the Nginx configuration.
 my $err = &validate_balancer_urls(@urls);
-return $err if ($err);
+if ($err) {
+	&nginx::unlock_all_config_files();
+	return $err;
+	}
+my $location_words = &web_balancer_location_words(
+	$balancer->{'path'}, $balancer->{'none'});
+if (join("\0", @{$l->{'words'} || []}) ne join("\0", @$location_words)) {
+	# Update the path and promote legacy proxy locations to regex-protected ones.
+	$l->{'words'} = $location_words;
+	&nginx::save_directive($server, [ $l ], [ $l ]);
+	}
 my $url;
 if ($u) {
 	# Change URLs in upstream block
