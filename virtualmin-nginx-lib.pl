@@ -564,6 +564,44 @@ foreach my $l (@locs) {
 return undef;
 }
 
+# web_balancer_location_path(&location)
+# Returns the managed path from a plain or regex-protected prefix location.
+sub web_balancer_location_path
+{
+my ($location) = @_;
+my $words = $location->{'words'} || [];
+return $words->[0] if (@$words == 1);
+return $words->[1]
+	if (@$words == 2 && $words->[0] eq '^~');
+return undef;
+}
+
+# web_balancer_location_words(path, no-proxy)
+# Returns a plain prefix for a no-proxy exclusion, or a regex-protected prefix
+# for an active proxy.
+sub web_balancer_location_words
+{
+my ($path, $no_proxy) = @_;
+return $no_proxy ? [ $path ] : [ '^~', $path ];
+}
+
+# set_web_balancer_regex_protection(&server, enabled)
+# Adds or removes ^~ on active proxy locations so regex handlers are either
+# bypassed normally or allowed to show the disabled-site response.
+sub set_web_balancer_regex_protection
+{
+my ($server, $enabled) = @_;
+foreach my $location (&nginx::find("location", $server)) {
+	my $path = &web_balancer_location_path($location);
+	next if (!defined($path));
+	next if (!&nginx::find_value("proxy_pass", $location));
+	my $protected = @{$location->{'words'}} == 2;
+	next if ($protected == $enabled);
+	$location->{'words'} = $enabled ? [ '^~', $path ] : [ $path ];
+	&nginx::save_directive($server, [ $location ], [ $location ]);
+	}
+}
+
 # setup_fcgiwrap_server(&domain)
 # Starts up a fcgiwrap process running as the domain user, and enables it
 # at boot time. Returns an OK flag and the port number selected to listen on.

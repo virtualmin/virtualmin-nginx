@@ -780,6 +780,9 @@ else {
 	my ($clash) = grep { $_->{'words'}->[0] eq '~' &&
 			     $_->{'words'}->[1] eq '/.*' } @locs;
 
+	# Let the disabled-site regex override active proxy locations.
+	&set_web_balancer_regex_protection($server, 0);
+
 	if ($tmpl->{'disabled_url'} eq 'none') {
 		# Disable is done via default website page
 		my $def_tpl = &read_file_contents("$virtual_server::default_content_dir/index.html");
@@ -878,6 +881,9 @@ else {
 			&nginx::save_directive($server, [ $loc ], [ ]);
 			}
 		}
+
+	# Restore proxy precedence over PHP and other regex handlers.
+	&set_web_balancer_regex_protection($server, 1);
 
 	&nginx::flush_config_file_lines();
         &nginx::unlock_all_config_files();
@@ -2322,10 +2328,11 @@ my $conf = &nginx::get_config();
 my $http = &nginx::find("http", $conf);
 my %upstreams = map { $_->{'words'}->[0], $_ } &nginx::find("upstream", $http);
 foreach my $l (@locations) {
-	next if (@{$l->{'words'}} > 1);
+	my $path = &web_balancer_location_path($l);
+	next if (!defined($path));
 	my $pp = &nginx::find_value("proxy_pass", $l);
 	next if (!$pp && @{$l->{'members'}});
-	my $b = { 'path' => $l->{'words'}->[0],
+	my $b = { 'path' => $path,
 		  'location' => $l };
 	if (!$pp) {
 		# No URL, so proxying disabled
@@ -2360,8 +2367,10 @@ sub feature_create_web_balancer
 my ($d, $balancer) = @_;
 my $server = &find_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
-my ($clash) = grep { $_->{'words'}->[0] eq $balancer->{'path'} }
-		   &nginx::find("location", $server);
+my ($clash) = grep {
+	my $path = &web_balancer_location_path($_);
+	defined($path) && $path eq $balancer->{'path'}
+	} &nginx::find("location", $server);
 $clash && return &text('redirect_eclash', $balancer->{'path'});
 &nginx::lock_all_config_files();
 my @urls = $balancer->{'none'} ? ( ) : @{$balancer->{'urls'}};
@@ -2396,7 +2405,8 @@ elsif (!$balancer->{'none'}) {
 	$url = $urls[0];
 	}
 my $l = { 'name' => 'location',
-	  'words' => [ $balancer->{'path'} ],
+	  'words' => &web_balancer_location_words(
+		$balancer->{'path'}, $balancer->{'none'}),
 	  'type' => 1,
 	  'members' => [ ],
         };
@@ -2474,8 +2484,11 @@ return &text('redirect_efind', $d->{'dom'}) if (!$server);
 return $text{'redirect_eobj2'} if (!$oldbalancer->{'location'});
 &nginx::lock_all_config_files();
 my $l = $oldbalancer->{'location'};
-if ($balancer->{'path'} ne $oldbalancer->{'path'}) {
-	$l->{'words'}->[0] = $balancer->{'path'};
+my $location_words = &web_balancer_location_words(
+	$balancer->{'path'}, $balancer->{'none'});
+if (join("\0", @{$l->{'words'} || []}) ne join("\0", @$location_words)) {
+	# Update the path and promote legacy proxy locations to regex-protected ones.
+	$l->{'words'} = $location_words;
 	&nginx::save_directive($server, [ $l ], [ $l ]);
 	}
 my $u = $oldbalancer->{'upstream'};
