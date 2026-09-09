@@ -64,7 +64,7 @@ feat_epassphrase=SSL certificates that use a passphrase are not supported by Ngi
 feat_clone=Cloning Nginx virtual host ..
 feat_clonealias=.. not necessary for alias domains
 feat_eclonefind=.. could not find new virtual host named $1 after cloning!
-feat_module=Nginx Webserver (for server blocks)
+feat_module=Nginx Webserver
 feat_addprotected=A protection for directory $1 already exists and is linked to a different $2 auth user file
 feat_delprotected=A protection for directory $1 cannot be removed because it is linked to a different $2 auth user file
 

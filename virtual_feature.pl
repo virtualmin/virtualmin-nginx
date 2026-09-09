@@ -1055,10 +1055,11 @@ else {
 
 # feature_modules()
 # Returns a list of the modules that domain owners with this feature may be
-# granted access to. Used in server templates.
+# granted access to. Used in server templates and server owner limits.
 sub feature_modules
 {
-return ( [ &nginx_webmin_module(), $text{'feat_module'} ] );
+return ( [ &nginx_webmin_module(), $text{'feat_module'}, undef,
+		   'config_avail', $module_name ] );
 }
 
 # feature_links(&domain)
