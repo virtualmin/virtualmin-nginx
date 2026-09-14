@@ -68,6 +68,18 @@ foreach my $s (@servers) {
 return undef;
 }
 
+# lock_domain_server(&domain)
+# Fetch the current server after locking, since locking clears the config cache.
+# A missing server is returned without leaving the config locked.
+sub lock_domain_server
+{
+my ($d) = @_;
+&nginx::lock_all_config_files();
+my $server = &find_domain_server($d);
+&nginx::unlock_all_config_files() if (!$server);
+return $server;
+}
+
 sub resolve_php_fpm_version
 {
 my ($d, $avail, $save) = @_;
