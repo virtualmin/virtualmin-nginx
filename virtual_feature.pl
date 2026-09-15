@@ -1302,7 +1302,7 @@ elsif ($mode eq "fpm" && ($oldmode ne "fpm" || !$d->{'php_fpm_port'})) {
 	}
 
 # Read the PHP location only after pool setup and config locking.
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return &text('feat_efind', $d->{'dom'}) if (!$server);
 my @locs = &nginx::find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
@@ -1703,7 +1703,7 @@ return 0;
 sub feature_save_web_domain_star
 {
 my ($d, $star) = @_;
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return undef if (!$server);
 my $obj = &nginx::find("server_name", $server);
 my $idx = &indexof("*.".$d->{'dom'}, @{$obj->{'words'}});
@@ -2177,7 +2177,7 @@ if ($redirect->{'host'}) {
 		  'members' => [ { 'name'  => 'return',
 				   'words' => [ $code, $ret_url ] } ],
 		  'words' => [ '$host', $op, $val ] };
-	my $server = &lock_domain_server($d);
+	my $server = &find_lock_domain_server($d);
 	return &text('redirect_efind', $d->{'dom'}) if (!$server);
 	foreach my $existing (&nginx::find("if", $server)) {
 		my @ew = @{$existing->{'words'}};
@@ -2246,7 +2246,7 @@ if (!$redirect->{'alias'} &&
 if ($redirect->{'stripquery'} && !$redirect->{'alias'}) {
 	$r->{'words'}->[1] .= "?";
 	}
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 if ($redirect->{'alias'}) {
 	# try_files can clear $fastcgi_path_info. Do not pass an empty PATH_INFO
@@ -2294,7 +2294,7 @@ sub feature_delete_web_redirect
 {
 my ($d, $redirect) = @_;
 return $text{'redirect_eobj'} if (!$redirect->{'object'});
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 # Listed redirects contain directive objects from before the lock.
 my ($current) = grep { $_->{'id'} eq $redirect->{'id'} &&
@@ -2373,7 +2373,7 @@ return @rv;
 sub feature_create_web_balancer
 {
 my ($d, $balancer) = @_;
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 my ($clash) = grep {
 	my $path = &web_balancer_location_path($_);
@@ -2469,7 +2469,7 @@ sub feature_delete_web_balancer
 {
 my ($d, $balancer) = @_;
 return $text{'redirect_eobj2'} if (!$balancer->{'location'});
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 # Re-read the selected location and upstream while holding the lock.
 my ($current) = grep { $_->{'path'} eq $balancer->{'path'} }
@@ -2504,7 +2504,7 @@ sub feature_modify_web_balancer
 {
 my ($d, $balancer, $oldbalancer) = @_;
 return $text{'redirect_eobj2'} if (!$oldbalancer->{'location'});
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 # Re-read the selected location and upstream while holding the lock.
 my ($current) = grep { $_->{'path'} eq $oldbalancer->{'path'} }
@@ -2567,7 +2567,7 @@ return 1;	# Can be setup using Nginx rewrites
 sub feature_add_web_webmail_redirect
 {
 my ($d, $tmpl) = @_;
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 foreach my $r ('webmail', 'admin') {
 	next if (!$tmpl->{'web_'.$r});
@@ -2636,7 +2636,7 @@ return undef;
 sub feature_remove_web_webmail_redirect
 {
 my ($d) = @_;
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 foreach my $r ('webmail', 'admin') {
 	# Update server_name
@@ -2690,7 +2690,7 @@ return 1;	# Websites can be made the default
 sub feature_set_web_default
 {
 my ($d) = @_;
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return &text('redirect_efind', $d->{'dom'}) if (!$server);
 my $conf = &nginx::get_config();
 my $http = &nginx::find("http", $conf);
@@ -2809,7 +2809,7 @@ return undef;
 sub feature_save_web_ssl_file
 {
 my ($d, $mode, $file) = @_;
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return &text('feat_efind', $d->{'dom'}) if (!$server);
 if ($mode eq 'cert') {
 	&nginx::save_directive($server, "ssl_certificate",
@@ -3179,7 +3179,7 @@ return 1;
 sub feature_set_web_public_html_dir
 {
 my ($d, $subdir) = @_;
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 $server || return &text('redirect_efind', $d->{'dom'});
 my $oldroot = &nginx::find_value("root", $server);
 my $root = $d->{'home'}."/".$subdir;
@@ -3313,7 +3313,7 @@ sub change_nginx_log_file
 my ($d, $logfile, $name) = @_;
 
 # Update Nginx config
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 $server || return &text('redirect_efind', $d->{'dom'});
 my $obj = &nginx::find($name, $server);
 my @w = $obj ? @{$obj->{'words'}} : ( );
@@ -3415,7 +3415,7 @@ elsif ($d->{'proxy_pass_mode'} == 1) {
 	}
 elsif ($d->{'proxy_pass_mode'} == 2) {
 	# Add frame forward
-	my $server = &lock_domain_server($d);
+	my $server = &find_lock_domain_server($d);
 	$server || return &text('redirect_efind', $d->{'dom'});
 	&virtual_server::create_framefwd_file($d);
 	my $ff = &virtual_server::framefwd_file($d);
@@ -3450,7 +3450,7 @@ elsif ($d->{'proxy_pass_mode'} == 1) {
 	}
 elsif ($d->{'proxy_pass_mode'} == 2) {
 	# Remove frame forward
-	my $server = &lock_domain_server($d);
+	my $server = &find_lock_domain_server($d);
 	$server || return &text('redirect_efind', $d->{'dom'});
 	my $ff = &virtual_server::framefwd_file($d);
 	my $phd = &virtual_server::public_html_dir($d);
@@ -3554,7 +3554,7 @@ sub feature_save_domain_php_fpm_port
 my ($d, $socket) = @_;
 
 # First update the Nginx config
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return "No Nginx server found" if (!$server);
 my @locs = &nginx::find("location", $server);
 my ($loc) = grep { $_->{'words'}->[0] eq '~' &&
@@ -3586,7 +3586,7 @@ sub feature_save_web_autoconfig
 {
 my ($d, $enable) = @_;
 my @autoconfig = &virtual_server::get_autoconfig_hostname($d);
-my $server = &lock_domain_server($d);
+my $server = &find_lock_domain_server($d);
 return "No Nginx server found" if (!$server);
 
 # Add or remove autoconfig alias names
@@ -3917,7 +3917,7 @@ my ($d, $prots) = @_;
 if ($d->{'virtualmin-nginx-ssl'}) {
 	my $http3 = &indexof('h3', @$prots) >= 0;
 	return &text('feat_ehttp3') if ($http3 && !&supports_http3());
-	my $s = &lock_domain_server($d);
+	my $s = &find_lock_domain_server($d);
 	return "No Nginx server found!" if (!$s);
 	my $restart = &server_http3_enabled($s) != $http3;
 	my @listen = &nginx::find("listen", $s);
@@ -3966,7 +3966,7 @@ return $obj ? $obj->{'words'} : [ ];
 sub feature_save_web_server_names
 {
 my ($d, $sn) = @_;
-my $s = &lock_domain_server($d);
+my $s = &find_lock_domain_server($d);
 return "No Nginx server found!" if (!$s);
 my $obj = &nginx::find("server_name", $s);
 $obj ||= { 'name' => 'server_name' };
@@ -4004,7 +4004,7 @@ if ($mode eq 'fcgiwrap' && !$d->{'nginx_fcgiwrap_port'}) {
 	&virtual_server::unlock_domain($d);
 
 	# Service setup may have allowed another domain to move this server.
-	my $server = &lock_domain_server($d);
+	my $server = &find_lock_domain_server($d);
 	return &text('feat_efind', $d->{'dom'}) if (!$server);
 	my $cloc = { 'name' => 'location',
 		     'words' => [ '/cgi-bin/' ],
@@ -4039,7 +4039,7 @@ elsif ($mode eq '' && $d->{'nginx_fcgiwrap_port'}) {
 	&virtual_server::save_domain($d);
 	&virtual_server::unlock_domain($d);
 	# Find the current CGI block under the lock before removing it.
-	my $server = &lock_domain_server($d);
+	my $server = &find_lock_domain_server($d);
 	return &text('feat_efind', $d->{'dom'}) if (!$server);
 	my ($cgi) = grep { $_->{'words'}->[0] eq '/cgi-bin/' }
 			 &nginx::find("location", $server);

@@ -68,10 +68,10 @@ foreach my $s (@servers) {
 return undef;
 }
 
-# lock_domain_server(&domain)
+# find_lock_domain_server(&domain)
 # Fetch the current server after locking, since locking clears the config cache.
 # A missing server is returned without leaving the config locked.
-sub lock_domain_server
+sub find_lock_domain_server
 {
 my ($d) = @_;
 &nginx::lock_all_config_files();
