@@ -249,7 +249,7 @@ if (!$d->{'alias'}) {
 	# Create initial config block for running PHP scripts. The port gets
 	# filled in later by save_domain_php_mode
 	&nginx::lock_all_config_files();
-	# Another setup may have moved this server since its initial creation.
+	# Locking refreshes the config cache, so fetch the current server object.
 	$server = &find_domain_server($d);
 	if (!$server) {
 		&nginx::unlock_all_config_files();
