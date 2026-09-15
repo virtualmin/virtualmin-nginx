@@ -248,11 +248,8 @@ if (!$d->{'alias'}) {
 
 	# Create initial config block for running PHP scripts. The port gets
 	# filled in later by save_domain_php_mode
-	&nginx::lock_all_config_files();
-	# Locking refreshes the config cache, so fetch the current server object.
-	$server = &find_domain_server($d);
+	$server = &find_lock_domain_server($d);
 	if (!$server) {
-		&nginx::unlock_all_config_files();
 		&$virtual_server::second_print(&text('feat_efind', $d->{'dom'}));
 		return 0;
 		}
