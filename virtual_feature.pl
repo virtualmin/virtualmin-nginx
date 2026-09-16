@@ -229,7 +229,6 @@ if (!$d->{'alias'}) {
 
 	&nginx::save_directive($http, [ ], [ $server ]);
 	&nginx::flush_config_file_lines();
-	&nginx::unlock_all_config_files();
 	&nginx::create_server_link($server);
 	&virtual_server::setup_apache_logs($d, $alog, $elog);
 	&virtual_server::link_apache_logs($d, $alog, $elog);
@@ -248,11 +247,6 @@ if (!$d->{'alias'}) {
 
 	# Create initial config block for running PHP scripts. The port gets
 	# filled in later by save_domain_php_mode
-	$server = &find_lock_domain_server($d);
-	if (!$server) {
-		&$virtual_server::second_print(&text('feat_efind', $d->{'dom'}));
-		return 0;
-		}
 	my @params = &list_fastcgi_params($server);
 	push(@params, map { $_->{'words'} }
 			  &nginx::find("fastcgi_param", $server));
@@ -292,7 +286,6 @@ if (!$d->{'alias'}) {
 	&nginx::save_directive($server, [ ], [ $ploc ]);
 
 	&nginx::flush_config_file_lines();
-	&nginx::unlock_all_config_files();
 
 	# Setup the selected PHP mode
 	&virtual_server::save_domain_php_mode($d, $mode);
@@ -344,6 +337,7 @@ if (!$d->{'alias'}) {
                 &virtual_server::add_webmail_redirect_directives($d, $tmpl, 0);
                 }
 
+	&nginx::unlock_all_config_files();
 	return 1;
 	}
 else {
