@@ -11,3 +11,12 @@ Use the fastcgi_param time_timeout directive on Ngix 1.6+, instead of fastcgi_re
 ---- Changes since 2.0 ----
 Added a Virtualmin template-level option for default Nginx directives for new severs.
 Added support for FPM as an execution mode, if Virtualmin 5.06 and FPM packages are installed.
+---- Changes in 3.1.0 ----
+Added HTTP/3 support to the SSL lifecycle and domain templates.
+Improved IPv4 and IPv6 listener handling for IP changes, restores, wildcard listeners, and IPv6-only domains.
+Added filename and query-string controls for redirects, while preserving access to .well-known paths.
+Fixed directory aliases, SSL chain synchronization, and X-Forwarded-Proto for proxy backends.
+---- Changes since 3.1.0 ----
+Fixed concurrent domain operations writing PHP, CGI, redirect, proxy, and other settings into the wrong server blocks.
+Fixed proxy locations incorrectly taking precedence over regular-expression locations.
+Fixed an Nginx configuration lock leak after balancer validation errors.
