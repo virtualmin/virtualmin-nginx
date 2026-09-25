@@ -616,8 +616,11 @@ if (!$d->{'alias'}) {
 			$virtual_server::text{'setup_done'});
 		}
 
-	# Update owner of log files
-	if ($d->{'user'} ne $oldd->{'user'}) {
+	# Repair log access when the domain or its owner changes
+	if ($d->{'user'} ne $oldd->{'user'} ||
+	    $d->{'dom'} ne $oldd->{'dom'} ||
+	    $d->{'gid'} ne $oldd->{'gid'} ||
+	    $d->{'ugid'} ne $oldd->{'ugid'}) {
 		my $alog = &get_nginx_log($d, 0);
 		my $elog = &get_nginx_log($d, 1);
 		foreach my $l ($alog, $elog) {
@@ -3362,18 +3365,20 @@ return undef;
 }
 
 # set_nginx_log_permissions(&domain, file)
-# Sets the correct user and group perms on a log file
+# Set log permissions, including rotated copies outside the domain home
 sub set_nginx_log_permissions
 {
 my ($d, $log) = @_;
 my $web_user = &get_nginx_user();
 if (&virtual_server::is_under_directory($d->{'home'}, $log)) {
+	# Keep permission changes inside the home limited to the domain user
 	&virtual_server::set_permissions_as_domain_user($d, 0660, $log);
 	}
 else {
-	my @uinfo = getpwnam($web_user);
-	my $web_group = getgrgid($uinfo[3]) || $uinfo[3];
-	&set_ownership_permissions($d->{'uid'}, $web_group, 0660, $log);
+	# Nginx changes the owner on reopen, so retain access via the domain group
+	my $gid = $d->{'gid'} || $d->{'ugid'};
+	my @logs = &unique($log, &virtual_server::all_log_files($log));
+	&set_ownership_permissions($web_user, $gid, 0660, @logs);
 	}
 }
 

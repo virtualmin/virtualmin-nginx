@@ -7,11 +7,12 @@ The tests below require a disposable Linux VM with the updated Webmin Nginx modu
 ```sh
 VIRTUALMIN_NGINX_CONFIG_TEST=1 prove -v t/config-updates-vm.t
 VIRTUALMIN_NGINX_CONCURRENT_TEST=1 prove -v t/concurrent-domains-vm.t
+VIRTUALMIN_NGINX_LOG_TEST=1 prove -v t/log-permissions-vm.t
 ```
 
 `config-updates-vm.t` exercises the installed parser and plugin functions against a temporary configuration. Another process shifts server blocks before each edit. Certificate generation and service actions are stubbed.
 
-It also checks that domain renames preserve active and rotated logs, including when the active log is missing or the home directory has already moved.
+`log-permissions-vm.t` runs an isolated Nginx instance on a Unix socket and rotates its logs twice. It checks that the domain owner can read the active log and rotated logs after reopening and rotation, while an unrelated account cannot. It also checks repair of existing rotated logs, the primary-group fallback, and whether domain renames preserve active and rotated logs when the active log is missing or the home directory has already moved. The two locked Unix accounts and all temporary files are removed afterwards.
 
 `concurrent-domains-vm.t` creates four domains in two pairs, starting each pair one second apart. It checks Nginx configuration, IPv4/IPv6 SSL listeners, domain validation, and static files and PHP over HTTP/HTTPS. The VM's default features must include Nginx, SSL and PHP-FPM, and Nginx must be running when the test starts. Creation emails and ACME requests are disabled. Domains and fixture credentials are removed afterward; command logs remain in the printed temporary directory.
 
