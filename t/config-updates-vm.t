@@ -267,4 +267,67 @@ foreach my $enable (1, 0) {
 	}
 }
 
+# Cover normal logs, missing active logs, and logs in an already moved home.
+foreach my $case ('active', 'archives', 'home') {
+	subtest "rename $case logs" => sub {
+		no warnings qw(once redefine);
+		my $oldhome = $case eq 'home' ? "$tmp/old-home" : $tmp;
+		my $newhome = $case eq 'home' ? "$tmp/new-home" : $tmp;
+		mkdir($newhome) or die $! if $case eq 'home';
+		my $old = { dom => 'logs.rename.invalid', home => $oldhome,
+			ip => '127.0.0.1', web_port => 80, web_sslport => 443 };
+		my $new = { %$old, dom => 'rename.invalid', home => $newhome };
+		my @suffixes = ($case eq 'archives' ? () : (''), '.1', '.2.gz', '-20260101.gz');
+		open(my $fh, '>', $conf) or die $!;
+		print $fh "http {\n    server {\n".
+			"        server_name $old->{'dom'};\n        listen 127.0.0.1:80;\n";
+		foreach my $kind ('access', 'error') {
+			print $fh "        ${kind}_log $oldhome/$old->{'dom'}_${kind}_log;\n";
+			my $log = "$newhome/$old->{'dom'}_${kind}_log";
+			foreach my $suffix (@suffixes) {
+				open(my $logfh, '>', $log.$suffix) or die $!;
+				print $logfh "$kind$suffix preserved\n";
+				close($logfh) or die $!;
+				}
+			}
+		print $fh "    }\n}\n";
+		close($fh) or die $!;
+
+		# Use the real parser and file moves without changing VM services.
+		local *virtual_server::get_apache_template_log = sub {
+			my ($domain, $error) = @_;
+			return "$domain->{'home'}/$domain->{'dom'}_".
+				($error ? 'error' : 'access').'_log';
+			};
+		local *virtual_server::link_apache_logs = sub {};
+		local *virtual_server::register_post_action = sub {};
+		local *virtual_server::fix_php_ini_files = sub {};
+		local *virtualmin_nginx::feature_get_web_php_mode = sub { return 'none'; };
+		local *virtualmin_nginx::feature_web_supports_cgi = sub { return 0; };
+		local $virtual_server::first_print = sub {};
+		local $virtual_server::second_print = sub {};
+		nginx::unflush_file_lines($conf);
+		nginx::flush_config_cache();
+		virtualmin_nginx::feature_modify($new, $old);
+		my $server = virtualmin_nginx::find_domain_server($new);
+		ok($server, 'server uses the new domain name');
+		foreach my $kind ('access', 'error') {
+			my $oldlog = "$newhome/$old->{'dom'}_${kind}_log";
+			my $newlog = "$newhome/$new->{'dom'}_${kind}_log";
+			is(nginx::find_value($kind.'_log', $server), $newlog,
+				"$kind log directive uses the new path");
+			foreach my $suffix (@suffixes) {
+				ok(!-e $oldlog.$suffix, "$kind$suffix old path is gone");
+				ok(-f $newlog.$suffix, "$kind$suffix new path exists") or next;
+				open(my $logfh, '<', $newlog.$suffix) or die $!;
+				is(do { local $/; <$logfh> }, "$kind$suffix preserved\n",
+					"$kind$suffix contents are preserved");
+				close($logfh);
+				unlink($newlog.$suffix) or die $!;
+				}
+			}
+		ok(!-e "$conf.lock", 'rename releases the config lock');
+		};
+	}
+
 done_testing();
