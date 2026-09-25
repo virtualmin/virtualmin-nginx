@@ -389,9 +389,18 @@ if (!$d->{'alias'}) {
 	# Changing a real virtual host
 	&nginx::lock_all_config_files();
 	my $changed = 0;
-	my $old_alog = &get_nginx_log($d, 0);
-	my $old_elog = &get_nginx_log($d, 1);
+	# Read log paths before changing the server's domain name
+	my $old_alog = &get_nginx_log($oldd, 0);
+	my $old_elog = &get_nginx_log($oldd, 1);
 	my $need_restart = 0;
+
+	# The directory feature has already moved logs inside the home directory
+	if ($d->{'home'} ne $oldd->{'home'}) {
+		foreach my $log ($old_alog, $old_elog) {
+			$log =~ s/^\Q$oldd->{'home'}\E\//$d->{'home'}\//
+				if (defined($log));
+			}
+		}
 
 	# Update domain name in server_name
 	if ($d->{'dom'} ne $oldd->{'dom'}) {
@@ -533,10 +542,18 @@ if (!$d->{'alias'}) {
 			return 0;
 			}
 		&feature_change_web_access_log($d, $new_alog);
-		&rename_logged($old_alog, $new_alog);
-		if ($old_elog ne $new_elog) {
-			&feature_change_web_error_log($d, $new_elog);
-			&rename_logged($old_elog, $new_elog);
+		&feature_change_web_error_log($d, $new_elog)
+			if ($old_elog ne $new_elog);
+
+		# Move access and error logs, keeping rotation suffixes
+		foreach my $p ([ $old_alog, $new_alog ], [ $old_elog, $new_elog ]) {
+			my ($old, $new) = @$p;
+			next if ($old eq $new);
+			foreach my $log (&virtual_server::all_log_files($old)) {
+				my $newlog = $log;
+				$newlog =~ s/^\Q$old\E/$new/;
+				&rename_logged($log, $newlog);
+				}
 			}
 		&virtual_server::link_apache_logs($d, $new_alog, $new_elog);
 		&$virtual_server::second_print(
